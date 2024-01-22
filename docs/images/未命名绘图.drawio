@@ -1,0 +1,43 @@
+<mxfile host="Electron" modified="2023-12-15T02:44:20.787Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/22.1.2 Chrome/114.0.5735.289 Electron/25.9.4 Safari/537.36" etag="wHdNqlk3I5uvuDN3BJoh" version="22.1.2" type="device">
+  <diagram name="第 1 页" id="InyRQt21qtZx8hypI70R">
+    <mxGraphModel dx="1228" dy="902" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="BjnLt2O30J2WvlR4hnUB-3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="BjnLt2O30J2WvlR4hnUB-1" target="BjnLt2O30J2WvlR4hnUB-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="BjnLt2O30J2WvlR4hnUB-1" value="切换分支 test/prod&lt;br&gt;合并开发分支代码" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="210" y="180" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="BjnLt2O30J2WvlR4hnUB-5" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="BjnLt2O30J2WvlR4hnUB-2" target="BjnLt2O30J2WvlR4hnUB-4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="BjnLt2O30J2WvlR4hnUB-2" value="推送代码&lt;br&gt;触发 git hook&amp;nbsp;" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="210" y="270" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="BjnLt2O30J2WvlR4hnUB-7" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="BjnLt2O30J2WvlR4hnUB-4" target="BjnLt2O30J2WvlR4hnUB-6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="BjnLt2O30J2WvlR4hnUB-4" value="执行 shell 脚本&lt;br&gt;分支检查&lt;br&gt;执行 npm script 脚本" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="210" y="370" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="BjnLt2O30J2WvlR4hnUB-9" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="BjnLt2O30J2WvlR4hnUB-6" target="BjnLt2O30J2WvlR4hnUB-8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="BjnLt2O30J2WvlR4hnUB-6" value="本地构建代码" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="210" y="470" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="BjnLt2O30J2WvlR4hnUB-11" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="BjnLt2O30J2WvlR4hnUB-8" target="BjnLt2O30J2WvlR4hnUB-10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="BjnLt2O30J2WvlR4hnUB-8" value="上传静态资源到服务" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="210" y="580" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="BjnLt2O30J2WvlR4hnUB-10" value="同步代码到 git 仓库" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="210" y="680" width="120" height="60" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

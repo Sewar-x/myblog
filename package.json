@@ -1,0 +1,31 @@
+{
+  "name": "myblog",
+  "version": "1.0.0",
+  "description": "my front end NoteBook",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vuepress dev docs",
+    "build": "vuepress build docs",
+    "deploy": "sh deploy.sh",
+    "upload": "cd docs/.vuepress/dist && git push -f https://github.com/Sewar-x/Sewar-x.github.io.git master:gh-pages"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://gitee.com/jokerxw/myNotes.git"
+  },
+  "keywords": [
+    "myblog"
+  ],
+  "author": "Zoro",
+  "license": "ISC",
+  "devDependencies": {
+    "vuepress": "^1.8.2"
+  },
+  "directories": {
+    "doc": "docs"
+  },
+  "dependencies": {
+    "markdown-it-disable-url-encode": "^1.0.1",
+    "vuepress-theme-hope": "^1.19.0"
+  }
+}

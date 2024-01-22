@@ -1,0 +1,205 @@
+const { config } = require("vuepress-theme-hope");
+module.exports = config({
+  title: 'Sewen 博客',
+  description: 'sewen 的前端学习笔记、博客、前端基础总结、技术深度剖析、面试题总结、算法总结、项目过程总结',
+  head: [
+    ['link', { rel: 'icon', href: './mylogo.png' }],
+    ["script", { src: "https://cdn.jsdelivr.net/npm/vue/dist/vue.min.js" }],
+    [
+      "script",
+      { src: "https://cdn.jsdelivr.net/npm/@babel/standalone/babel.min.js" },
+    ],
+  ],
+
+  themeConfig: {
+    logo: './mylogo.png',  // 左上角logo
+    hostname: 'https://sewar-x.github.io/',
+    nav: [ // 导航栏配置
+      { text: '首页', link: '/' },
+      {
+        text: '前端基础',
+        ariaLabel: 'Front-end Basics',
+        items: [
+          { text: 'HTML', link: '../html/' },
+          { text: 'Css', link: '../css/' },
+          { text: 'JavaScript', link: '../javascript/' },
+          { text: 'TypeScript', link: '../typescript/' },
+        ]
+      },
+      {
+        text: '计算机基础',
+        ariaLabel: '计算机基础',
+        items: [
+          { text: '数据结构和算法', link: '../algorithms/' },
+          { text: '计算机网络/HTTP', link: '../network/' },
+          { text: '输入url到页面展示全过程', link: '../network/输入url到页面展示全过程' },
+          { text: '操作系统', link: '../operating-system/' },
+          { text: '设计模式', link: '../design-model/' },
+          { text: 'Web安全', link: '../Web-Security/' }
+        ]
+      },
+      {
+        text: '框架和源码分析',
+        ariaLabel: '框架和源码分析',
+        items: [
+          { text: 'Vue2.x', link: '../vue2/vue2原理源码分析' },
+          { text: 'Axios', link: '../axios/' },
+          { text: 'React', link: '../React/' }
+        ]
+      },
+      {
+        text: '浏览器',
+        ariaLabel: '浏览器',
+        items: [
+          { text: '浏览器原理', link: '../browser/浏览器原理' },
+          { text: '前端缓存和存储', link: '../browser/前端缓存和存储' },
+          { text: '前端调试技巧', link: '../performance/前端调试技巧' },
+        ]
+      },
+
+      {
+        text: '服务器',
+        ariaLabel: 'node.js',
+        items: [
+          { text: 'Node.js', link: '../node/' },
+          { text: 'Linux', link: '../linux/' },
+          { text: 'MySQL', link: '../mysql/' },
+          { text: 'Nginx', link: '../nginx/' },
+          { text: 'Docker', link: '../docker/' },
+        ]
+      },
+      {
+        text: '性能优化',
+        ariaLabel: '浏览器和性能优化',
+        items: [
+          { text: '性能优化指标和监控', link: '../performance/性能优化指标和监控' },
+          { text: '前端性能优化方案', link: '../performance/前端性能优化方案' },
+          { text: '一次管理后台的渲染优化', link: '../performance/一次管理后台的渲染优化' },
+        ]
+      },
+      {
+        text: '前端工程',
+        ariaLabel: '前端工程',
+        items: [
+          { text: '前端工程化', link: '../Front-end-Engineering/前端工程化' },
+          { text: '前端渲染架构', link: '../Front-end-Engineering/前端渲染架构' },
+          { text: '前端架构实践', link: '../Front-end-Engineering/前端架构实践' },
+          { text: 'webpack原理和实践', link: '../webpack/webpack构建原理' },
+          { text: 'npm', link: '../Front-end-Engineering/npm' },
+          { text: 'Git', link: '../git/' },
+          { text: '自动构建和部署', link: '../Front-end-Engineering/自动构建和部署' },
+        ]
+      },
+      {
+        text: '项目实践',
+        ariaLabel: '项目实践',
+        items: [
+          { text: '从零到一搭建Vue2工程化项目', link: '../projectsSummary/从零到一搭建Vue2工程化项目' },
+          { text: '从零到一搭建Vue3工程化项目', link: '../projectsSummary/从零到一搭建Vue3工程化项目' },
+          { text: '从零到一搭建SSR项目', link: '../projectsSummary/从零到一搭建SSR项目' },
+          { text: '从零到一搭建移动端SSG项目', link: '../projectsSummary/从零到一搭建移动端SSG项目' },
+          { text: '移动端SSG项目实践', link: '../projectsSummary/移动端SSG项目实践' },
+          { text: '搭建低代码平台', link: '../projectsSummary/搭建低代码平台' },
+          { text: '组件和组件封装实践', link: '../componentsEncapsulation/组件和组件封装实践' },
+          { text: '登录与单点登录', link: '../projectsSummary/登录与单点登录' },
+          { text: '权限管理方案实践', link: '../projectsSummary/权限管理方案实践' },
+          { text: 'Echarts二次封装实践', link: '../projectsSummary/Echarts二次封装实践' },
+          { text: '移动端开发实践', link: '../projectsSummary/移动端开发实践' },
+          { text: '文档在线预览和编辑方案', link: '../projectsSummary/文档在线预览和编辑方案' },
+          { text: '混合桌面应用开发实践', link: '../projectsSummary/混合桌面应用开发实践' },
+        ]
+      },
+      {
+        text: '常见问题汇总',
+        ariaLabel: '常见问题汇总',
+        items: [
+          { text: '前端发版静态资源404问题', link: '../workNote/前端发版静态资源404问题' },
+        ]
+      },
+    ],
+    sidebar: {
+      '/javascript/': [
+        '',
+        '异步',
+        'Promise',
+        '原理实现',
+        '应用题'
+      ],
+      '/algorithms/': [ //算法和数据结构
+        '',
+        '数组',
+        '栈和队列',
+        '链表',
+        '字符串',
+        '树',
+        '堆',
+        '图',
+        '哈希表',
+        '查找',
+        '排序',
+        '递归',
+        '分治',
+        '回溯',
+        '动态规划',
+        '贪心算法',
+        '数学运算'
+      ],
+      '/vue2/': [
+        'vue2原理源码分析',
+        'vuex',
+        'vueRouter',
+        'VueSSR',
+        '前端框架选型'
+      ],
+
+      '/node/': [
+        '',
+        '使用docker服务node部署',
+        'Node性能',
+        '常见问题汇总'
+      ],
+      '/git/': [
+        '',
+        'Git流程规范'
+      ],
+      '/componentsEncapsulation/': [
+        '',
+        'Element二次封装',
+        'JSON组件'
+      ],
+      '/webpack/': [
+        'webpack构建原理',
+        'Loader和Plugin原理',
+        'webpackAPI',
+        'webpack项目实践'
+      ]
+    },
+
+    sidebarDepth: 6,
+    displayAllHeaders: true,
+    blog: {
+      avatar: './mylogo.png',
+      intro: "../outline.md",
+      sidebarDisplay: "mobile",
+      links: {
+        Github: "https://github.com/Sewar-x/Sewar-x.github.io",
+        Wechat: "1567910907"
+      },
+    },
+    pageInfo: {
+      author: true,
+      time: true,
+      category: true,
+      tag: true,
+      'reading-time': true,
+      word: true,
+      visitor: true
+    }
+  },
+  markdown: {
+    // ......
+    extendMarkdown: md => {
+      md.use(require("markdown-it-disable-url-encode"));
+    }
+  }
+})
