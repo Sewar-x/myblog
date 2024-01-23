@@ -306,3 +306,353 @@ module.exports = {
 ### 参考资料
 
 [《深入浅出webpack - 编写 Loader》](https://webpack.wuhaolin.cn/5%E5%8E%9F%E7%90%86/5-3%E7%BC%96%E5%86%99Loader.html)
+
+
+
+
+
+## Plugin
+
+### **Plugin 是什么？**
+
+Webpack插件通常**是一个JavaScript对象或类，它具有一些指定的方法或钩子**（hooks）。Webpack在构建过程中会调用这些方法或钩子，从而允许开发人员在不同的构建阶段执行自定义逻辑。
+
+Webpack插件（Webpack plugins）是**用于扩展和定制Webpack构建过程的模块**。它们可以用来处理资源、优化输出、引入环境变量或者执行其他自定义操作。
+
+Webpack插件通过在Webpack**构建流程的不同阶段注入自定义代码**来修改构建行为。这些插件可以在Webpack的配置文件中配置并应用于特定的构建任务。
+
+
+
+![img](../images/plugin.png)
+
+### **为什么要 Plugin?**
+
+**使用 Plugin 目的是解决`loader` 无法实现的其他事**
+
+通过使用插件，开发人员可以轻松地**扩展和定制Webpack的功能**，以满足特定的项目需求。
+
+一些常见的Webpack插件功能包括：
+
+- **资源优化**：如压缩代码、混淆代码、拆分代码块、提取公共模块等。
+- **文件处理**：如处理图片、字体、样式文件等。
+- **环境变量注入**：根据构建环境注入不同的变量或配置。
+- **代码检查**：如ESLint或Stylelint等代码规范检查工具的集成。
+- **HTML生成**：生成HTML文件并自动注入构建后的资源。
+- **自动化部署**：将构建结果自动部署到远程服务器或发布到CDN等。
+
+### **Plugin 怎么用？**
+
+通过 `plugins` 属性来配置需要使用的插件列表的。
+
+ `plugins` 属性是一个数组，里面的每一项都是插件的一个实例，在实例化一个组件时可以通过构造函数传入这个组件支持的配置属性。
+
+```js
+const HtmlWebpackPlugin = require('html-webpack-plugin'); // 通过 npm 安装
+const webpack = require('webpack'); // 访问内置的插件
+module.exports = {
+  ...
+  plugins: [
+    new webpack.ProgressPlugin(),
+    new HtmlWebpackPlugin({ template: './src/index.html' }),
+  ],
+};
+```
+
+
+
+### **Plugin 原理？**
+
+#### **具有`apply`方法的对象**
+
+Plugin 其本质是一个**具有`apply`方法`javascript`对象**
+
+`apply` 方法会被 `webpack compiler`调用，并且在整个编译生命周期都可以访问 `compiler`对象，在 Webpack 运行的生命周期中会广播出许多事件，Plugin 可以通过 `compiler`对象监听 webpack 生命周期事件，在合适的时机通过 Webpack 提供的 API 改变输出结果。
+
+一个最基础的 Plugin 的代码：
+
+```js
+class BasicPlugin{
+  // 在构造函数中获取用户给该插件传入的配置
+  constructor(options){
+  }
+
+  // Webpack 会调用 BasicPlugin 实例的 apply 方法给插件实例传入 compiler 对象
+  apply(compiler){
+    //通过 `compiler`对象监听 webpack 生命周期事件
+    compiler.plugin('compilation',function(compilation) {
+    })
+  }
+}
+
+// 导出 Plugin
+module.exports = BasicPlugin;
+```
+
+在使用这个 Plugin 时，相关配置代码如下：
+
+```js
+const BasicPlugin = require('./BasicPlugin.js');
+module.export = {
+  plugins:[
+    new BasicPlugin(options),
+  ]
+}
+```
+
+**过程：**
+
+1. Webpack 启动后，在读取配置的过程中会先执行 `new BasicPlugin(options)` 初始化一个 BasicPlugin 获得其实例。 
+
+2. 在初始化 compiler 对象后，再调用 `basicPlugin.apply(compiler)` 给插件实例传入 compiler 对象。 
+
+   * > 在 webpack 开始编译时，执行了`run`方法后，首先会触发`compile`，构建一个`Compilation`对象。详细参考 [WebPack 原理解析 | Sewen 博客 (sewar-x.github.io)](https://sewar-x.github.io/webpack/webpack构建原理/#编译流程)
+
+3. 插件实例在获取到 compiler 对象后，就可以通过 `compiler.plugin(事件名称, 回调函数)` 监听到 Webpack 广播出来的事件。 并且可以通过 compiler 对象去操作 Webpack。
+
+
+
+#### **事件流机制**
+
+Webpack 就像一条生产线，要经过一系列处理流程后才能将源文件转换成输出结果。 这条生产线上的每个处理流程的职责都是单一的，多个流程之间有存在依赖关系，只有完成当前处理后才能交给下一个流程去处理。 插件就像是一个插入到生产线中的一个功能，在特定的时机对生产线上的资源做处理。
+
+Webpack 通过 [Tapable](https://github.com/webpack/tapable) 来组织这条复杂的生产线。 Webpack 在**运行过程中会广播事件**，插件只需要监听它所关心的事件，就能加入到这条生产线中，去改变生产线的运作。 Webpack 的事件流机制保证了插件的有序性，使得整个系统扩展性很好。
+
+Webpack 的事件流机制应用了观察者模式，和 Node.js 中的 EventEmitter 非常相似。 Compiler 和 Compilation 都继承自 Tapable，可以直接在 Compiler 和 Compilation 对象上广播和监听事件;
+
+Compiler 方法如下：
+
+```js
+/**
+* 广播出事件
+* event-name 为事件名称，注意不要和现有的事件重名
+* params 为附带的参数
+*/
+compiler.apply('event-name',params);
+
+/**
+* 监听名称为 event-name 的事件，当 event-name 事件发生时，函数就会被执行。
+* 同时函数中的 params 参数为广播事件时附带的参数。
+*/
+compiler.plugin('event-name',function(params) {
+
+});
+```
+
+> `compiler hook` 的 `tap`方法的第一个参数，应是驼峰式命名的插件名称
+>
+> 关于整个编译生命周期钩子，有如下：
+>
+> - entry-option ：初始化 option
+> - run
+> - compile： 真正开始的编译，在创建 compilation 对象之前
+> - compilation ：生成好了 compilation 对象
+> - make 从 entry 开始递归分析依赖，准备对每个模块进行 build
+> - after-compile： 编译 build 过程结束
+> - emit ：在将内存中 assets 内容写到磁盘文件夹之前
+> - after-emit ：在将内存中 assets 内容写到磁盘文件夹之后
+> - done： 完成所有的编译过程
+> - failed： 编译失败的时候
+
+
+
+同理，compilation.apply 和 compilation.plugin 使用方法和上面一致。
+
+
+
+> Compiler 和 Compilation 的区别在于：Compiler 代表了整个 Webpack 从启动到关闭的生命周期，而 Compilation 只是代表了一次新的编译。
+>
+> * Compiler 对象包含了 Webpack 环境所有的的配置信息，包含 options，loaders，plugins 这些信息，这个对象在 Webpack 启动时候被实例化，它是全局唯一的，可以简单地把它理解为 Webpack 实例;
+> * 当 Webpack 以开发模式运行时，每当检测到一个文件变化，一次新的 Compilation 将被创建。Compilation 对象也提供了很多事件回调供插件做扩展。通过 Compilation 也能读取到 Compiler 对象。
+>
+> 详细参考[WebPack 原理解析 | Sewen 博客 (sewar-x.github.io)](https://sewar-x.github.io/webpack/webpack构建原理/#编译流程)
+
+
+
+在开发插件时，还需要注意以下两点：
+
+- 只要能拿到 Compiler 或 Compilation 对象，就能广播出新的事件，所以在新开发的插件中也能广播出事件，给其它插件监听使用。
+
+- 传给每个插件的 Compiler 和 Compilation 对象都是同一个引用。也就是说在一个插件中修改了 Compiler 或 Compilation 对象上的属性，会影响到后面的插件。
+
+- 有些事件是异步的，这些异步的事件会附带两个参数，第二个参数为回调函数，在插件处理完任务时需要调用回调函数通知 Webpack，才会进入下一处理流程。例如：
+
+  ```js
+    compiler.plugin('emit',function(compilation, callback) {
+      // 支持处理逻辑
+  
+      // 处理完毕后执行 callback 以通知 Webpack 
+      // 如果不执行 callback，运行流程将会一直卡在这不往下执行 
+      callback();
+    });
+  ```
+
+### Plugin 常用 API
+
+插件可以用来修改输出文件、增加输出文件、甚至可以提升 Webpack 性能、等等，总之插件通过调用 Webpack 提供的 API 能完成很多事情。 
+
+#### 读取输出资源、代码块、模块及其依赖
+
+有些插件可能需要读取 Webpack 的处理结果，例如输出资源、代码块、模块及其依赖，以便做下一步处理。
+
+在 `emit` 事件发生时，代表源文件的转换和组装已经完成，在这里可以读取到最终将输出的资源、代码块、模块及其依赖，并且可以修改输出资源的内容。 
+
+* `emit` 事件发生在 webpack 编译时，执行 run 方法时候触发，详细参考 [WebPack 原理解析 | Sewen 博客 (sewar-x.github.io)](https://sewar-x.github.io/webpack/webpack构建原理/#编译流程)
+
+`compilation` API 如下：
+
+* `compilation.chunks` 存放所有代码块，是一个数组;
+  * 代码块由多个模块组成，通过 `chunk.forEachModule` 能读取组成代码块的每个模块
+  * ` chunk.files`
+
+插件代码如下：
+
+```js
+class Plugin {
+  apply(compiler) {
+    compiler.plugin('emit', function (compilation, callback) {
+      // compilation.chunks 存放所有代码块，是一个数组
+      compilation.chunks.forEach(function (chunk) {
+        // chunk 代表一个代码块
+        // 代码块由多个模块组成，通过 chunk.forEachModule 能读取组成代码块的每个模块
+        chunk.forEachModule(function (module) {
+          // module 代表一个模块
+          // module.fileDependencies 存放当前模块的所有依赖的文件路径，是一个数组
+          module.fileDependencies.forEach(function (filepath) {
+          });
+        });
+
+        // Webpack 会根据 Chunk 去生成输出的文件资源，每个 Chunk 都对应一个及其以上的输出文件
+        // 例如在 Chunk 中包含了 CSS 模块并且使用了 ExtractTextPlugin 时，
+        // 该 Chunk 就会生成 .js 和 .css 两个文件
+        chunk.files.forEach(function (filename) {
+          // compilation.assets 存放当前所有即将输出的资源
+          // 调用一个输出资源的 source() 方法能获取到输出资源的内容
+          let source = compilation.assets[filename].source();
+        });
+      });
+
+      // 这是一个异步事件，要记得调用 callback 通知 Webpack 本次事件监听处理结束。
+      // 如果忘记了调用 callback，Webpack 将一直卡在这里而不会往后执行。
+      callback();
+    })
+  }
+}
+```
+
+#### 监听文件变化
+
+在[4-5使用自动刷新](https://webpack.wuhaolin.cn/4优化/4-5使用自动刷新.html) 中介绍过 Webpack 会从配置的入口模块出发，依次找出所有的依赖模块，当入口模块或者其依赖的模块发生变化时， 就会触发一次新的 Compilation。
+
+在开发插件时经常需要知道是哪个文件发生变化导致了新的 Compilation，为此可以使用如下代码：
+
+```js
+// 当依赖的文件发生变化时会触发 watch-run 事件
+compiler.plugin('watch-run', (watching, callback) => {
+    // 获取发生变化的文件列表
+    const changedFiles = watching.compiler.watchFileSystem.watcher.mtimes;
+    // changedFiles 格式为键值对，键为发生变化的文件路径。
+    if (changedFiles[filePath] !== undefined) {
+      // filePath 对应的文件发生了变化
+    }
+    callback();
+});
+```
+
+默认情况下 Webpack 只会监视入口和其依赖的模块是否发生变化，在有些情况下项目可能需要引入新的文件，例如引入一个 HTML 文件。 由于 JavaScript 文件不会去导入 HTML 文件，Webpack 就不会监听 HTML 文件的变化，编辑 HTML 文件时就不会重新触发新的 Compilation。 为了监听 HTML 文件的变化，我们需要把 HTML 文件加入到依赖列表中，为此可以使用如下代码：
+
+```js
+compiler.plugin('after-compile', (compilation, callback) => {
+  // 把 HTML 文件添加到文件依赖列表，好让 Webpack 去监听 HTML 模块文件，在 HTML 模版文件发生变化时重新启动一次编译
+    compilation.fileDependencies.push(filePath);
+    callback();
+});
+```
+
+#### 修改输出资源
+
+有些场景下插件需要修改、增加、删除输出的资源，要做到这点需要监听 `emit` 事件，因为发生 `emit` 事件时所有模块的转换和代码块对应的文件已经生成好， 需要输出的资源即将输出，因此 `emit` 事件是修改 Webpack 输出资源的最后时机。
+
+所有需要输出的资源会存放在 `compilation.assets` 中，`compilation.assets` 是一个键值对，键为需要输出的文件名称，值为文件对应的内容。
+
+设置 `compilation.assets` 的代码如下：
+
+```js
+compiler.plugin('emit', (compilation, callback) => {
+  // 设置名称为 fileName 的输出资源
+  compilation.assets[fileName] = {
+    // 返回文件内容
+    source: () => {
+      // fileContent 既可以是代表文本文件的字符串，也可以是代表二进制文件的 Buffer
+      return fileContent;
+      },
+    // 返回文件大小
+      size: () => {
+      return Buffer.byteLength(fileContent, 'utf8');
+    }
+  };
+  callback();
+});
+```
+
+读取 `compilation.assets` 的代码如下：
+
+```js
+compiler.plugin('emit', (compilation, callback) => {
+  // 读取名称为 fileName 的输出资源
+  const asset = compilation.assets[fileName];
+  // 获取输出资源的内容
+  asset.source();
+  // 获取输出资源的文件大小
+  asset.size();
+  callback();
+});
+```
+
+#### 判断 Webpack 使用了哪些插件
+
+在开发一个插件时可能需要根据当前配置是否使用了其它某个插件而做下一步决定，因此需要读取 Webpack 当前的插件配置情况。 以判断当前是否使用了 ExtractTextPlugin 为例，可以使用如下代码：
+
+```js
+// 判断当前配置使用使用了 ExtractTextPlugin，
+// compiler 参数即为 Webpack 在 apply(compiler) 中传入的参数
+function hasExtractTextPlugin(compiler) {
+  // 当前配置所有使用的插件列表
+  const plugins = compiler.options.plugins;
+  // 去 plugins 中寻找有没有 ExtractTextPlugin 的实例
+  return plugins.find(plugin=>plugin.__proto__.constructor === ExtractTextPlugin) != null;
+}
+```
+
+### **手写 Plugin** 
+
+### 常见的 Plugin
+
+### **Plugin 与 Loader 区别？**
+
+Webpack插件（Webpack plugins）和加载器（loaders）在Webpack中扮演不同的角色，各自有不同的功能和用途。
+
+**Plugin 的作用**：
+Plugin 用于**扩展和定制Webpack的构建过程**。
+
+它们可以对打包结果进行优化、自动化任务、资源管理等。插件通过在Webpack构建流程的不同阶段注入自定义代码来修改构建行为。例如，可以使用插件来压缩代码、拆分代码块、生成HTML文件、提取CSS等。插件是通过实现Webpack插件接口的JavaScript对象或类来定义的，它们具有一些指定的方法或钩子（hooks），Webpack在构建过程中会调用这些方法或钩子。
+
+**Loader 的作用**：
+Loader 用于**处理非JavaScript资源**，例如处理样式表、图片、字体等文件。
+
+加载器可以将这些资源转换为Webpack可处理的模块，并将它们添加到依赖图中。加载器是通过使用正则表达式匹配特定类型的文件，并将其传递给相应的加载器进行处理的。加载器可以对资源进行转换、压缩、优化等操作，将其转换为可在JavaScript模块中导入的形式。
+
+**区别：**
+
+**插件用于扩展Webpack构建过程，而加载器用于处理非JavaScript资源**。
+
+它们在配置方式、处理对象、调用时机等方面也有所不同。
+
+| 特点               | Plugin                                                       | Loader                                                       |
+| ------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| 功能和用途         | 扩展和定制Webpack构建过程，对打包结果进行优化、自动化任务、资源管理等 | 将非JavaScript资源转换为Webpack可处理的模块，如样式表、图片、字体等 |
+| 配置方式           | 在Webpack配置文件中实例化并配置                              | 在模块规则中配置                                             |
+| 处理对象           | 操作Webpack的编译对象和输出结果                              | 处理特定类型的文件                                           |
+| 调用时机           | 在Webpack构建流程的不同阶段被调用                            | 文件被引入时被调用                                           |
+| 示例               | UglifyJsPlugin、HtmlWebpackPlugin等                          | css-loader、file-loader、babel-loader等                      |
+| 文件扩展和匹配规则 | 不涉及文件扩展和匹配规则                                     | 通过正则表达式匹配特定类型的文件                             |
+
