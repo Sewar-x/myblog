@@ -1,115 +1,4 @@
-# WebPack 原理解析
-
-## 大纲
-
-![webpack](../images/webpack大纲.png)
-
-
-
-
-
-## WebPack 产生背景
-
-### 模块化
-
-`Webpack` 最初的目标是解决前端项目的模块化，旨在更高效地管理和维护项目中的每一个资源
-
-最早的时候，我们会通过文件划分的形式实现模块化，也就是将每个功能及其相关状态数据各自单独放到不同的`JS` 文件中
-
-约定每个文件是一个独立的模块，然后再将这些`js`文件引入到页面，一个`script`标签对应一个模块，然后调用模块化的成员
-
-```html
-<script src="module-a.js"></script>
-<script src="module-b.js"></script>
-```
-
-但这种模块弊端十分的明显，模块都是在全局中工作，大量模块成员污染了环境，模块与模块之间并没有依赖关系、维护困难、没有私有空间等问题
-
-项目一旦变大，上述问题会尤其明显
-
-随后，就出现了命名空间方式，规定每个模块只暴露一个全局对象，然后模块的内容都挂载到这个对象中
-
-```js
-window.moduleA = {
-  method1: function () {
-    console.log('moduleA#method1')
-  }
-}
-```
-
-这种方式也并没有解决第一种方式的依赖等问题
-
-再后来，我们使用立即执行函数为模块提供私有空间，通过参数的形式作为依赖声明，如下
-
-```js
-// module-a.js
-(function ($) {
-  var name = 'module-a'
-
-  function method1 () {
-    console.log(name + '#method1')
-    $('body').animate({ margin: '200px' })
-  }
-
-  window.moduleA = {
-    method1: method1
-  }
-})(jQuery)
-```
-
-上述的方式都是早期解决模块的方式，但是仍然存在一些没有解决的问题。例如，我们是用过`script`标签在页面引入这些模块的，这些模块的加载并不受代码的控制，时间一久维护起来也十分的麻烦
-
-理想的解决方式是，在页面中引入一个`JS`入口文件，其余用到的模块可以通过代码控制，按需加载进来
-
-除了模块加载的问题以外，还需要规定模块化的规范，如今流行的则是`CommonJS`、`ES Modules`
-
-
-
-## WebPack 解决什么问题？
-
-从后端渲染的`JSP`、`PHP`，到前端原生`JavaScript`，再到`jQuery`开发，再到目前的三大框架`Vue`、`React`、`Angular`
-
-开发方式，也从`javascript`到后面的`es5`、`es6、7、8、9、10`，再到`typescript`，包括编写`CSS`的预处理器`less`、`scss`等
-
-现代前端开发已经变得十分的复杂，所以我们开发过程中会遇到如下的问题：
-
-- 需要通过模块化的方式来开发
-- 使用一些高级的特性来加快我们的开发效率或者安全性，比如通过ES6+、TypeScript开发脚本逻辑，通过sass、less等方式来编写css样式代码
-- 监听文件的变化来并且反映到浏览器上，提高开发的效率
-- JavaScript 代码需要模块化，HTML 和 CSS 这些资源文件也会面临需要被模块化的问题
-- 开发完成后我们还需要将代码进行压缩、合并以及其他相关的优化
-
-而`webpack`恰巧可以解决以上问题
-
-
-
-## 基础概念
-
-
-
-![image-20240105195713962](../images/webpack基础概念.png)
-
-
-
-## WebPack 的能力
-
-### **编译代码能力**
-
-提高效率，**解决浏览器兼容问题** ![img](../images/webpack能力.png) **模**
-
-
-
-### **模块整合能力**
-
-提高性能，可维护性，**解决浏览器频繁请求文件的问题** ![img](../images/webpack能力1.png) 
-
-
-
-### **模块化能力**
-
-项目维护性增强，支持不同种类的前端模块类型，统一的模块化方案，所有资源文件的加载都可以通过代码控制 ![img](../images/webpack能力2.png)
-
-
+# WebPack 构建原理
 
 ## **webpack 基础配置项**
 
@@ -611,7 +500,17 @@ if (!cli.installed) {
 
 在加载配置文件和 shell 后缀参数申明的插件，并传入构建信息 options 对象后，开始整个 webpack 打包最漫长的一步。
 
-而这个时候，真正的 webpack 对象才刚被初始化，具体的初始化逻辑在`./node_modules/webpack/lib/webpack.js`  中，该文件中定义了 webpack 的核心代码
+而这个时候，真正的 webpack 对象才刚被初始化，具体的初始化逻辑在`./node_modules/webpack/lib/webpack.js`  中，该文件中定义了 webpack 的核心代码。
+
+> webpack 构建流程：
+>
+> 1. Webpack 启动后会从 Entry 里配置的 Module 开始递归**解析 Entry 依赖的所有 Module**。 
+> 2. 每找到一个 Module， 就会根据配置的 **Loader 去找出对应的转换规则**，对 Module 进行转换后，再**解析出当前 Module 依赖的 Module**。
+> 3. 这些模块会**以 Entry 为单位进行分组**，一个 Entry 和其所有依赖的 Module 被分到一个组也就是一个 Chunk。
+> 4. 最后 Webpack 会把**所有 Chunk 转换成文件输出**。 
+> 5. 在整个流程中 Webpack 会在恰当的时机执行 Plugin 里定义的逻辑。
+
+
 
 #### **编译阶段事件**
 
@@ -730,15 +629,15 @@ module.exports = {
 
 
 
-> ## Compiler 和 Compilation 区分
->
+#### **Compiler 和 Compilation 区分**
+
 > 在开发 Plugin 时最常用的两个对象就是 Compiler 和 Compilation，它们是 Plugin 和 Webpack 之间的桥梁。 
 >
 > Compiler 和 Compilation 的含义如下：
 >
 > - Compiler 对象包含了 Webpack 环境所有的的配置信息，包含 options，loaders，plugins 这些信息，这个对象在 Webpack 启动时候被实例化，它是全局唯一的，可以简单地把它理解为 Webpack 实例；
-> - Compilation 对象包含了当前的模块资源、编译生成资源、变化的文件等。当 Webpack 以开发模式运行时，每当检测到一个文件变化，一次新的 Compilation 将被创建。Compilation 对象也提供了很多事件回调供插件做扩展。通过 Compilation 也能读取到 Compiler 对象。
->
+>- Compilation 对象包含了当前的模块资源、编译生成资源、变化的文件等。当 Webpack 以开发模式运行时，每当检测到一个文件变化，一次新的 Compilation 将被创建。Compilation 对象也提供了很多事件回调供插件做扩展。通过 Compilation 也能读取到 Compiler 对象。
+> 
 > Compiler 和 Compilation 的区别在于：**Compiler 代表了整个 Webpack 从启动到关闭的生命周期，而 Compilation 只是代表了一次新的编译。**
 
 
@@ -1248,58 +1147,6 @@ async function packager() {
 }  
 packager(); // 启动打包流程。你可以在需要的时候多次调用此函数来多次打包。例如：packager(), 通常情况下你只需要调用一次就足够了。 打包成功后，你将在项目的dist目录下看到生成的bundle.js文件。这就是你的打包结果。你可以在HTML文件中引用这个文件来运行你的应用。例如：<script src="dist/bundle.js"></script>。这只是一个简单的实现，并不包含Tree Shaking等高级特性。要实现这些特性，你可能需要更深入地学习Webpack并对其进行配置。例如，要启用Tree Shaking，你需要在Webpack的配置中设置mode为production并移除一些不必要的插件和加载器。同时，你可能还需要使用一些第三方工具来帮助你检测你的代码中的死代码并对其进行清理。例如，你可以使用babel-plugin-transform-remove-unused-polyfills插件来删除未使用的polyfills，或者使用babel-plugin-transform-remove-unused-variables插件来删除未使用的变量。
 ```
-
-## DevServer
-
-Webpack DevServer 是一个简单的 web 服务器，主要用于在开发过程中提供模块热替换（HMR）和源映射（source maps）等功能。
-
-### 功能
-
-1. 提供 HTTP 服务而不是使用本地文件预览；
-2. 监听文件的变化并自动刷新网页，做到实时预览；
-3. 支持 Source Map，以方便调试。
-
-Webpack DevServe 实现实时预览有两种模式：
-
-1.  **监听模式**：当发生变化时重新执行完构建后通知 DevServer，通过 `webpack --watch` 来开启监听模式；
-2. **模块热替换**：在不重新加载整个网页的情况下，通过将被更新过的模块替换老的模块，再重新执行一次来实现实时预览。
-
-
-
-
-
-### webpack 热更新原理
-
-> * webpack-dev-server 创建两个服务器：  提供静态资源的服务  (express)   和socket服务;
-> * express server 负责直接提供静态资源的服务  (打包后的资源直接被浏览器请求和解析)；
-> * socket server 是一 个 websocket 的长连接 ， 双方可以通信;
-> * 当 socket server 监听到对应的模块发生变化时 ， 会生成两个文件 json  (manifest文件)  和 .js文件 
-> * 通过长连接 socket server 可以直接将这两个文件主动发送给客户端  (浏览器);
-> * 浏览器拿到两个新的文件后， 通过 HMR runtime 机制，加载这两个文件，并且针对修改的模块进行更新。
-
-![image-20240106101154614](../images/webpack热更新原理.png)
-
-> * `Webpack compile`：将 JS 源代码编译成 bundle.js;
-> * `HMR Server`：用来将热更新的文件输出给 HMR Runtime;
-> * `Bundle server`：静态资源文件服务器 ， 提供文件访问路径;
-> * `HMR Runtime`：socket服务器 , 会被注入到浏览器,更新文件的变化;
-> * `bundle.js`：构建输出的文件;
-
-在HMR Runtime 和 HMR Server之间建立 websocket,即图上4号线, 用于实时更新文件变化上面图中,  可以分成两个阶段：
-
-* **启动阶段**:  为上图 `1 -> 2 -> A -> B` 在编写未经过 webpack 打包的源代码后  Webpack Compile 将源代码和 HMR Runtime 一起编译成 bundle 文件 ，传输给  Bundle Server 静态资源服务器;
-
-* **更新阶段**: 为上图 `1 -> 2 -> 3 -> 4` 当某一个文件或者模块发生变化时  webpack 监听到文件变化对文件重新编译打包 ，编译生成唯一 的   hash  值, 这个  hash 值用来作为下次热更新的标识。
-
-  * 根据变化的内容生成两个补丁文件 :    manifest (包含了  hash 和 chundId, 用来说明变化的内容)  和  chunk.js 模块
-
-  * 由于  socket 服务器在  HMR Runtime 和    HMR Server 之间建立   websocket 链接， 当文件发生改动的时候 ，服务端会向浏览器推送一条消息， 消息包含文件改动后生成的  hash 值 ， 如下图的  h 属性 ，作为下-次热更细的标识：
-
-    ![image-20240106102409228](../images/webpack热更原理1.png)
-
-    在浏览器接受到这条消息之前， 浏览器已经在上一次 socket 消息中已经记住了此时的 hash 标识，这时候我们会创建一个 ajax 去服务端请求获取到变化内容的 manifest 文件，  manifest 文件包含重新生成的 hash 值以及变化后的模块，对应上图的 c 属性，浏览器根据 manifest 文件模块变化内容，从而触发 render 流程，实现局部更新。
-
-
 
 
 
