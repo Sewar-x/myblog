@@ -50,6 +50,108 @@
 
 ![](../images/kuayu-fangan1.png)
 
+##### **概念**
+
+JSONP（JSON with Padding）是一种解决跨域数据访问问题的技术。
+
+由于同源策略的限制，位于不同源的网页无法直接进行数据交互。
+
+而HTML的`<script>`元素是一个例外，它允许动态加载JavaScript代码，不受同源策略的限制。JSONP利用这一特性，通过动态创建`<script>`标签，从其他源获取JSON数据。
+
+##### **原理**
+
+ JSONP 的原理是动态地向 HTML 中插入一个 `<script src="url"></script>` 标签去加载异步资源。
+
+具体来说，JSONP的工作原理如下：
+
+1. 在客户端注册一个函数。
+2. 将这个函数的名字传给服务器。
+3. 服务器生成JSON数据，并以JavaScript语法的方式将数据传入客户端注册的函数中。
+4. 在客户端的注册函数中接收JSON数据。
+
+通过这种方式，客户端可以通过动态创建`<script>`标签，从其他源获取JSON数据，从而实现了跨域数据访问。
+
+
+
+##### **手写  JSONP**
+
+以下是一个简单的 JSONP 实现示例：
+
+```javascript
+// 创建 script，并插入 body
+function createScriptTag(src) {  
+  var script = document.createElement('script');  
+  script.src = src;  
+  document.body.appendChild(script);  
+}  
+//接受服务器响应
+function handleResponse(data) {  
+  console.log('Received data:', data);  
+  // 在这里处理接收到的数据  
+}  
+// 获取 JSONP 方法
+function jsonpRequest(url, callback) {  
+  var callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());  
+  var scriptTag = document.createElement('script');  
+  window[callbackName] = function(data) {  
+    scriptTag.parentNode.removeChild(scriptTag);  
+    callback(data);  
+  };  
+  scriptTag.src = url + '?callback=' + callbackName;  
+  document.body.appendChild(scriptTag);  
+}
+```
+
+使用方法：
+
+1. 创建一个 `script` 标签并设置其 `src` 属性为要请求的 JSONP 地址。例如：
+
+```javascript
+createScriptTag('https://api.example.com/data');
+```
+
+1. 定义一个处理响应的函数，例如：
+
+```javascript
+function handleResponse(data) {  
+  console.log('Received data:', data);  
+  // 在这里处理接收到的数据  
+}
+```
+
+1. 调用 `jsonpRequest` 函数，传递要请求的 URL 和处理响应的函数作为参数。例如：
+
+```javascript
+jsonpRequest('https://api.example.com/data', handleResponse);
+```
+
+> 在上面的示例中:
+>
+> 1. `jsonpRequest` 函数首先生成一个唯一的回调函数名称，并将其存储在全局 `window` 对象上。
+>
+> 2. 然后，创建一个 `script` 标签，将其 `src` 属性设置为请求的 URL，并在 URL 中添加回调函数的名称作为参数。
+>
+> 3. 最后，将 `script` 标签添加到文档的 `body` 中。
+>
+> 4. 当服务器返回数据时，回调函数将被调用，并将数据传递给处理响应的函数。
+> 5. 在处理响应的函数中，可以执行所需的操作，例如更新 UI、处理数据等。
+
+
+
+##### **优点**
+
+1. 它可以解决跨域数据访问的问题。由于同源策略的限制，不同源的网页无法直接进行数据交互。而JSONP通过动态创建`<script>`标签，从其他源获取JSON数据，从而实现了跨域数据访问。
+2. 它能够绕过浏览器的同源策略，使得请求可以不受限制地从其他源获取数据。
+
+
+
+##### **缺点**
+
+1. 它只支持GET请求而不支持POST等其它类型的HTTP请求。
+2. 它只支持跨域HTTP请求这种情况，不能解决不同域的两个页面之间如何进行JavaScript调用的问题。
+3. JSONP在调用失败的时候不会返回各种HTTP状态码，因此难以进行错误处理。
+4. JSONP在安全性方面存在一些问题。例如，如果提供JSONP的服务存在页面注入漏洞，那么返回的JavaScript的内容可能被人控制，导致安全风险。
+
 
 
 #### CORS

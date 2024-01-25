@@ -1,12 +1,12 @@
 # DevServer
 
-
-
 ![DevServer](../images/DevServer.png)
+
+
 
 ## **DevServer 是什么**
 
-Webpack DevServer 是一个简单的 web 服务器，主要用于在开发过程中提供模块热替换（HMR）和源映射（source maps）等功能。
+Webpack DevServer 是一个方便开发的小型 HTTP 服务器，主要用于在开发过程中提供模块热替换（HMR）和源映射（source maps）等功能。
 
 ## DevServer 功能
 
@@ -100,6 +100,219 @@ webpack output is served from /
    ```
 
    
+
+## **DevServer 原理**
+
+DevServer 其实是基于 [webpack-dev-middleware](https://github.com/webpack/webpack-dev-middleware) 和 [Expressjs](https://expressjs.com/) 实现的， 而 `webpack-dev-middleware` 其实是 Expressjs 的一个中间件。
+
+DevServer 基本功能的代码大致如下：
+
+```js
+const express = require('express');
+const webpack = require('webpack');
+const webpackMiddleware = require('webpack-dev-middleware');
+
+// 从 webpack.config.js 文件中读取 Webpack 配置 
+const config = require('./webpack.config.js');
+// 用读取到的 Webpack 配置实例化一个 Compiler
+const compiler = webpack(config);
+// 实例化一个 Expressjs app
+const app = express();
+// 给 app 注册 webpackMiddleware 中间件
+app.use(webpackMiddleware(compiler));
+// 启动 HTTP 服务器，服务器监听在 3000 端口 
+app.listen(3000);
+```
+
+> DevServer 核心是使用  `webpack-dev-middleware`  中间件实现
+
+
+
+## **`webpack-dev-middleware` 原理**
+
+`webpack-dev-middleware` 中导出 `webpackMiddleware` 是一个函数，该函数需要接收一个 Compiler 实例。
+
+`webpackMiddleware` 函数的返回结果是一个 Expressjs 的中间件，该中间件有以下功能：
+
+- 接收来自 Webpack Compiler 实例输出的文件，但不会把文件输出到硬盘，而是保存在内存中；
+- 往 Expressjs app 上注册路由，拦截 HTTP 收到的请求，根据请求路径响应对应的文件内容；
+
+通过 webpack-dev-middleware 能够将 DevServer 集成到现有的 HTTP 服务器中，让现有的 HTTP 服务器能返回 Webpack 构建出的内容，而不是在开发时启动多个 HTTP 服务器。 这特别适用于后端接口服务采用 Node.js 编写的项目。
+
+具体来说，webpack-dev-middleware具备以下功能：
+
+1. **快速响应**：它使用**内存作为文件系统**，所以文件的更改能够快速地被反映。
+2. **实时编译**：当源文件发生改变时，`webpack-dev-middleware` 能够实时编译新的代码，并把编译后的文件输出到内存中。
+3. **自动刷新**：当源代码发生改变时，浏览器会自动刷新，显示最新的代码。
+4. **支持热替换**（Hot Module Replacement）：这允许开发者在不刷新整个页面的情况下替换、添加或删除模块。
+5. **自定义配置**：除了webpack的配置，开发者还可以对webpack-dev-middleware进行自定义配置，以满足特定的需求。
+
+
+
+**Webpack Dev Middleware 支持的配置项:**
+
+```js
+// webpackMiddleware 函数的第二个参数为配置项
+app.use(webpackMiddleware(compiler, {
+    // webpack-dev-middleware 所有支持的配置项
+    // 只有 publicPath 属性为必填，其它都是选填项
+
+    // Webpack 输出资源绑定在 HTTP 服务器上的根目录，
+    // 和 Webpack 配置中的 publicPath 含义一致 
+    publicPath: '/assets/',
+
+    // 不输出 info 类型的日志到控制台，只输出 warn 和 error 类型的日志
+    noInfo: false,
+
+    // 不输出任何类型的日志到控制台
+    quiet: false,
+
+    // 切换到懒惰模式，这意味着不监听文件变化，只会在请求到时再去编译对应的文件，
+    // 这适合页面非常多的项目。
+    lazy: true,
+
+    // watchOptions
+    // 只在非懒惰模式下才有效
+    watchOptions: {
+        aggregateTimeout: 300,
+        poll: true
+    },
+
+    // 默认的 URL 路径, 默认是 'index.html'.
+    index: 'index.html',
+
+    // 自定义 HTTP 头
+    headers: {'X-Custom-Header': 'yes'},
+
+    // 给特定文件后缀的文件添加 HTTP mimeTypes ，作为文件类型映射表
+    mimeTypes: {'text/html': ['phtml']},
+
+    // 统计信息输出样式
+    stats: {
+        colors: true
+    },
+
+    // 自定义输出日志的展示方法
+    reporter: null,
+
+    // 开启或关闭服务端渲染
+    serverSideRender: false,
+}));
+```
+
+
+
+
+
+## **WebPack proxy**
+
+### **是什么？**
+
+> Webpack的代理功能（proxy）允许你在开发过程中将特定的HTTP请求转发到其他服务器上。
+
+### **为什么？**
+
+> 通过本地代理服务解决**开发中**跨域请求的问题
+
+代理功能允许你在开发过程中将请求代理到其他服务器上，以解决跨域请求的问题。
+
+通过配置代理规则，Webpack DevServer可以将特定的请求路径映射到远程服务器上，从而绕过同源策略。
+
+### **怎么用？**
+
+在`webpack`配置对象属性中通过`devServer`属性提供，如下：
+
+```js
+// ./webpack.config.js
+const path = require('path')
+
+module.exports = {
+    // ...
+    devServer: {
+        contentBase: path.join(__dirname, 'dist'),
+        compress: true,
+        port: 9000,
+        // 配置本地代理
+        proxy: {
+            '/api': { // 代理匹配的路径
+                target: 'https://test.com' // 转发的路径，通过将原路径中 /api 替换成 https://test.com
+            }
+        }
+        // ...
+    }
+}
+```
+
+`devServetr`里面`proxy`则是关于代理的配置，该属性为对象的形式，对象中每一个属性就是一个代理的规则匹配：
+
+* 属性的名称是需要被代理的请求路径前缀，一般为了辨别都会设置前缀为`/api`
+
+* 值为对应的代理匹配规则，对应如下：
+
+  - target：表示的是代理到的目标地址；
+
+  - pathRewrite：默认情况下，我们的` /api-hy `也会被写入到URL中，如果希望删除，可以使用pathRewrite
+
+  - secure：默认情况下不接收转发到 https 的服务器上，如果希望支持，可以设置为false；
+  - changeOrigin：它表示是否更新代理后请求的 headers 中host地址
+
+
+
+### **解决跨域原理**
+
+* 在开发阶段， `webpack-dev-server` 会启动一个本地开发服务器，所以我们的应用在开发阶段是独立运行在 `localhost`的一个端口上，而后端服务又是运行在另外一个地址上；
+
+* 所以在开发阶段中，由于浏览器同源策略的原因，当本地访问后端就会出现跨域请求的问题；
+
+* 通过设置`webpack proxy`实现代理请求后，相当于浏览器与服务端中添加一个代理者；
+
+* 当本地发送请求的时候，代理服务器响应该请求，并将请求转发到目标服务器，目标服务器响应数据后再将数据返回给代理服务器，最终再由代理服务器将数据响应给本地；
+* 在代理服务器传递数据给本地浏览器的过程中，两者同源，并不存在跨域行为，这时候浏览器就能正常接收数据。
+
+![img](../images/跨域.png)
+
+
+
+注意：**服务器与服务器之间请求数据并不会存在跨域行为，跨域行为是浏览器安全策略限制**
+
+
+
+### **代理原理**
+
+Webpack的代理功能（proxy）通过**拦截和转发HTTP请求来实现**：
+
+1. 当Webpack DevServer收到一个HTTP请求时，它会检查请求的URL是否匹配了代理配置中定义的规则。
+2. 如果匹配成功，Webpack DevServer将会将该请求转发到代理目标服务器上，并将响应返回给客户端。
+   * 当一个请求到达Webpack DevServer时，它会检查请求的URL是否与代理配置中的源路径匹配。如果匹配成功，Webpack DevServer将会将该请求转发到配置的目标URL。
+   * 在转发请求时，Webpack DevServer会将原始请求的URL进行修改，以便与目标服务器的路径匹配（如果配置了路径重写）。
+
+代理配置规则通常包括以下信息：
+
+1. **源路径（context）**：指定需要被代理的请求路径的前缀或模式。例如，`/api`或`/api/**`。
+2. **目标URL（target）**：指定将请求转发到的目标服务器的URL。例如，`http://api.example.com`。
+3. **路径重写（pathRewrite）**：可选项，用于对请求路径进行修改。可以用于移除前缀、重定向到其他路径等操作。
+
+webpack 中提供服务器的工具为 `webpack-dev-server`，`webpack-dev-server`是 `webpack` 官方推出的一款开发工具，将自动编译和自动刷新浏览器等一系列对开发友好的功能全部集成在了一起。
+
+ `webpack-dev-server`目的是为了提高开发者日常的开发效率，**只适用在开发阶段**
+
+`proxy`工作原理实质上是利用`http-proxy-middleware` 这个`http`代理中间件，实现请求转发给其他服务器：
+
+> 在开发阶段，本地地址为`http://localhost:3000`，该浏览器发送一个前缀带有`/api`标识的请求到服务端获取数据，但响应这个请求的服务器只是将请求转发到另一台服务器中
+>
+> ```js
+> const express = require('express');
+> const proxy = require('http-proxy-middleware');
+> 
+> const app = express();
+> 
+> app.use('/api', proxy({target: 'http://www.example.org', changeOrigin: true}));
+> app.listen(3000);
+> 
+> // http://localhost:3000/api/foo/bar -> http://www.example.org/api/foo/bar
+> ```
+
+
 
 
 
@@ -289,13 +502,15 @@ module.export = {
 
 #### **开启模块热替换**
 
-**命令行开启：**
+开启模块热替换有三种方式：
+
+**1.命令行开启：**
 
 模块热替换默认是关闭的，要开启模块热替换，你只需在启动 DevServer 时带上 `--hot` 参数，重启 DevServer 后再去更新文件，完整命令是 `webpack-dev-server --hot`。
 
 
 
-**webpack 配置：**
+**2.webpack 配置：**
 
 ```js
 const webpack = require('webpack')
@@ -311,7 +526,35 @@ module.exports = {
 
 
 
-**接入 Plugin：**
+**3.接入 `webpack-hot-middleware` 中间件：**
+
+第1步：修改 HTTP 服务器代码 `server.js` 文件，接入 `webpack-hot-middleware` 中间件，修改如下：
+
+```js
+const express = require('express');
+const webpack = require('webpack');
+const webpackMiddleware = require('webpack-dev-middleware');
+
+// 从 webpack.config.js 文件中读取 Webpack 配置
+const config = require('./webpack.config.js');
+// 实例化一个 Expressjs app
+const app = express();
+
+// 用读取到的 Webpack 配置实例化一个 Compiler
+const compiler = webpack(config);
+// 给 app 注册 webpackMiddleware 中间件
+app.use(webpackMiddleware(compiler));
+// 为了支持模块热替换，响应用于替换老模块的资源
+app.use(require('webpack-hot-middleware')(compiler));
+// 把项目根目录作为静态资源目录，用于服务 HTML 文件
+app.use(express.static('.'));
+// 启动 HTTP 服务器，服务器监听在 3000 端口
+app.listen(3000, () => {
+  console.info('成功监听在 3000');
+});
+```
+
+第2步：修改 `webpack.config.js` 文件，加入 `HotModuleReplacementPlugin` 插件，修改如下：
 
 ```js
 const HotModuleReplacementPlugin = require('webpack/lib/HotModuleReplacementPlugin');
@@ -334,7 +577,19 @@ module.exports = {
 
 >  在启动 Webpack 时带上参数 `--hot` 其实就是自动为你完成以上配置
 
+第3步：修改执行入口文件 `main.js`，加入替换逻辑，在文件末尾加入以下代码：
 
+```js
+if (module.hot) {
+  module.hot.accept();
+}
+```
+
+第4步：安装新引入的依赖：
+
+```bash
+npm i -D webpack-dev-middleware webpack-hot-middleware express
+```
 
 
 
@@ -465,8 +720,6 @@ module.exports = {
 
 在开发过程中，通常会对代码进行转换、压缩和合并等操作，以提高代码执行效率和减小文件大小。然而，这样的转换会使得源代码与最终生成的代码之间的对应关系变得复杂，不易于调试和定位问题。
 
-这时候，Source map就发挥了作用。
-
 Source map包含了源代码与转换后代码的映射关系，通常以一种叫做VLQ（Variable Length Quantity，可变长度编码）的格式存储。
 
 Source map可以告诉开发者，转换后代码中的特定位置对应于源代码中的哪个位置，从而使得浏览器的开发者工具能够在调试时正确地显示源代码，而不是转换后的代码。
@@ -479,7 +732,47 @@ Source map可以告诉开发者，转换后代码中的特定位置对应于源�
 
 ### **怎么用？**
 
+ 控制 Source Map 输出的 Webpack 配置项是 `devtool`，取值其实可以由 `source-map`、`eval`、`inline`、`hidden`、`cheap`、`module` 这六个关键字随意组合而成。 这六个关键字每个都代表一种特性，它们的含义分别是：
+
+- eval：用 `eval` 语句包裹需要安装的模块；
+- source-map：生成独立的 Source Map 文件；
+- hidden：不在 JavaScript 文件中指出 Source Map 文件所在，这样浏览器就不会自动加载 Source Map；
+- inline：把生成的 Source Map 转换成 base64 格式内嵌在 JavaScript 文件中；
+- cheap：生成的 Source Map 中不会包含列信息，这样计算量更小，输出的 Source Map 文件更小；同时 Loader 输出的 Source Map 不会被采用；
+- module：来自 Loader 的 Source Map 被简单处理成每行一个模块；
+
+配置项 `devtool`可选值：
+
+| devtool                 | 含义                                                         |
+| ----------------------- | ------------------------------------------------------------ |
+| 空                      | 不生成 Source Map                                            |
+| eval                    | 每个 module 会封装到 eval 里包裹起来执行，并且会在每个 eval 语句的末尾追加注释 `//# sourceURL=webpack:///./main.js` |
+| source-map              | 会额外生成一个单独 Source Map 文件，并且会在 JavaScript 文件末尾追加 `//# sourceMappingURL=bundle.js.map` |
+| hidden-source-map       | 和 source-map 类似，但不会在 JavaScript 文件末尾追加 `//# sourceMappingURL=bundle.js.map` |
+| inline-source-map       | 和 source-map 类似，但不会额外生成一个单独 Source Map 文件，而是把 Source Map 转换成 base64 编码内嵌到 JavaScript 中 |
+| eval-source-map         | 和 eval 类似，但会把每个模块的 Source Map 转换成 base64 编码内嵌到 eval 语句的末尾，例如 `//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW...` |
+| cheap-source-map        | 和 source-map 类似，但生成的 Source Map 文件中没有列信息，因此生成速度更快<br />1.会额外生成一个单独 Source Map 文件，并且会在 JavaScript 文件末尾追加 `//# sourceMappingURL=bundle.js.map`<br />2.生成的 Source Map 文件中没有列信息；<br />3.生成速度更快 |
+| cheap-module-source-map | 和 cheap-source-map 类似，但会包含 Loader 生成的 Source Map；<br />1.会额外生成一个单独 Source Map 文件，并且会在 JavaScript 文件末尾追加 `//# sourceMappingURL=bundle.js.map`<br />2.生成的 Source Map 文件中没有列信息；<br />3.生成速度更快，并会包含 Loader 生成的 Source Map； |
+
+
+
+**1.webpack 配置**
+
+```js
+module.exports = {  
+  // ...  
+  devtool: 'source-map', // 根据需要选择适合的方式  
+  // ...  
+};
+```
+
+
+
+**2.命令行参数**
+
  Webpack 支持生成 Source Map，只需在启动时带上 `--devtool source-map` 参数。
+
+
 
 加上参数重启 DevServer 后刷新页面，再打开 Chrome 浏览器的开发者工具，就可在 Sources 栏中看到可调试的源代码了。
 
@@ -487,110 +780,55 @@ Source map可以告诉开发者，转换后代码中的特定位置对应于源�
 
 
 
-## **WebPack proxy**
+### **如何选择Devtool 配置项**
 
-### **是什么？**
+1. 如果你不关心细节和性能，只是想在不出任何差错的情况下调试源码，可以直接设置成 `source-map`;
+   * 但这样会造成两个问题：
+     - `source-map` 模式下会输出质量最高最详细的 Source Map，这会造成构建速度缓慢，特别是在开发过程需要频繁修改的时候会增加等待时间；
+     - `source-map` 模式下会把 Source Map 暴露出去，如果构建发布到线上的代码的 Source Map 暴露出去就等于源码被泄露；
+2. 实践优化方案：
+   * 在开发环境下把 `devtool` 设置成 `cheap-module-eval-source-map`；
+     * 因为生成这种 Source Map 的速度最快，能加速构建。由于在开发环境下不会做代码压缩，Source Map 中即使没有列信息也不会影响断点调试；
+   * 在生产环境下把 `devtool` 设置成 `hidden-source-map`
+     * 意思是生成最详细的 Source Map，但不会把 Source Map 暴露出去。由于在生产环境下会做代码压缩，一个 JavaScript 文件只有一行，所以需要列信息。
 
-> Webpack的代理功能（proxy）允许你在开发过程中将特定的HTTP请求转发到其他服务器上。
+**注意：**
 
-### **为什么？**
+在生产环境下通常不会把 Source Map 上传到 HTTP 服务器让用户获取，而是上传到 JavaScript 错误收集系统，在错误收集系统上根据 Source Map 和收集到的 JavaScript 运行错误堆栈计算出错误所在源码的位置。
 
-> 通过本地代理服务解决**开发中**跨域请求的问题
+不要在生产环境下使用 `inline` 模式的 Source Map， 因为这会使 JavaScript 文件变得很大，而且会泄露源码。
 
-代理功能允许你在开发过程中将请求代理到其他服务器上，以解决跨域请求的问题。
 
-通过配置代理规则，Webpack DevServer可以将特定的请求路径映射到远程服务器上，从而绕过同源策略。
 
-### **怎么用？**
+### **加载现有的 Source Map**
 
-在`webpack`配置对象属性中通过`devServer`属性提供，如下：
+有些从 Npm 安装的第三方模块是采用 ES6 或者 TypeScript 编写的，它们在发布时会同时带上编译出来的 JavaScript 文件和对应的 Source Map 文件，以方便你在使用它们出问题的时候调试它们；
+
+默认情况下 Webpack 是不会去加载这些附加的 Source Map 文件的，Webpack 只会在转换过程中生成 Source Map。 为了让 Webpack 加载这些附加的 Source Map 文件，需要安装 [source-map-loader](https://github.com/webpack-contrib/source-map-loader) 。 使用方法如下：
 
 ```js
-// ./webpack.config.js
-const path = require('path')
-
 module.exports = {
-    // ...
-    devServer: {
-        contentBase: path.join(__dirname, 'dist'),
-        compress: true,
-        port: 9000,
-        // 配置本地代理
-        proxy: {
-            '/api': { // 代理匹配的路径
-                target: 'https://test.com' // 转发的路径，通过将原路径中 /api 替换成 https://test.com
-            }
-        }
-        // ...
-    }
-}
+  module: {
+    rules: [
+      {
+        test: /\.js$/,
+        // 只加载你关心的目录下的 Source Map，以提升构建速度
+        include: [path.resolve(root, 'node_modules/some-components/')],
+        use: ['source-map-loader'],
+        // 要把 source-map-loader 的执行顺序放到最前面，如果在 source-map-loader 之前有 Loader 转换了该 JavaScript 文件，会导致 Source Map 映射错误
+        enforce: 'pre'
+      }
+    ]
+  }
+};
 ```
 
-`devServetr`里面`proxy`则是关于代理的配置，该属性为对象的形式，对象中每一个属性就是一个代理的规则匹配：
+> 由于 source-map-loader 在加载 Source Map 时计算量很大，因此要避免让该 Loader 处理过多的文件，不然会导致构建速度缓慢。 通常会采用 `include` 去命中只关心的文件。
 
-* 属性的名称是需要被代理的请求路径前缀，一般为了辨别都会设置前缀为`/api`
+再安装新引入的依赖：
 
-* 值为对应的代理匹配规则，对应如下：
+```bash
+npm i -D source-map-loader
+```
 
-  - target：表示的是代理到的目标地址；
-
-  - pathRewrite：默认情况下，我们的` /api-hy `也会被写入到URL中，如果希望删除，可以使用pathRewrite
-
-  - secure：默认情况下不接收转发到 https 的服务器上，如果希望支持，可以设置为false；
-  - changeOrigin：它表示是否更新代理后请求的 headers 中host地址
-
-
-
-### **解决跨域原理**
-
-* 在开发阶段， `webpack-dev-server` 会启动一个本地开发服务器，所以我们的应用在开发阶段是独立运行在 `localhost`的一个端口上，而后端服务又是运行在另外一个地址上；
-
-* 所以在开发阶段中，由于浏览器同源策略的原因，当本地访问后端就会出现跨域请求的问题；
-
-* 通过设置`webpack proxy`实现代理请求后，相当于浏览器与服务端中添加一个代理者；
-
-* 当本地发送请求的时候，代理服务器响应该请求，并将请求转发到目标服务器，目标服务器响应数据后再将数据返回给代理服务器，最终再由代理服务器将数据响应给本地；
-* 在代理服务器传递数据给本地浏览器的过程中，两者同源，并不存在跨域行为，这时候浏览器就能正常接收数据。
-
-![img](../images/跨域.png)
-
-
-
-注意：**服务器与服务器之间请求数据并不会存在跨域行为，跨域行为是浏览器安全策略限制**
-
-
-
-### **代理原理**
-
-Webpack的代理功能（proxy）通过**拦截和转发HTTP请求来实现**：
-
-1. 当Webpack DevServer收到一个HTTP请求时，它会检查请求的URL是否匹配了代理配置中定义的规则。
-2. 如果匹配成功，Webpack DevServer将会将该请求转发到代理目标服务器上，并将响应返回给客户端。
-   * 当一个请求到达Webpack DevServer时，它会检查请求的URL是否与代理配置中的源路径匹配。如果匹配成功，Webpack DevServer将会将该请求转发到配置的目标URL。
-   * 在转发请求时，Webpack DevServer会将原始请求的URL进行修改，以便与目标服务器的路径匹配（如果配置了路径重写）。
-
-代理配置规则通常包括以下信息：
-
-1. **源路径（context）**：指定需要被代理的请求路径的前缀或模式。例如，`/api`或`/api/**`。
-2. **目标URL（target）**：指定将请求转发到的目标服务器的URL。例如，`http://api.example.com`。
-3. **路径重写（pathRewrite）**：可选项，用于对请求路径进行修改。可以用于移除前缀、重定向到其他路径等操作。
-
-webpack 中提供服务器的工具为 `webpack-dev-server`，`webpack-dev-server`是 `webpack` 官方推出的一款开发工具，将自动编译和自动刷新浏览器等一系列对开发友好的功能全部集成在了一起。
-
- `webpack-dev-server`目的是为了提高开发者日常的开发效率，**只适用在开发阶段**
-
-`proxy`工作原理实质上是利用`http-proxy-middleware` 这个`http`代理中间件，实现请求转发给其他服务器：
-
-> 在开发阶段，本地地址为`http://localhost:3000`，该浏览器发送一个前缀带有`/api`标识的请求到服务端获取数据，但响应这个请求的服务器只是将请求转发到另一台服务器中
->
-> ```js
-> const express = require('express');
-> const proxy = require('http-proxy-middleware');
-> 
-> const app = express();
-> 
-> app.use('/api', proxy({target: 'http://www.example.org', changeOrigin: true}));
-> app.listen(3000);
-> 
-> // http://localhost:3000/api/foo/bar -> http://www.example.org/api/foo/bar
-> ```
+重启 Webpack 后，你就能在浏览器中调试 `node_modules/some-components/` 目录下的源码了。

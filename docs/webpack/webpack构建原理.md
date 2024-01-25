@@ -21,7 +21,7 @@ module 和 chunk 的关系图：（Webpack会根据一定的规则将Module打�
 使用 webpack 可以有两种方式：
 
 1. 使用 webpack-cli 构建；（使用参考官网或 [安装与使用 · 深入浅出 Webpack](https://webpack.wuhaolin.cn/1入门/1-3安装与使用.html))
-2. 使用 `webpack` 核心对象构建；
+2. 使用 `webpack` 核心对象构建（通过 Node.js API 启动 Webpack）；
 
 ### 区别
 
@@ -35,11 +35,34 @@ module 和 chunk 的关系图：（Webpack会根据一定的规则将Module打�
 
 ### **使用 webpack 核心对象构建**
 
+ Webpack API  ： `webpack(config , callback);`
+
+* 如果不传 callback 回调函数，就会返回一个 Compiler 实例：`const compiler = webpack(config)`;
+* 如果传入 callbakc 不会返回任何参数：
+
+使用方法如下：
+
+```js
+webpack({
+  // Webpack 配置，和 webpack.config.js 文件一致
+}, (err, stats) => {
+  if (err || stats.hasErrors()) {
+    // 构建过程出错
+  }
+  // 成功执行完构建
+});
+```
+
+
+
 使用示例：
 
 ```js
 const webpack = require('webpack');
-// 传入webpack配置参数，webpack 将返回一个编译对象，该编译对象包含一个run 方法,run 方法将执行编译
+/** 
+  * 使用方式： webpack(config , callback);
+  * 传入webpack配置参数，webpack 将返回一个编译对象，该编译对象包含一个run 方法,run 方法将执行编译
+**/ 
 const compiler = webpack({
     entry:'./serve/App.vue',
     target:'node',
