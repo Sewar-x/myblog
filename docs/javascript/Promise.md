@@ -2,11 +2,11 @@
 
 
 
-# Promise 基础和实现
+# Promise 专题
 
 ## Promise 基础
 
-### 概念
+### Promise 概念
 
 ![](../images/promise1.png)
 
@@ -48,7 +48,7 @@
 
 promise 基础直接参考 阮一峰[《ECMAScript 6 入门》](https://es6.ruanyifeng.com/#docs/promise) 
 
-## 原理实现
+## Promise 原理实现
 
 强烈推荐先看 《[图解 Promise 实现原理](https://mp.weixin.qq.com/s/UNzYgpnKzmW6bAapYxnXRQ) 》文章，文章内容将原理讲述透彻，该系列文章有如下几个章节组成：
 
@@ -62,7 +62,7 @@ promise 基础直接参考 阮一峰[《ECMAScript 6 入门》](https://es6.ruan
 
    
 
-Promise 核心原理实现主要分为：基础方法+链式调用+延迟机制+状态管理+异常处理
+Promise 核心原理实现主要分为：**基础方法+链式调用+延迟机制+状态管理+异常处理**
 
 * Promise() 对象最基础包含 constructor()、then()、resolve() 三个方法；
 * 链式调用主要原理： then() 返回一个新的 Promise() 对象；
@@ -161,7 +161,7 @@ class Promise {
 }
 ```
 
-### 参考资料
+**参考资料**
 
 [图解 Promise 实现原理](https://mp.weixin.qq.com/s/UNzYgpnKzmW6bAapYxnXRQ) 
 
@@ -171,15 +171,11 @@ class Promise {
 
 
 
-# Promise 相关题目
+## Promise 执行顺序
 
-## 基础题目
+执行顺序题目主要结合 JavaScript 的事件循环和 Promise 的宏任务/微任务考察：
 
-### 执行顺序
-
-执行顺序题目主要结合 JavaScript 的事件循环 和 Promise 的宏任务/微任务考察：
-
-* Promise 新建后executor就会立即执行
+* Promise 新建后executor就会立即执行;
 * 调用 resolve() 或 reject() 并不会终结 Promise 的 executor 函数的执行
 * Promise 的状态一旦变更为成功或者失败，则不会再次改变
 * 宏任务： script(主程序代码)，setTimeout(), setInterval(), setImmediate(), I/O, requestAnimationFrame()，UI rendering
@@ -192,7 +188,7 @@ class Promise {
 
 
 
-* 
+
 
 ```javascript
 setTimeout(function () {
@@ -457,7 +453,7 @@ setTimeout
 
 
 
-### Promise 封装异步操作 
+## Promise 封装异步操作 
 
 * 题目一：使用 promise 封装 setTimeout
 
@@ -517,63 +513,65 @@ setTimeout
 
 
 
-### Promise 特性相关
+## Promise 特性
 
-* 题目一： **如何取消一个Promise？**
+### **Promise 特性问题**
 
-  * 在要停止的`promise`链位置添加一个方法，返回一个永远不执行`resolve`或者`reject`的`Promise`，那么这个`promise`永远处于`pending`状态，所以永远也不会向下执行`then`或`catch`了。这样我们就停止了一个`promise`链
+ **如何取消一个Promise？**
 
-    ```javascript
-    Promise.resolve().then(() => {
-        console.log('ok1')
-        return new Promise(()=>{})  // 返回“pending”状态的Promise对象
-    }).then(() => {
-        // 后续的函数不会被调用
-        console.log('ok2')
-    }).catch(err => {
-        console.log('err->', err)
-    })
-    ```
+* 在要停止的`promise`链位置添加一个方法，返回一个永远不执行`resolve`或者`reject`的`Promise`，那么这个`promise`永远处于`pending`状态，所以永远也不会向下执行`then`或`catch`了。这样我们就停止了一个`promise`链
 
-  * Promise.race竞速方法
+  ```javascript
+  Promise.resolve().then(() => {
+      console.log('ok1')
+      return new Promise(()=>{})  // 返回“pending”状态的Promise对象
+  }).then(() => {
+      // 后续的函数不会被调用
+      console.log('ok2')
+  }).catch(err => {
+      console.log('err->', err)
+  })
+  ```
 
-    ```javascript 
-    let p1 = new Promise((resolve, reject) => {
-        resolve('ok1')
-    })
-    
-    let p2 = new Promise((resolve, reject) => {
-        setTimeout(() => {resolve('ok2')}, 10)
-    })
-    
-    Promise.race([p2, p1]).then((result) => {
-        console.log(result) //ok1
-    }).catch((error) => {
-        console.log(error)
-    })
-    ```
+* Promise.race竞速方法
 
-* 题目二：**如果向Promise.all()和Promise.race()传递空数组，运行结果会有什么不同？**
+  ```javascript 
+  let p1 = new Promise((resolve, reject) => {
+      resolve('ok1')
+  })
+  
+  let p2 = new Promise((resolve, reject) => {
+      setTimeout(() => {resolve('ok2')}, 10)
+  })
+  
+  Promise.race([p2, p1]).then((result) => {
+      console.log(result) //ok1
+  }).catch((error) => {
+      console.log(error)
+  })
+  ```
 
-  * ![](../images/promise-test.png)
-  * all会立即决议，决议结果是fullfilled，值是undefined; race会永远都不决议，程序卡死
+**如果向Promise.all()和Promise.race()传递空数组，运行结果会有什么不同？**
 
-* 题目三：**Promise链上返回的最后一个Promise出错了怎么办？**
+* ![](../images/promise-test.png)
+* all会立即决议，决议结果是fullfilled，值是undefined; race会永远都不决议，程序卡死
 
-  * `catch`在`promise`链式调用的末尾调用，用于捕获链条中的错误信息，但是`catch`方法内部也可能出现错误，所以有些`promise`实现中增加了一个方法`done`，`done`相当于提供了一个不会出错的`catch`方法，并且不再返回一个`promise`，一般用来结束一个`promise`链
+**Promise链上返回的最后一个Promise出错了怎么办？**
 
-    ```javascript
-    done() {
-        this.catch(reason => { //调用 Promise 的 catch 方法
-          console.log('done', reason);
-          throw reason; // 向外抛出错误
-        });
-     }
-    ```
+* `catch`在`promise`链式调用的末尾调用，用于捕获链条中的错误信息，但是`catch`方法内部也可能出现错误，所以有些`promise`实现中增加了一个方法`done`，`done`相当于提供了一个不会出错的`catch`方法，并且不再返回一个`promise`，一般用来结束一个`promise`链
 
-    
+  ```javascript
+  done() {
+      this.catch(reason => { //调用 Promise 的 catch 方法
+        console.log('done', reason);
+        throw reason; // 向外抛出错误
+      });
+   }
+  ```
 
-### 应用题
+  
+
+### Promise 应用题
 
 * 题目一：**顺序加载10张图片，图片地址已知，但是同时最多加载3张图片，要求用`promise`实现**
 
@@ -660,13 +658,13 @@ startLoadImage(urls, 3)
 
 ## Promisec串行
 
-### 概念
+### 串行概念
 
 * 有多个任务，多个任务必须顺序执行（下一个任务依赖上一个任务结果）
 * 使用 Promise 进行异步操作的顺序处理
 * Promise 串行执行实现原理： 利用 Promise.then() 的链式调用
 
-### 实现
+### Pomise 串行实现
 
 模拟三个异步函数，每一个函数依赖上一个函数结果
 
@@ -800,7 +798,7 @@ let p3 = function (data) {
   ```
 
 
-### 应用
+### 串行应用
 
 #### axios请求/响应拦截过程
 
@@ -903,17 +901,17 @@ console.log(promise)
 
 ### 并发控制
 
-#### 概念
+#### 并发概念
 
 ​	要求执行 n 个异步任务，但不能 n 个异步任务同时执行 (内存资源限制等原因)，需要控制每次 m ( m<n ) 个异步任务同时进行，但最终结果是执行 n 个异步任务
 
-#### 思想
+#### 并发思想
 
 * 使用 Promise 并行执行 API : Promise.all()、Promise.allSettled()、Promise.race()、Promise.any() 并行执行异步，控制每次并行执行的 Promise 实例;
 * Promise 并发限制，其实根源上就是控制 Promise 的实例化个数；Promise 并不是因为调用 Promise.all 才执行，而是在实例化 Promise 对象的时候就执行了;
 * 要实现并发限制，只能从 Promise 实例化上下手，把生成 Promises 数组的控制权，交给并发控制逻辑
 
-#### 通用实现
+#### 并发实现
 
 * 实现一： **使用 async await 和 Promise.all 封装并发任务 (推荐)**
 
@@ -1117,13 +1115,13 @@ console.log(promise)
 
   
 
-#### 应用
+#### 并发应用
 
 * 题目一：**网页中预加载20张图片资源，分步加载，一次加载10张，两次完成，怎么控制图片请求的并发，怎样感知当前异步请求是否已完成？**
 
   答案参考 [Promise 异步流程控制](https://zhuanlan.zhihu.com/p/29792886)
 
-## 参考
+## 参考资料
 
 [Promise](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise)
 
