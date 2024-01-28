@@ -7305,7 +7305,7 @@ class Vue {
 
 
 
-## [特殊 attribute](https://cn.vuejs.org/v2/api/#特殊-attribute)
+## [特殊属性](https://cn.vuejs.org/v2/api/#特殊-attribute)
 
 ### [key](https://cn.vuejs.org/v2/api/#key)
 
@@ -7369,81 +7369,81 @@ class Vue {
   ![](../images/quexian.png)
   
 
-#### 为什么 vue2 无法检测到 data 对象属性的新增或删除？
+### 为什么 Vue2 无法检测到 data 对象属性的新增或删除？
 
-* **Vue的响应式系统在实例化时会对数据对象进行递归遍历**，将其属性转换为getter/setter，从而实现数据的响应式更新;
-* 当你在 Vue实例的 data 选项中定义一个初始的数据对象，Vue 将遍历该对象属性，将其属性转换为响应式属性。这意味着Vue会追踪这些属性的变化，并在变化时更新视图。
-* 然而，如果你在运行时通过直接给对象新增或删除属性的方式来改变数据，Vue 无法遍历到新增的属性，因此无法对新增属性调用 `defineReactive` 定义响应式。
+* Vue.js 2.x 的响应系统是基于 **Object.defineProperty** 的，该 API **只能对对象单个属性操作拦截**;
+* Vue 的响应式系统**在实例化时会对数据对象 data 选项进行递归遍历**，将其属性转换为getter/setter，从而实现数据的响应式更新;由于 Object.defineProperty只能对对象单个属性操作拦，因此必须对对象深度遍历；
+* **当初始化完成以后，不再进行响应式操作**，因此在运行时通过直接给对象新增或删除属性的方式来改变数据，Vue 无法遍历到新增的属性，因此无法对新增属性调用 `defineReactive` 定义响应式。
 
-* 以下截取部分 `手写响应式原理过程`（详细代码可参考以上 `手写响应式原理`）, 当新增数据时候， ` if (data.hasOwnProperty(key))`  语句为 `false`，跳过了 `defineReactive`，因此新增属性无法进行响应式。
+以下截取部分 `手写响应式原理过程`（详细代码可参考以上 `手写响应式原理`）, 当新增数据时候， ` if (data.hasOwnProperty(key))`  语句为 `false`，跳过了 `defineReactive`，因此新增属性无法进行响应式。
 
-  ```js
-  //遍历数据，对数据每一个属性定义响应式
-  function Observer(data) {
-    for (let key in data) {
-    // 当新增数据时候，该语句为 false，跳过了 defineReactive 方法，因此新增属性无法进行响应式。
-      if (data.hasOwnProperty(key)) {
-        defineReactive(data, key, data[key]);
-      }
+```js
+//遍历数据，对数据每一个属性定义响应式
+function Observer(data) {
+  for (let key in data) {
+  // 当新增数据时候，该语句为 false，跳过了 defineReactive 方法，因此新增属性无法进行响应式。
+    if (data.hasOwnProperty(key)) {
+      defineReactive(data, key, data[key]);
     }
   }
-  
-  function defineReactive(obj, key, value) {
-    let dep = new Dep();
-  
-    Object.defineProperty(obj, key, {
-      enumerable: true,
-      configurable: true,
-      get: function() {
-        if (Dep.target) {
-          dep.addWatcher(Dep.target);
-        }
-        return value;
-      },
-      set: function(newValue) {
-        if (value !== newValue) {
-          value = newValue;
-          dep.notify();
-        }
+}
+
+function defineReactive(obj, key, value) {
+  let dep = new Dep();
+
+  Object.defineProperty(obj, key, {
+    enumerable: true,
+    configurable: true,
+    get: function() {
+      if (Dep.target) {
+        dep.addWatcher(Dep.target);
       }
-    });
-  }
-  
-  // vue 实例，初始化时遍历 data 对象，进行观察数据，双向绑定
-  function Vue(options) {
-    this.data = options.data;
-    Observer(this.data);
-    this.bindData();
-  }
-  
-  Vue.prototype.bindData = function() {
-    let self = this;
-    // 遍历对象上所有属性进行双向绑定
-    for (let key in this.data) {
-      if (this.data.hasOwnProperty(key)) {
-        Object.defineProperty(this, key, {
-          get: function() {
-            return self.data[key];
-          },
-          set: function(newValue) {
-            self.data[key] = newValue;
-          }
-        });
-      }
-    }
-  };
-  
-  let vm = new Vue({
-    data: {
-      someObject: {
-          key1: 'value1'
+      return value;
+    },
+    set: function(newValue) {
+      if (value !== newValue) {
+        value = newValue;
+        dep.notify();
       }
     }
   });
-  
-  // 无法监听到 key2 值的变化
-  vm.data.key2 = 'value2'
-  ```
+}
+
+// vue 实例，初始化时遍历 data 对象，进行观察数据，双向绑定
+function Vue(options) {
+  this.data = options.data;
+  Observer(this.data);
+  this.bindData();
+}
+
+Vue.prototype.bindData = function() {
+  let self = this;
+  // 遍历对象上所有属性进行双向绑定
+  for (let key in this.data) {
+    if (this.data.hasOwnProperty(key)) {
+      Object.defineProperty(this, key, {
+        get: function() {
+          return self.data[key];
+        },
+        set: function(newValue) {
+          self.data[key] = newValue;
+        }
+      });
+    }
+  }
+};
+
+let vm = new Vue({
+  data: {
+    someObject: {
+        key1: 'value1'
+    }
+  }
+});
+
+// 无法监听到 key2 值的变化
+vm.data.key2 = 'value2'
+```
 
 #### **解决 vue2 无法检测到 data 对象属性的新增或删除**
 
@@ -7821,13 +7821,13 @@ Q：响应式的数据主要分为两类：Object 和 Array
 
 ### **数据更新相关问题**
 
->  Vue 默认更新是同步的还是异步的？
+#### **Vue 默认更新是同步的还是异步？**
 
 Q：Vue 默认异步更新，通过 `watcher.async`。Vue 源码还设置了开启同步更新的操作，可以通过设置 `watcher.sync` 的属性，在 watcher.update() 方法时并直接执行 watcher.run() 方法进行更新操作。**但 Vue 官方不推荐使用该属性，因同步更新机制将阻塞后续任务的执行，整个组件更新将大打折扣。**
 
 
 
->  Vue 是如何避免重复执行同一次异步更新？
+#### **Vue 是如何避免重复执行同一次异步更新？**
 
 Q：通过三个标识符的操作来进行避免重复执行同一次的异步更新：
 
@@ -7839,7 +7839,7 @@ Q：通过三个标识符的操作来进行避免重复执行同一次的异步�
 
 
 
-> Vue 是如何将刷新 callbacks 数组的函数放入浏览器任务队列进行异步更新的？
+#### **Vue 是如何将刷新 callbacks 数组的函数放入浏览器任务队列进行异步更新的？**
 
 Q：根据浏览器任务队列异步执行的效率来选择放入方法的优先级，分别为：
 
@@ -7861,7 +7861,7 @@ Q：根据浏览器任务队列异步执行的效率来选择放入方法的优�
 
 ### VUE2 与 VUE3 比较
 
-#### 语法差异
+#### **语法差异**
 
 [vue3.x 文档-vue2迁移](https://vue3js.cn/docs/zh/guide/migration/introduction.html#%E4%BB%8B%E7%BB%8D)章节中介绍了 vue3.x 新增特性和 vue2 差异。
 
@@ -7889,7 +7889,7 @@ Vue 3 中需要关注的一些新功能包括：
 
   
 
-**创建实例方式**
+#### **创建实例方式**
 
 * vue2: 使用 `new Vue()` 创建实例。
 
@@ -7928,7 +7928,7 @@ Vue 3 中需要关注的一些新功能包括：
     .use(LocalePlugin)
   ```
 
-**生命周期**
+#### **生命周期**
 
 * vue 3.x 生命周期：
 
@@ -7938,25 +7938,36 @@ Vue 3 中需要关注的一些新功能包括：
 
 
 
-#### 使用 Proxy 重构 Vue2 原因
+## Proxy 比 defineProperty好在哪里？
 
 * Vue 3.x 响应式系统使用  [ES6 Proxy](https://es6.ruanyifeng.com/#docs/proxy)，Vue2.x 使用 `Object.defineProperty()` 实现。
 
-* 使用 Proxy 重构原因：
+Proxy和defineProperty都是JavaScript中用于处理对象属性的机制，但它们在功能和灵活性上存在一些差异。
 
-  * 原因1：
+以下是一些Proxy比defineProperty更好的地方：
 
-    * `Object.defineProperty()` 存在以下缺陷 (参考本章 vue2.x 缺陷): 
-      * 不能监听数组的变化。因此 vue2.x 针对数组是多做了一层处理，代理了数组的基本方法。
-      * 无法检测到对象属性的新增或删除;
+1. **Proxy支持数组**：
+   * Proxy可以直接监听数组的变化; （Proxy 通过返回一个代理对象操作源对象），在使用Proxy时，你可以更容易地更新数组的索引或添加/删除数组元素。
+   * Object.defineProperty 需要深度遍历数组，对数组每个元素递归调用 Object.defineProperty 实现监听；因此原生API不能监听数组的变化；
+   * Proxy可以检测到数组基于下标的修改和长度修改，而Object.defineProperty无法做到。
+2. **Proxt 支持监听对象属性新增和删除**：
+   * Proxy 通过返回代理对象监听源对象，对整个对象操作进行拦截，因此在对象属性新增和删除时候能在代理对象中监听到；
+   * 使用 Object.defineProperty 对对象监听，需要对每一个对象属性进行遍历监听，因此在完成初始化属性遍历拦截后，再对对象属性进行新增和修改时就无法监听到变化； (Vue2.x 中使用Object.defineProperty 进行响应式初始化之后，不再进行响应式操作，因此无法监听对象属性新增和修改 )
+3. **Proxy 可以拦截更多的操作**：
+   * Proxy 可以拦截更多的操作，包括属性的读取、设置和删除等；
+     * Proxy 通过返回一个代理对象操作源对象，这意味着使用Proxy可以在不干扰现有代码逻辑的情况下修改对象的行为。
+   * Object.defineProperty 只能监视对象单个属性值的变化。
+4. **Proxy性能更好**：
+   * Proxy 通过返回一个代理对象操作源对象，Proxy可以在内存中只存储一份数据；Proxy可以在调用的时候递归，用到才代理，也不需要维护特别多的依赖关系，性能提升很大。
+   * Object.defineProperty 需要为每个对象每个属性都创建一个数据结构，导致内存占用较大；
+   * 由此在处理大量数据时，Object.defineProperty 内存占用较大；
+5. **Proxy提供了更丰富的特性**：
+   * Proxy提供了更丰富的特性，例如get/set属性、apply、construct、deleteProperty、getOwnPropertyDescriptor、getPrototypeOf、isExtensible、ownKeys、preventExtensions、setPrototype等。这些特性使得Proxy在处理对象属性时更加灵活和强大。
+6. **Proxy更简单的语法**：
+   * Proxy提供了一个相对简单的API，使得创建代理对象更加容易；
+   * Object.defineProperty的语法更加复杂和不易理解；
 
-    *   [ES6 Proxy](https://es6.ruanyifeng.com/#docs/proxy)优化：能响应新增的属性。当新增一个属性的时候，可以响应到get中，对当前对象/数组进行代理。
 
-  * 原因2：
-
-    * `Object.defineProperty()` 只能劫持对象的单个属性,因此需要对每个对象的每个属性进行遍历。
-      * data/computed/props  中的属性进行响应式初始化时 (`initData`-> `observer()`)是通过 递归 + 遍历  对象来实现对数据的监控的，如果属性值也是对象那么需要深度遍历，如果 vue 对象的 data/computed/props 中的数据规模庞大，那么遍历起来就会慢很多。（详细过程参考本章 响应式 源码分析过程）
-    * Vue3.x 使用 Proxy 的监听是针对一个对象的，那么对这个对象的所有操作会进入监听操作，因此不需要遍历 + 递归。
 
 
 
