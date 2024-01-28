@@ -4,7 +4,8 @@
 
 - **Entry**：入口，Webpack 执行构建的第一步将从 Entry 开始，可抽象成输入。
 - **Module**：模块，在 Webpack 里一切皆模块，一个模块对应着一个文件。Webpack 会从配置的 Entry 开始递归找出所有依赖的模块。
-- **Chunk**：代码块，code splitting 后的产物，也就是按需加载的分块，装载了不同的 module。一个 Chunk 由多个module组合而成，用于代码合并与分割。
+- **Chunk**：代码块，code splitting 后的产物，也就是按需加载的分块，装载了不同的 module。
+  - Chunk 是一系列文件的集合，一个 Chunk 中会包含这个 Chunk 的入口文件和入口文件依赖的文件，由多个module组合而成，用于代码合并与分割。
 - **Loader**：模块转换器，用于把模块原内容按照需求转换成新内容。loader 间可以串行使用。
 - **Plugin**：扩展插件，在 Webpack 构建流程中的特定时机会广播出对应的事件，插件可以监听这些事件的发生，在特定时机做对应的事情。
 
