@@ -46,6 +46,8 @@ footer:  MIT Licensed | Copyright © 2023-present
 |                    |                            | VueX 原理分析                                          | 💯        |
 |                    |                            | Vue-Router 原理分析                                    | 💯        |
 |                    |                            | Vue-SSR 原理分析                                       | 💦        |
+|                    |                            | Vue-Cli 分析                                           | 💦        |
+|                    |                            |                                                        |          |
 |                    | Vue3.x                     |                                                        | ❌        |
 |                    |                            | Vue3 基础和原理解析                                    | ❌        |
 |                    | Vue Vs React               |                                                        | 💦        |
@@ -73,8 +75,10 @@ footer:  MIT Licensed | Copyright © 2023-present
 |                    |                            | 创建发布私有 npm 包                                    | 💦        |
 |                    | WebPack                    |                                                        | 💦        |
 |                    |                            | WebPack 基础                                           | 💦        |
-|                    |                            | WebPack 原理解析                                       | 💦        |
-|                    |                            | WebPackAPI                                             | 💦        |
+|                    |                            | WebPack 原理解析                                       | 💯        |
+|                    |                            | WebPack 优化                                           | 💯        |
+|                    |                            | WebPackAPI                                             | 💯        |
+|                    |                            | WebPack 项目实践                                       | 💦        |
 |                    | Vite                       |                                                        | ❌        |
 |                    | Git                        |                                                        |          |
 |                    |                            | Git 基础和操作                                         | 💯        |
