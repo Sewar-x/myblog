@@ -174,7 +174,8 @@ module.exports = config({
         'DevServer原理',
         'webpack优化',
         'webpackAPI分析',
-        'webpack项目实践'
+        'webpack项目实践',
+        'Vue2.5项目webpack分析'
       ]
     },
 
