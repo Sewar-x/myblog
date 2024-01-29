@@ -145,10 +145,11 @@ module.exports = config({
         '数学运算'
       ],
       '/vue2/': [
-        'vue2原理源码分析',
-        'vuex',
-        'vueRouter',
-        'VueSSR',
+        'Vue2原理源码分析',
+        'Vuex原理分析',
+        'VueRouter原理分析',
+        'VueSSR原理分析',
+        'VueCli源码分析',
         '前端框架选型'
       ],
 

@@ -1,6 +1,8 @@
-## VUEX
+# Vuex原理分析
 
-### VUEX 基础
+# VUEX
+
+## VUEX 基础
 
 * Vuex  应用开发的状态管理模式。采用集中式存储管理应用的所有组件的状态。
 
@@ -162,7 +164,7 @@
 
     * vuex中存储的数据不能持久化。vuex 的 store 中的数据是保存在运行内存中的，当页面刷新后，页面会重新加载 vue 实例，vuex 里面的数据就会被重新赋值，这样就会出现页面刷新vuex中的数据丢失的问题。需要监听处理来维持vuex存储的数据状态持久化。
 
-### 初始化
+## 初始化
 
 * 初始化过程：
 
@@ -175,7 +177,7 @@
 
   
 
-### 实例化
+## 实例化
 
 
 
@@ -227,7 +229,7 @@
 
 ![](../flow-graph/vuex实例化过程.png)
 
-### 相关问题
+## 相关问题
 
 **基础题：**
 
@@ -349,9 +351,9 @@
 
 
 
-### 应用
+## 应用
 
-#### Vuex和localStorage 比较
+### Vuex和localStorage 比较
 
 共同点：
 
@@ -378,7 +380,7 @@
     * vuex与localStorage结合，实现组件间通信，同时刷新页面数据不丢失
   * 当需求是刷新页面仍然可以获取到数据，或者是同一域名下不同项目共享数据，需要使用 localStorage
 
-#### Vuex数据持久化
+### Vuex数据持久化
 
 > Vuex 实现数据持久化？ vuex 如何解决页面刷新后数据丢失的问题？
 
@@ -461,7 +463,7 @@
   * [vuex-persistedstate 插件](https://www.npmjs.com/package/vuex-persistedstate)：`persistedState`内部默认使用`localStorage`存储。
   * [vuex-persist 插件](https://github.com/championswimmer/vuex-persist)
 
-### 参考资料
+## 参考资料
 
 [vuex3.x文档](https://vuex.vuejs.org/zh/guide/)
 

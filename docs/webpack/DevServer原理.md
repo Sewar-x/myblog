@@ -754,7 +754,7 @@ Source map可以告诉开发者，转换后代码中的特定位置对应于源�
 | cheap-source-map        | 和 source-map 类似，但生成的 Source Map 文件中没有列信息，因此生成速度更快<br />1.会额外生成一个单独 Source Map 文件，并且会在 JavaScript 文件末尾追加 `//# sourceMappingURL=bundle.js.map`<br />2.生成的 Source Map 文件中没有列信息；<br />3.生成速度更快 |
 | cheap-module-source-map | 和 cheap-source-map 类似，但会包含 Loader 生成的 Source Map；<br />1.会额外生成一个单独 Source Map 文件，并且会在 JavaScript 文件末尾追加 `//# sourceMappingURL=bundle.js.map`<br />2.生成的 Source Map 文件中没有列信息；<br />3.生成速度更快，并会包含 Loader 生成的 Source Map； |
 
-
+![img](../images/sourcemap参数比较.png)
 
 **1.webpack 配置**
 
