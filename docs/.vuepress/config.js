@@ -32,7 +32,7 @@ module.exports = config({
         items: [
           { text: '数据结构和算法', link: '../algorithms/' },
           { text: '计算机网络/HTTP', link: '../network/' },
-          { text: '输入url到页面展示全过程', link: '../network/输入url到页面展示全过程' },
+          { text: '输入url到页面展示全过程', link: '../network/输入url到页面展示全过程/' },
           { text: '操作系统', link: '../operating-system/' },
           { text: '设计模式', link: '../design-model/' },
           { text: 'Web安全', link: '../Web-Security/' }
@@ -51,9 +51,9 @@ module.exports = config({
         text: '浏览器',
         ariaLabel: '浏览器',
         items: [
-          { text: '浏览器原理', link: '../browser/浏览器原理' },
-          { text: '前端缓存和存储', link: '../browser/前端缓存和存储' },
-          { text: '前端调试技巧', link: '../performance/前端调试技巧' },
+          { text: '浏览器原理', link: '../browser/浏览器原理/' },
+          { text: '前端缓存和存储', link: '../browser/前端缓存和存储/' },
+          { text: '前端调试技巧', link: '../performance/前端调试技巧/' },
         ]
       },
 
@@ -72,48 +72,48 @@ module.exports = config({
         text: '性能优化',
         ariaLabel: '浏览器和性能优化',
         items: [
-          { text: '性能优化指标和监控', link: '../performance/性能优化指标和监控' },
-          { text: '前端性能优化方案', link: '../performance/前端性能优化方案' },
-          { text: '一次管理后台的渲染优化', link: '../performance/一次管理后台的渲染优化' },
+          { text: '性能优化指标和监控', link: '../performance/性能优化指标和监控/' },
+          { text: '前端性能优化方案', link: '../performance/前端性能优化方案/' },
+          { text: '一次管理后台的渲染优化', link: '../performance/一次管理后台的渲染优化/' },
         ]
       },
       {
         text: '前端工程',
         ariaLabel: '前端工程',
         items: [
-          { text: '前端工程化', link: '../Front-end-Engineering/前端工程化' },
-          { text: '前端渲染架构', link: '../Front-end-Engineering/前端渲染架构' },
-          { text: '前端架构实践', link: '../Front-end-Engineering/前端架构实践' },
+          { text: '前端工程化', link: '../Front-end-Engineering/前端工程化/' },
+          { text: '前端渲染架构', link: '../Front-end-Engineering/前端渲染架构/' },
+          { text: '前端架构实践', link: '../Front-end-Engineering/前端架构实践/' },
           { text: 'webpack专题', link: '../webpack/' },
-          { text: 'npm', link: '../Front-end-Engineering/npm' },
+          { text: 'npm', link: '../Front-end-Engineering/npm/' },
           { text: 'Git', link: '../git/' },
-          { text: '自动构建和部署', link: '../Front-end-Engineering/自动构建和部署' },
+          { text: '自动构建和部署', link: '../Front-end-Engineering/自动构建和部署/' },
         ]
       },
       {
         text: '项目实践',
         ariaLabel: '项目实践',
         items: [
-          { text: '从零到一搭建Vue2工程化项目', link: '../projectsSummary/从零到一搭建Vue2工程化项目' },
-          { text: '从零到一搭建Vue3工程化项目', link: '../projectsSummary/从零到一搭建Vue3工程化项目' },
-          { text: '从零到一搭建SSR项目', link: '../projectsSummary/从零到一搭建SSR项目' },
-          { text: '从零到一搭建移动端SSG项目', link: '../projectsSummary/从零到一搭建移动端SSG项目' },
-          { text: '移动端SSG项目实践', link: '../projectsSummary/移动端SSG项目实践' },
-          { text: '搭建低代码平台', link: '../projectsSummary/搭建低代码平台' },
-          { text: '组件和组件封装实践', link: '../componentsEncapsulation/组件和组件封装实践' },
-          { text: '登录与单点登录', link: '../projectsSummary/登录与单点登录' },
-          { text: '权限管理方案实践', link: '../projectsSummary/权限管理方案实践' },
-          { text: 'Echarts二次封装实践', link: '../projectsSummary/Echarts二次封装实践' },
-          { text: '移动端开发实践', link: '../projectsSummary/移动端开发实践' },
-          { text: '文档在线预览和编辑方案', link: '../projectsSummary/文档在线预览和编辑方案' },
-          { text: '混合桌面应用开发实践', link: '../projectsSummary/混合桌面应用开发实践' },
+          { text: '从零到一搭建Vue2工程化项目', link: '../projectsSummary/从零到一搭建Vue2工程化项目/' },
+          { text: '从零到一搭建Vue3工程化项目', link: '../projectsSummary/从零到一搭建Vue3工程化项目/' },
+          { text: '从零到一搭建SSR项目', link: '../projectsSummary/从零到一搭建SSR项目/' },
+          { text: '从零到一搭建移动端SSG项目', link: '../projectsSummary/从零到一搭建移动端SSG项目/' },
+          { text: '移动端SSG项目实践', link: '../projectsSummary/移动端SSG项目实践/' },
+          { text: '搭建低代码平台', link: '../projectsSummary/搭建低代码平台/' },
+          { text: '组件和组件封装实践', link: '../componentsEncapsulation/组件和组件封装实践/' },
+          { text: '登录与单点登录', link: '../projectsSummary/登录与单点登录/' },
+          { text: '权限管理方案实践', link: '../projectsSummary/权限管理方案实践/' },
+          { text: 'Echarts二次封装实践', link: '../projectsSummary/Echarts二次封装实践/' },
+          { text: '移动端开发实践', link: '../projectsSummary/移动端开发实践/' },
+          { text: '文档在线预览和编辑方案', link: '../projectsSummary/文档在线预览和编辑方案/' },
+          { text: '混合桌面应用开发实践', link: '../projectsSummary/混合桌面应用开发实践/' },
         ]
       },
       {
         text: '常见问题汇总',
         ariaLabel: '常见问题汇总',
         items: [
-          { text: '前端发版静态资源404问题', link: '../workNote/前端发版静态资源404问题' },
+          { text: '前端发版静态资源404问题', link: '../workNote/前端发版静态资源404问题/' },
         ]
       },
     ],
