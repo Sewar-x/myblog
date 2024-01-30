@@ -6,7 +6,7 @@
 
 ## **怎么用**
 
-## 原理
+## **原理**
 
 ## **源码分析**
 
@@ -14,38 +14,60 @@
 
 ## 基础
 
-* 构建的 vue-cli 工程都到了哪些技术，它们的作用分别是什么？
-  * `vue.js`：`vue-cli` 工程的核心。
-  * `vue-router`：vue官方推荐使用的路由框架。
-  * `vuex`：专为 Vue.js 应用项目开发的状态管理器，主要用于维护vue组件间共用的一些 变量 和 方法。
-  * `axios`（ 或者 fetch 、ajax ）：用于发起 GET 、或 POST 等 http请求，基于 Promise 设计。
-  * `vux` 等组件库：一个专为 vue 设计的移动端UI组件库。
-  * `emit.js` 文件，用于 vue 事件机制的管理。
-  * `webpack`：模块加载和 vue-cli 工程打包器。
-* vue-cli 工程常用的 npm 命令有哪些？
-  * 下载 node_modules 资源包的命令：`npm install`
-  * 启动 vue-cli 开发环境的 npm命令：`npm run dev`
-  * vue-cli 生成 生产环境部署资源 的 npm命令：`npm run build`
-  * 用于查看 vue-cli 生产环境部署资源文件大小的 npm命令：`npm run build --report`
+### **Vue-cli 工程集成技术**
+
+| 技术           | 作用                                                         |
+| :------------- | :----------------------------------------------------------- |
+| Vue.js         | 用于构建用户界面的流行JavaScript前端框架                     |
+| Webpack        | 静态模块打包工具，处理项目中的资源文件并打包成可用的文件     |
+| Babel          | JavaScript 编译器，将ES6+代码转换为向后兼容的JavaScript版本  |
+| ESLint         | 可插拔的JavaScript代码检查工具，帮助保持一致的代码风格和发现潜在问题 |
+| Vue Router     | Vue.js官方提供的路由管理器，用于构建单页应用程序的路由系统   |
+| Vuex           | Vue.js官方提供的状态管理库，用于管理应用程序的全局状态       |
+| Axios          | 用于发起 GET 、或 POST 等 http请求，基于 Promise 设计        |
+| Jest           | 单元测试框架，用于编写和运行单元测试                         |
+| Cypress        | 端到端测试框架，用于编写和运行整个应用程序的端到端测试       |
+| Sass           | CSS预处理器，增强CSS的编程能力和可维护性                     |
+| Less           | CSS预处理器，增强CSS的编程能力和可维护性                     |
+| Prettier       | 代码格式化工具，用于自动格式化代码                           |
+| 代码分割       | 将代码拆分成多个小块，实现按需加载和提高应用程序性能         |
+| 懒加载         | 延迟加载页面中的资源，提高应用程序的性能                     |
+| `emit.js` 文件 | 用于 vue 事件机制的管理                                      |
+
+
+
+### **Vue-cli 工程常用的 npm 命令**
+
+* 下载 node_modules 资源包的命令：`npm install`
+* 启动 vue-cli 开发环境的 npm命令：`npm run dev`
+* vue-cli 生成 生产环境部署资源 的 npm命令：`npm run build`
+* 用于查看 vue-cli 生产环境部署资源文件大小的 npm命令：`npm run build --report`
+
 * 自定义脚本命令： 在 `script` 添加命令，使用 `npm run 命令` 执行命令。
-* vue-cli目录解析：
-  * `build` 文件夹：用于存放 `webpack` 相关配置和脚本。开发中仅 偶尔使用 到此文件夹下 `webpack.base.conf.js`用于配置 `less`、`sass `等 `css `预编译库，或者配置一下 UI 库。
-  * config 文件夹：主要存放配置文件，用于区分开发环境、线上环境的不同。 常用到此文件夹下 `config.js` 配置开发环境的 端口号、是否开启热加载 或者 设置生产环境的静态资源相对路径、是否开启gzip压缩、`npm run build` 命令打包生成静态资源的名称和路径等。
-  * `dist` 文件夹：默认` npm run build` 命令打包生成的静态资源文件，用于生产部署。
-  * `node_modules`：存放npm命令下载的开发环境和生产环境的依赖包。
-  * `src`: 存放项目源码及需要引用的资源文件。
-  * `src/assets`：存放项目中需要用到的资源文件，css、js、images等。
-  * `src/componets`：存放vue开发中一些公共组件：`header.vue`、`footer.vue` 等。
-  * `src/emit`：自己配置的vue集中式事件管理机制。
-  * `src/router`：vue-router vue路由的配置文件。
-  * `src/service`：自己配置的vue请求后台接口方法。
-  * `src/page`：存在vue页面组件的文件夹。
-  * `src/util`：存放vue开发过程中一些公共的.js方法。
-  * `src/vuex`：存放 vuex 为vue专门开发的状态管理器。
-  * `src/app.vue`：使用标签`<route-view></router-view>`渲染整个工程的.vue组件。
-  * `src/main.js`：vue-cli工程的入口文件。
-  * `index.html`：设置项目的一些meta头信息和提供`<div id="app"></div>`用于挂载 vue 节点。
-  * `package.json`：用于 node_modules资源部 和 启动、打包项目的 npm 命令管理。
+
+
+
+### **Vue-cli 目录解析**
+
+* `build` 文件夹：用于存放 `webpack` 相关配置和脚本。开发中仅 偶尔使用 到此文件夹下 `webpack.base.conf.js`用于配置 `less`、`sass `等 `css `预编译库，或者配置一下 UI 库。
+* config 文件夹：主要存放配置文件，用于区分开发环境、线上环境的不同。 常用到此文件夹下 `config.js` 配置开发环境的 端口号、是否开启热加载 或者 设置生产环境的静态资源相对路径、是否开启gzip压缩、`npm run build` 命令打包生成静态资源的名称和路径等。
+* `dist` 文件夹：默认` npm run build` 命令打包生成的静态资源文件，用于生产部署。
+* `node_modules`：存放npm命令下载的开发环境和生产环境的依赖包。
+* `src`: 存放项目源码及需要引用的资源文件。
+* `src/assets`：存放项目中需要用到的资源文件，css、js、images等。
+* `src/componets`：存放vue开发中一些公共组件：`header.vue`、`footer.vue` 等。
+* `src/emit`：自己配置的vue集中式事件管理机制。
+* `src/router`：vue-router vue路由的配置文件。
+* `src/service`：自己配置的vue请求后台接口方法。
+* `src/page`：存在vue页面组件的文件夹。
+* `src/util`：存放vue开发过程中一些公共的.js方法。
+* `src/vuex`：存放 vuex 为vue专门开发的状态管理器。
+* `src/app.vue`：使用标签`<route-view></router-view>`渲染整个工程的.vue组件。
+* `src/main.js`：vue-cli工程的入口文件。
+* `index.html`：设置项目的一些meta头信息和提供`<div id="app"></div>`用于挂载 vue 节点。
+* `package.json`：用于 node_modules资源部 和 启动、打包项目的 npm 命令管理。
+
+
 
 ## 原理
 
@@ -62,7 +84,7 @@
 
 
 
-## CLI 服务分析
+## **CLI 服务分析**
 
 ### **使用**
 
@@ -106,7 +128,7 @@ npx vue-cli-service serve
 
 3. 该批处理脚本的主要作用是找到并设置Vue CLI服务的执行路径，然后使用Node.js来运行Vue CLI服务，Vue CLI服务的执行路径执行路径为 `..\@vue\cli-service\bin\vue-cli-service.js`
 
-`vue-cli-service.js` 文件主要作用是检查运行环境、解析命令行参数，并运行 Vue CLI 服务:
+`vue-cli-service.js` 文件主要作用是**检查运行环境、解析命令行参数，并运行 Vue CLI 服务**:
 
 ```js
 
@@ -184,13 +206,15 @@ service.run(command, args, rawArgv).catch(err => {
   用法：vue-cli-service build [options] [entry|pattern]
   ```
 
-通过以上代码可知，`vue-cli-service` 命令通过 `service.run()` 方法执行
+通过以上代码可知，`vue-cli-service` 命令执行前，先创建了一个 Service 类，并通过 `service.run()` 方法执行执行命令。
 
 ### **Service 对象初始化**
 
 Service 对象定义位于 `./node_modules/@vue/cli-service/lib/Service.js` 中;
 
-`Service`的类包含了Vue CLI中的服务对象。服务对象负责处理命令行选项、插件加载、Webpack配置和其他与项目构建相关的任务:
+`Service`的类包含了Vue CLI中的服务对象。
+
+服务对象负责**处理命令行选项、插件加载、Webpack配置和其他与项目构建相关的任务**:
 
 ```js
 module.exports = class Service {
@@ -289,7 +313,7 @@ module.exports = class Service {
 > 6. `modes`：是一个默认模式对象，用于定义每个命令的默认模式。这个对象是通过插件的`apply`对象中的`defaultModes`来构建的。
 > 7. `init` 方法：
 >    * 初始化`Service`类，设置一些基本的状态。
->    * 根据环境变量`VUE_CLI_MODE`来加载相应的配置文件。
+>    * 根据环境变量`VUE_CLI_MODE`来加载相应的配置文件（`vue-cli-service serve [options] [entry]` 命令通过 `--mode` 参数指定环境模式 ，默认值为 development，该参数会加载当前目录下指定环境的下配置文件）。
 >    * 加载用户提供的选项，并使用默认值来填充缺失的选项。
 >    * 遍历插件列表，并执行它们的方法。
 >    * 链入Webpack配置处理函数，以便在构建过程中使用。
@@ -512,9 +536,476 @@ return fn(args, rawArgv)
 
 #### **源码分析**
 
-通过以上分析可知，serve 命令脚本在 `cli-service/lib/commands/serve.js` 中；
+在通过以上“解析插件” 步骤时，执行`vue-cli-service serve`命令时，最终是通过调用 `serve` 插件方法，serve 命令脚本在 `cli-service/lib/commands/serve.js` 中：
 
-在通过以上“解析插件” 步骤时，执行 `serve` 插件方法：
+```js
+module.exports = (api, options) => {
+  //调用 registerCommand 注册一个 serve 命令
+  api.registerCommand('serve', {
+    description: 'start development server',
+    usage: 'vue-cli-service serve [options] [entry]',
+    options: {
+      '--open': `open browser on server start`,
+      '--copy': `copy url to clipboard on server start`,
+      '--stdin': `close when stdin ends`,
+      '--mode': `specify env mode (default: development)`,
+      '--host': `specify host (default: ${defaults.host})`,
+      '--port': `specify port (default: ${defaults.port})`,
+      '--https': `use https (default: ${defaults.https})`,
+      '--public': `specify the public network URL for the HMR client`,
+      '--skip-plugins': `comma-separated list of plugin names to skip for this run`
+    }
+  }, async function serve (args) {
+    info('Starting development server...')
+ 	// 启动一个开发服务器，以下代码省略...
+    })
+  })
+}
+```
+
+>  在 `serve.js` 中主要调用了 ` api.registerCommand` 进行注册命令，并传入三个参数:
+>
+> * 第一个参数：serve 命令名称；
+> * 第二个参数：命令选项；
+> * 第三个参数：命令回调函数，在该回调函数中使用 webpack 启动一个本地开发服务;
+>
+> ` api.registerCommand`  方式实际上在 `cli-service/lib/PluginAPI.js` 中定义：主要作用是在 Service 类中注册一个命令
+>
+> ```js
+>   registerCommand (name, opts, fn) {
+>     if (typeof opts === 'function') {
+>       fn = opts
+>       opts = null
+>     }
+>     this.service.commands[name] = { fn, opts: opts || {}}
+>   }
+> ```
+
+该命令的主要执行逻辑为` api.registerCommand` 的第三个参数回调方法，下面分析该回调 `serve` 方法 :
+
+#### **`serve` 回调**
+
+serve 回调中主要**使用 webpack 启动一个启动一个本地开发服务**,内部主要逻辑：
+
+1. **配置初始化**： webpack 和 webpack 开发服务配置项初始化；
+2. 创建 webpack 实例 和 开发服务实例；
+3. 返回 HTTP 服务实例，并启动本地 HTTP 服务;
+
+代码简化逻辑为：
+
+```js
+async function serve (args) {
+    info('Starting development server...')
+  
+    // although this is primarily a dev server, it is possible that we
+    // are running it in a mode with a production env, e.g. in E2E tests.
+    const isInContainer = checkInContainer()
+    const isProduction = process.env.NODE_ENV === 'production'
+
+    const url = require('url')
+    const { chalk } = require('@vue/cli-shared-utils')
+    const webpack = require('webpack')
+    const WebpackDevServer = require('webpack-dev-server')
+    const portfinder = require('portfinder')
+    const prepareURLs = require('../util/prepareURLs')
+    const prepareProxy = require('../util/prepareProxy')
+    const launchEditorMiddleware = require('launch-editor-middleware')
+    const validateWebpackConfig = require('../util/validateWebpackConfig')
+    const isAbsoluteUrl = require('../util/isAbsoluteUrl')
+   // ==================webpack 和 webpack 开发服务配置项 初始化====================
+    // 往 service.webpackChainFns 队列中添加回调...
+    // 1.设置开发环境下 webpack 开发工具...
+    // 2.解析 webpack 配置
+    // 3.检查常见的 webpack 配置错误
+    // 4.暴露高级统计信息...
+    //5.解析 webpack 入口参数...
+    // 6.解析服务器选项...
+    // 7.非生产环境下，注入开发和热重载中间件...
+  
+    //========== webpack 配置项初始化完成 ====================
+    //========== 创建 webpack 实例 和 开发服务实例============
+    // create compiler
+    // 核心：创建 webpack 实例，返回一个编译器对象
+    const compiler = webpack(webpackConfig)
+
+    // create server
+    // 核心：创建一个 webpack 开发服务, 传入一个编译器实例 和 参数选项
+    const server = new WebpackDevServer(compiler, {
+     //配置项省略...
+    })
+	// 返回一个 HTTP 服务实例
+    return new Promise((resolve, reject) => {
+      // log instructions & open browser on first compilation complete
+      let isFirstCompile = true
+      // 监听 webpack 插件 done 事件
+      compiler.hooks.done.tap('vue-cli-service serve', stats => {
+  	  // 配置操作....
+      // 启动服务，并监听
+      server.listen(port, host, err => {
+        if (err) {
+          reject(err)
+        }
+      })
+    })
+  }
+```
+
+
+
+完整代码和注释为：
+
+```js
+async function serve (args) {
+    info('Starting development server...')
+    // ==================webpack 和 webpack 开发服务配置项 初始化====================
+    // although this is primarily a dev server, it is possible that we
+    // are running it in a mode with a production env, e.g. in E2E tests.
+    const isInContainer = checkInContainer()
+    const isProduction = process.env.NODE_ENV === 'production'
+
+    const url = require('url')
+    const { chalk } = require('@vue/cli-shared-utils')
+    const webpack = require('webpack')
+    const WebpackDevServer = require('webpack-dev-server')
+    const portfinder = require('portfinder')
+    const prepareURLs = require('../util/prepareURLs')
+    const prepareProxy = require('../util/prepareProxy')
+    const launchEditorMiddleware = require('launch-editor-middleware')
+    const validateWebpackConfig = require('../util/validateWebpackConfig')
+    const isAbsoluteUrl = require('../util/isAbsoluteUrl')
+
+    // configs that only matters for dev server
+    // 往 service.webpackChainFns 队列中添加回调
+    api.chainWebpack(webpackConfig => {
+      // 设置开发环境下 webpack 开发工具
+      if (process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test') {
+        webpackConfig
+          .devtool('cheap-module-eval-source-map')
+
+        // 添加 webpack 热更新插件
+        webpackConfig
+          .plugin('hmr')
+            .use(require('webpack/lib/HotModuleReplacementPlugin'))
+
+        // https://github.com/webpack/webpack/issues/6642
+        // https://github.com/vuejs/vue-cli/issues/3539
+        // https://v3.vuejs.org/api/global-api.html#definecomponnet
+        // 设置 webpack 全局对象 一些插件需要它来正确工作
+        webpackConfig
+          .output
+            .globalObject(`(typeof self !== 'undefined' ? self : this)`)
+
+        // 添加 webpack 进度条
+        if (!process.env.VUE_CLI_TEST && options.devServer.progress !== false) {
+          webpackConfig
+            .plugin('progress')
+            .use(require('webpack/lib/ProgressPlugin'))
+        }
+      }
+    })
+
+    // resolve webpack config 解析 webpack 配置
+    const webpackConfig = api.resolveWebpackConfig()
+
+    // check for common config errors
+    // 检查常见的 webpack 配置错误
+    validateWebpackConfig(webpackConfig, api, options)
+
+    // load user devServer options with higher priority than devServer
+    // in webpack config
+    // 加载用户 devServer 选项，具有比 webpack 配置中的 devServer 更高的优先级
+    const projectDevServerOptions = Object.assign(
+      webpackConfig.devServer || {},
+      options.devServer
+    )
+
+    // expose advanced stats
+    // 暴露高级统计信息
+    if (args.dashboard) {
+      // https://github.com/FormidableLabs/webpack-dashboard
+      const DashboardPlugin = require('../webpack/DashboardPlugin')
+      ;(webpackConfig.plugins = webpackConfig.plugins || []).push(new DashboardPlugin({
+        type: 'serve'
+      }))
+    }
+
+    // entry arg
+    //解析 webpack 入口参数
+    const entry = args._[0]
+    if (entry) {
+      webpackConfig.entry = {
+        app: api.resolve(entry)
+      }
+    }
+
+    // resolve server options
+    // 解析服务器选项
+    const useHttps = args.https || projectDevServerOptions.https || defaults.https   
+    const protocol = useHttps ? 'https' : 'http'
+    const host = args.host || process.env.HOST || projectDevServerOptions.host || defaults.host
+    portfinder.basePort = args.port || process.env.PORT || projectDevServerOptions.port || defaults.port
+    const port = await portfinder.getPortPromise()
+    const rawPublicUrl = args.public || projectDevServerOptions.public
+    const publicUrl = rawPublicUrl
+      ? /^[a-zA-Z]+:\/\//.test(rawPublicUrl)
+        ? rawPublicUrl
+        : `${protocol}://${rawPublicUrl}`
+      : null
+
+    const urls = prepareURLs(
+      protocol,
+      host,
+      port,
+      isAbsoluteUrl(options.publicPath) ? '/' : options.publicPath
+    )
+    const localUrlForBrowser = publicUrl || urls.localUrlForBrowser
+    // proxy config
+    const proxySettings = prepareProxy(
+      projectDevServerOptions.proxy,
+      api.resolve('public')
+    )
+
+    // inject dev & hot-reload middleware entries
+    // 非生产环境下，注入开发和热重载中间件
+    if (!isProduction) {
+      // socket 连接路径
+      const sockPath = projectDevServerOptions.sockPath || '/sockjs-node'
+      const sockjsUrl = publicUrl
+        // explicitly configured via devServer.public
+        ? `?${publicUrl}&sockPath=${sockPath}`
+        : isInContainer
+          // can't infer public network url if inside a container...
+          // use client-side inference (note this would break with non-root publicPath)
+          ? ``
+          // otherwise infer the url
+          : `?` + url.format({
+            protocol,
+            port,
+            hostname: urls.lanUrlForConfig || 'localhost'
+          }) + `&sockPath=${sockPath}`
+      const devClients = [
+        // dev server client
+        require.resolve(`webpack-dev-server/client`) + sockjsUrl,
+        // hmr client
+        require.resolve(projectDevServerOptions.hotOnly
+          ? 'webpack/hot/only-dev-server'
+          : 'webpack/hot/dev-server')
+        // TODO custom overlay client
+        // `@vue/cli-overlay/dist/client`
+      ]
+      if (process.env.APPVEYOR) {
+        devClients.push(`webpack/hot/poll?500`)
+      }
+      // inject dev/hot client
+      // 添加开发和热重载客户端到 entry
+      addDevClientToEntry(webpackConfig, devClients)
+    }
+    //========== webpack 配置项初始化完成 ====================
+    //========== 创建 webpack 实例 和 开发服务实例============
+    // create compiler
+    // 核心：创建 webpack 实例，返回一个编译器对象
+    const compiler = webpack(webpackConfig)
+
+    // handle compiler error
+    // webpack 处理编译错误，监听错误，发生错误时退出程序
+    compiler.hooks.failed.tap('vue-cli-service serve', msg => {
+      error(msg)
+      process.exit(1)
+    })
+
+    // create server
+    // 核心：创建一个 webpack 开发服务, 传入一个编译器实例 和 参数选项
+   const server = new WebpackDevServer(compiler, Object.assign({
+      // 关闭 webpack 的日志
+      logLevel: 'silent',
+      // 关闭 webpack-dev-server 的日志
+      clientLogLevel: 'silent',
+      // 支持页面跳转
+      historyApiFallback: {
+        // 禁用点式规则
+        disableDotRule: true,
+        // 生成历史api回退重写
+        rewrites: genHistoryApiFallbackRewrites(options.publicPath, options.pages)
+      },
+      // 指定内容基础
+      contentBase: api.resolve('public'),
+      // 非生产环境时，监听内容基础
+      watchContentBase: !isProduction,
+      // 非生产环境时，启用热更新
+      hot: !isProduction,
+      // 禁用注入客户端
+      injectClient: false,
+      // 压缩
+      compress: isProduction,
+      // 指定publicPath
+      publicPath: options.publicPath,
+      // 非生产环境时，启用覆盖
+      overlay: isProduction // TODO disable this
+        ? false
+        : { warnings: false, errors: true }
+    }, projectDevServerOptions, {
+      // 使用https
+      https: useHttps,
+      // 代理设置
+      proxy: proxySettings,
+      // 注册中间件
+      // eslint-disable-next-line no-shadow
+      before (app, server) {
+        // launch editor support.
+        // this works with vue-devtools & @vue/cli-overlay
+        // 启动编辑器支持
+        // 此功能与vue-devtools和@vue/cli-overlay一起工作
+        app.use('/__open-in-editor', launchEditorMiddleware(() => console.log(
+          `To specify an editor, specify the EDITOR env variable or ` +
+          `add "editor" field to your Vue project config.\n`
+        )))
+        // allow other plugins to register middlewares, e.g. PWA
+        // 允许其他插件注册中间件，例如PWA
+        api.service.devServerConfigFns.forEach(fn => fn(app, server))
+        // apply in project middlewares
+        // 应用项目中间件
+        projectDevServerOptions.before && projectDevServerOptions.before(app, server)
+      },
+      // avoid opening browser
+      // 避免打开浏览器
+      open: false
+    }))
+
+   // 注册 node 信号
+   ;['SIGINT', 'SIGTERM'].forEach(signal => {
+      // 当收到SIGINT或SIGTERM信号时，关闭服务器
+      process.on(signal, () => {
+        server.close(() => {
+          // 退出进程
+          process.exit(0)
+        })
+      })
+    })
+
+   // 判断args.stdin是否存在
+   if (args.stdin) {
+      // 当标准输入流结束时
+      process.stdin.on('end', () => {
+        // 关闭服务器
+        server.close(() => {
+          // 退出进程
+          process.exit(0)
+        })
+      })
+
+      // 恢复标准输入流
+      process.stdin.resume()
+    }
+
+   // on appveyor, killing the process with SIGTERM causes execa to
+    // throw error
+    if (process.env.VUE_CLI_TEST) {
+      process.stdin.on('data', data => {
+        if (data.toString() === 'close') {
+          console.log('got close signal!')
+          server.close(() => {
+            process.exit(0)
+          })
+        }
+      })
+    }
+
+    return new Promise((resolve, reject) => {
+      // log instructions & open browser on first compilation complete
+      let isFirstCompile = true
+      // 监听 webpack 插件 done 事件
+      compiler.hooks.done.tap('vue-cli-service serve', stats => {
+        if (stats.hasErrors()) {
+          return
+        }
+
+        let copied = ''
+        // 首次编译将服务地址添加到粘贴板
+        if (isFirstCompile && args.copy) {
+          try {
+            require('clipboardy').writeSync(localUrlForBrowser)
+            copied = chalk.dim('(copied to clipboard)')
+          } catch (_) {
+            /* catch exception if copy to clipboard isn't supported (e.g. WSL), see issue #3476 */
+          }
+        }
+
+        const networkUrl = publicUrl
+          ? publicUrl.replace(/([^/])$/, '$1/')
+          : urls.lanUrlForTerminal
+
+        console.log()
+        console.log(`  App running at:`)
+        console.log(`  - Local:   ${chalk.cyan(urls.localUrlForTerminal)} ${copied}`)
+        if (!isInContainer) {
+          console.log(`  - Network: ${chalk.cyan(networkUrl)}`)
+        } else {
+          console.log()
+          console.log(chalk.yellow(`  It seems you are running Vue CLI inside a container.`))
+          if (!publicUrl && options.publicPath && options.publicPath !== '/') {
+            console.log()
+            console.log(chalk.yellow(`  Since you are using a non-root publicPath, the hot-reload socket`))
+            console.log(chalk.yellow(`  will not be able to infer the correct URL to connect. You should`))
+            console.log(chalk.yellow(`  explicitly specify the URL via ${chalk.blue(`devServer.public`)}.`))
+            console.log()
+          }
+          console.log(chalk.yellow(`  Access the dev server via ${chalk.cyan(
+            `${protocol}://localhost:<your container's external mapped port>${options.publicPath}`
+          )}`))
+        }
+        console.log()
+
+        if (isFirstCompile) {
+          isFirstCompile = false
+
+          if (!isProduction) {
+            const buildCommand = hasProjectYarn(api.getCwd()) ? `yarn build` : hasProjectPnpm(api.getCwd()) ? `pnpm run build` : `npm run build`
+            console.log(`  Note that the development build is not optimized.`)
+            console.log(`  To create a production build, run ${chalk.cyan(buildCommand)}.`)
+          } else {
+            console.log(`  App is served in production mode.`)
+            console.log(`  Note this is for preview or E2E testing only.`)
+          }
+          console.log()
+          // 打开浏览器
+          if (args.open || projectDevServerOptions.open) {
+            const pageUri = (projectDevServerOptions.openPage && typeof projectDevServerOptions.openPage === 'string')
+              ? projectDevServerOptions.openPage
+              : ''
+            openBrowser(localUrlForBrowser + pageUri)
+          }
+
+          // Send final app URL
+          // 发送 url 到粘贴板
+          if (args.dashboard) {
+            const ipc = new IpcMessenger()
+            ipc.send({
+              vueServe: {
+                url: localUrlForBrowser
+              }
+            })
+          }
+
+          // resolve returned Promise
+          // so other commands can do api.service.run('serve').then(...)
+          resolve({
+            server,
+            url: localUrlForBrowser
+          })
+        } else if (process.env.VUE_CLI_TEST) {
+          // signal for test to check HMR
+          console.log('App updated')
+        }
+      })
+      // 启动服务，并监听
+      server.listen(port, host, err => {
+        if (err) {
+          reject(err)
+        }
+      })
+    })
+  }
+```
 
 
 

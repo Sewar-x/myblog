@@ -1,21 +1,17 @@
 # 目录
 
-------
+## [webpack基础](https://sewar-x.github.io/webpack/webpack基础/)
 
-[TOC]
+## [webpack构建原理](https://sewar-x.github.io/webpack/webpack构建原理/)
 
-## [webpack基础](https://sewar-x.github.io/webpack/webpack基础.html)
+## [Loader和Plugin原理](https://sewar-x.github.io/webpack/Loader和Plugin原理/)
 
-## [webpack构建原理](https://sewar-x.github.io/webpack/webpack构建原理.html)
+## [DevServer原理](https://sewar-x.github.io/webpack/DevServer原理/)
 
-## [Loader和Plugin原理](https://sewar-x.github.io/webpack/Loader和Plugin原理.html)
+## [webpack优化](https://sewar-x.github.io/webpack/webpack优化/)
 
-## [DevServer原理](https://sewar-x.github.io/webpack/DevServer原理.html)
+## [webpackAPI分析](https://sewar-x.github.io/webpack/webpackAPI分析/)
 
-## [webpack优化](https://sewar-x.github.io/webpack/webpack优化.html)
+## [webpack项目实践](https://sewar-x.github.io/webpack/webpack项目实践/)
 
-## [webpackAPI分析](https://sewar-x.github.io/webpack/webpackAPI分析.html)
-
-## [webpack项目实践](https://sewar-x.github.io/webpack/webpack项目实践.html)
-
-## [Vue2.5项目webpack分析](https://sewar-x.github.io/webpack/Vue2.5项目webpack分析.html)
+## [Vue2.5项目webpack分析](https://sewar-x.github.io/webpack/Vue2.5项目webpack分析/)
