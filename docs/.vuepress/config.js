@@ -42,7 +42,7 @@ module.exports = config({
         text: '框架和源码分析',
         ariaLabel: '框架和源码分析',
         items: [
-          { text: 'Vue2.x源码分析专题', link: '../vue2/vue2原理源码分析' },
+          { text: 'Vue2.x源码分析专题', link: '../vue2/' },
           { text: 'Axios源码分析专题', link: '../axios/' },
           { text: 'React', link: '../React/' }
         ]
@@ -84,7 +84,7 @@ module.exports = config({
           { text: '前端工程化', link: '../Front-end-Engineering/前端工程化' },
           { text: '前端渲染架构', link: '../Front-end-Engineering/前端渲染架构' },
           { text: '前端架构实践', link: '../Front-end-Engineering/前端架构实践' },
-          { text: 'webpack专题', link: '../webpack/webpack专题大纲' },
+          { text: 'webpack专题', link: '../webpack/' },
           { text: 'npm', link: '../Front-end-Engineering/npm' },
           { text: 'Git', link: '../git/' },
           { text: '自动构建和部署', link: '../Front-end-Engineering/自动构建和部署' },
@@ -145,7 +145,8 @@ module.exports = config({
         '数学运算'
       ],
       '/vue2/': [
-        'Vue2原理源码分析',
+        '',
+        'Vue2原理和源码分析',
         'Vuex原理分析',
         'VueRouter原理分析',
         'VueSSR原理分析',
@@ -169,6 +170,7 @@ module.exports = config({
         'JSON组件'
       ],
       '/webpack/': [
+        '',
         'webpack专题大纲',
         'webpack构建原理',
         'Loader和Plugin原理',

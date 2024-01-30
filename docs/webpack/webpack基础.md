@@ -1,6 +1,6 @@
 
 
-# WebPack 专题大纲
+# webpack基础
 
 ![webpack](../images/webpack大纲.png)
 
