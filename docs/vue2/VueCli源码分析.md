@@ -1457,6 +1457,203 @@ async function serve (args) {
 
 #### **源码分析**
 
+`build` 命令插件位于 `cli-service/lib/commands/build/index.js`:![image-20240131201435242](../images/vue-cli-build命令插件.png)
+
+> 该命令入口文件使用 `api.registerCommand('build',options, callback)` 注册一个 build 命令：
+>
+> - 注册并处理一个名为 `build` 的命令。
+> - 根据命令的参数和选项来设置默认值。
+> - 根据 `args.modern` 的值来执行不同的构建操作。
+> - 在 Modern 模式下，通过子进程来执行构建操作。
+> - 删除构建操作中产生的临时文件。
+
+
+
+在注册完成 `build` 命令后，解析命令参数，最后传入一个 `build` 方法解析命令行参数、配置 Webpack 配置、执行 Webpack 构建执行 webpack 构建：
+
+```js
+//负责解析命令行参数、配置 Webpack 配置、执行 Webpack 构建
+async function build(args, api, options) {
+  const fs = require('fs-extra')
+  const path = require('path')
+  const webpack = require('webpack')
+  const { chalk } = require('@vue/cli-shared-utils')
+  const formatStats = require('./formatStats')
+  const validateWebpackConfig = require('../../util/validateWebpackConfig')
+  const {
+    log,
+    done,
+    info,
+    logWithSpinner,
+    stopSpinner
+  } = require('@vue/cli-shared-utils')
+
+  log()
+  const mode = api.service.mode
+  //检查命令行参数，并根据参数内容修改了构建模式（如 --modern 和 --no-modern）
+  if (args.target === 'app') {
+    const bundleTag = args.modern
+      ? args.modernBuild
+        ? `modern bundle `
+        : `legacy bundle `
+      : ``
+    logWithSpinner(`Building ${bundleTag}for ${mode}...`)
+  } else {
+    const buildMode = buildModes[args.target]
+    if (buildMode) {
+      const additionalParams = buildMode === 'library' ? ` (${args.formats})` : ``
+      logWithSpinner(`Building for ${mode} as ${buildMode}${additionalParams}...`)
+    } else {
+      throw new Error(`Unknown build target: ${args.target}`)
+    }
+  }
+
+  if (args.dest) {
+    // Override outputDir before resolving webpack config as config relies on it (#2327)
+    options.outputDir = args.dest
+  }
+
+  const targetDir = api.resolve(options.outputDir)
+  const isLegacyBuild = args.target === 'app' && args.modern && !args.modernBuild
+
+  // resolve raw webpack config
+  //加载了相应的webpack配置文件
+  let webpackConfig
+  if (args.target === 'lib') {
+    webpackConfig = require('./resolveLibConfig')(api, args, options)
+  } else if (
+    args.target === 'wc' ||
+    args.target === 'wc-async'
+  ) {
+    webpackConfig = require('./resolveWcConfig')(api, args, options)
+  } else {
+    webpackConfig = require('./resolveAppConfig')(api, args, options)
+  }
+
+  // check for common config errors
+  //检查了 Webpack 配置是否包含错误，并进行了修正
+  validateWebpackConfig(webpackConfig, api, options, args.target)
+  //启动一个监听器来监听文件变化并自动重新构建
+  if (args.watch) {
+    modifyConfig(webpackConfig, config => {
+      config.watch = true
+    })
+  }
+
+  // 判断是否有标准输入
+  if (args.stdin) {
+    // 当标准输入结束时，退出程序
+    process.stdin.on('end', () => {
+      process.exit(0)
+    })
+    // 恢复标准输入
+    process.stdin.resume()
+  }
+
+  // Expose advanced stats
+  // 判断参数dashboard是否存在
+  if (args.dashboard) {
+    // 引入DashboardPlugin插件
+    const DashboardPlugin = require('../../webpack/DashboardPlugin')
+    // 修改webpack配置
+    modifyConfig(webpackConfig, config => {
+      // 将DashboardPlugin插件添加到配置中
+      config.plugins.push(new DashboardPlugin({
+        type: 'build',
+        modernBuild: args.modernBuild,
+        keepAlive: args.keepAlive
+      }))
+    })
+  }
+  // 如果args.report或者args['report-json']存在，则引入webpack-bundle-analyzer插件
+  if (args.report || args['report-json']) {
+    const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer')
+    // 修改webpackConfig配置
+    modifyConfig(webpackConfig, config => {
+      // 根据target参数，设置bundleName
+      const bundleName = args.target !== 'app'
+        ? config.output.filename.replace(/\.js$/, '-')
+        : isLegacyBuild ? 'legacy-' : ''
+      // 添加BundleAnalyzerPlugin插件
+      config.plugins.push(new BundleAnalyzerPlugin({
+        // 设置日志等级
+        logLevel: 'warn',
+        // 关闭浏览器
+        openAnalyzer: false,
+        // 根据args.report参数，设置analyzerMode
+        analyzerMode: args.report ? 'static' : 'disabled',
+        // 设置报告文件名
+        reportFilename: `${bundleName}report.html`,
+        // 设置报告文件名
+        statsFilename: `${bundleName}report.json`,
+        // 根据args['report-json']参数，设置generateStatsFile
+        generateStatsFile: !!args['report-json']
+      }))
+    })
+  }
+
+  if (args.clean) {
+    // 如果args.clean为true，则执行fs.remove函数，删除targetDir目录
+    await fs.remove(targetDir)
+  }
+
+ return new Promise((resolve, reject) => {
+    // 执行webpack构建
+    webpack(webpackConfig, (err, stats) => {
+      // 停止spinner
+      stopSpinner(false)
+      // 如果出现错误，则返回错误
+      if (err) {
+        return reject(err)
+      }
+
+      // 如果构建有错误，则返回错误
+      if (stats.hasErrors()) {
+        return reject(`Build failed with errors.`)
+      }
+
+      // 如果不是静默模式，则输出构建信息
+      if (!args.silent) {
+        const targetDirShort = path.relative(
+          api.service.context,
+          targetDir
+        )
+        log(formatStats(stats, targetDirShort, api))
+        // 如果是app目标，且不是legacy构建，则输出部署信息
+        if (args.target === 'app' && !isLegacyBuild) {
+          // 如果不是watch模式，则输出构建完成信息
+          if (!args.watch) {
+            done(`Build complete. The ${chalk.cyan(targetDirShort)} directory is ready to be deployed.`)
+            info(`Check out deployment instructions at ${chalk.cyan(`https://cli.vuejs.org/guide/deployment.html`)}\n`)
+          } else {
+            done(`Build complete. Watching for changes...`)
+          }
+        }
+      }
+
+      // test-only signal
+      // 测试only信号
+      if (process.env.VUE_CLI_TEST) {
+        console.log('Build complete.')
+      }
+
+      // 构建成功，返回成功
+      resolve()
+    })
+  })
+}
+```
+
+> 该方法主要逻辑为：
+>
+> 1. 代码检查了命令行参数，并根据参数内容修改了构建模式（如 `--modern` 和 `--no-modern`）。
+> 2. 然后，代码加载了相应的配置文件（如 `resolveAppConfig`、`resolveLibConfig` 等），并根据命令行参数进行了相应的配置修改。
+> 3. 接着，代码检查了 Webpack 配置是否包含错误，并进行了修正。
+> 4. 最后，代码根据命令行参数（如 `--silent` 和 `--report`）决定是否输出构建结果。
+> 5. 如果需要，代码还会启动一个监听器来监听文件变化并自动重新构建。
+> 6. 执行 webpack 构建；
+> 7. 为了方便测试，代码还允许在测试环境中输出一些信号。
+
 
 
 ## **WebPack 配置原理**
