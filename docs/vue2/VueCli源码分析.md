@@ -66,6 +66,16 @@ yarn global add @vue/cli
 vue create hello-world
 ```
 
+> `vue create` 命令在 Windows 下的解析流程常在用户执行命令时自动进行：
+>
+> 1. **命令行输入**：当你在命令提示符（Command Prompt）或 PowerShell 中输入 `vue create` 命令时，首先会检查系统环境变量中定义的全局安装包目录。
+> 2. **环境变量查找**：Windows 会检查系统的 `PATH` 环境变量中列出的目录，寻找 `@vue/cli` 的可执行文件。在全局安装 npm 包时，通常会将包的 bin 目录添加到系统的 PATH 中。
+> 3. **全局安装包目录**：找到 `@vue/cli` 的安装位置后，系统会在该目录下的 `bin` 子目录中查找名为 `vue` 的可执行文件。
+> 4. **执行文件关联**：一旦找到 `vue` 可执行文件，系统会将其与 `vue create` 命令关联起来。这意味着当你输入 `vue create` 时，实际上是在执行这个可执行文件。
+> 5. **命令执行**：`vue` 可执行文件会接收到 `create` 命令及其后续参数（例如 `hello-world`），并执行相应的操作。这通常涉及启动一个脚本来创建新的 Vue 项目。
+> 6. **子进程调用**：在某些情况下，`vue create` 命令可能会通过子进程调用其他工具或脚本，如 `yarn` 或 `npm`，来安装项目的依赖项或执行其他初始化任务。
+> 7. **输出与反馈**：命令的执行结果（如成功创建项目或遇到错误）会显示在命令行界面上，为用户提供反馈。
+
 当运行 `vue create` 命令时，默认会执行安装的 `vue-cli` 项目下的 `/bin/vue.js` 文件（以下是全局安装的 `vue-cli` 项目目录）：
 
 ![image-20240131164539288](../images/vue-cli.png)
@@ -106,6 +116,327 @@ vue create hello-world
 > 1. 检查输入的 projectName 是否符合规范；必须指定一个 `app-name `，否则会报错；
 > 2. 判断 target  目录是否存在，然后通过交互询问用户是否覆盖（对应的是操作是删除原目录;
 > 3. 创建 Creator 类,并执行`creator.create(options)`;
+
+###  **Creator 创建项目**
+
+Creator 类是主要创建脚手架的类，该类定义如下：
+
+![image-20240131190642601](../images/creator类.png)
+
+由以上 Creator 类的定义，创建项目的核心方法在 `Creator.create()` 中：
+
+```js
+  // 根据用户交互提示创建项目
+  async create(cliOptions = {}, preset = null) {
+    // 判断是否是测试或调试环境
+    const isTestOrDebug = process.env.VUE_CLI_TEST || process.env.VUE_CLI_DEBUG
+    // 获取 run、name、context、afterInvokeCbs、afterAnyInvokeCbs 五个属性
+    const { run, name, context, afterInvokeCbs, afterAnyInvokeCbs } = this
+
+    // 如果没有提供preset，则根据cliOptions的参数来决定使用哪个preset
+    if (!preset) {
+      if (cliOptions.preset) {
+        // vue create foo --preset bar
+        preset = await this.resolvePreset(cliOptions.preset, cliOptions.clone)
+      } else if (cliOptions.default) {
+        // vue create foo --default
+        preset = defaults.presets.default
+      } else if (cliOptions.inlinePreset) {
+        // vue create foo --inlinePreset {...}
+        try {
+          preset = JSON.parse(cliOptions.inlinePreset)
+        } catch (e) {
+          error(`CLI inline preset is not valid JSON: ${cliOptions.inlinePreset}`)
+          exit(1)
+        }
+      } else {
+        // 用户没有提供任何preset，因此弹出一个提示，让用户选择
+        preset = await this.promptAndResolvePreset()
+      }
+    }
+
+    // clone before mutating
+    // 克隆一份preset，因为后面会修改它
+    preset = cloneDeep(preset)
+    // inject core service
+    // 注入核心服务
+    preset.plugins['@vue/cli-service'] = Object.assign({
+      projectName: name
+    }, preset)
+
+    // 判断cliOptions.bare是否存在，存在则将preset.plugins['@vue/cli-service'].bare设置为true
+    if (cliOptions.bare) {
+      preset.plugins['@vue/cli-service'].bare = true
+    }
+
+    // legacy support for router
+    // 判断preset.router是否存在，存在则将preset.plugins['@vue/cli-plugin-router']设置为空对象
+    if (preset.router) {
+      preset.plugins['@vue/cli-plugin-router'] = {}
+
+      // 判断preset.routerHistoryMode是否存在，存在则将preset.plugins['@vue/cli-plugin-router'].historyMode设置为true
+      if (preset.routerHistoryMode) {
+        preset.plugins['@vue/cli-plugin-router'].historyMode = true
+      }
+    }
+
+    // Introducing this hack because typescript plugin must be invoked after router.
+    // Currently we rely on the `plugins` object enumeration order,
+    // which depends on the order of the field initialization.
+    // FIXME: Remove this ugly hack after the plugin ordering API settled down
+    // 如果preset.plugins中包含@vue/cli-plugin-router和@vue/cli-plugin-typescript，则删除@vue/cli-plugin-typescript，并将@vue/cli-plugin-typescript设置为preset.plugins['@vue/cli-plugin-typescript']
+    if (preset.plugins['@vue/cli-plugin-router'] && preset.plugins['@vue/cli-plugin-typescript']) {
+      const tmp = preset.plugins['@vue/cli-plugin-typescript']
+      delete preset.plugins['@vue/cli-plugin-typescript']
+      preset.plugins['@vue/cli-plugin-typescript'] = tmp
+    }
+
+    // legacy support for vuex
+    // 如果preset.vuex存在，则将preset.plugins['@vue/cli-plugin-vuex']设置为空对象
+    if (preset.vuex) {
+      preset.plugins['@vue/cli-plugin-vuex'] = {}
+    }
+
+    // 加载cliOptions中的packageManager属性，如果没有则加载options中的packageManager属性，
+    // 如果没有则根据是否有yarn，pnpm3或更高版本，返回对应的packageManager
+    const packageManager = (
+      cliOptions.packageManager ||
+      loadOptions().packageManager ||
+      (hasYarn() ? 'yarn' : null) ||
+      (hasPnpm3OrLater() ? 'pnpm' : 'npm')
+    )
+
+    await clearConsole()
+    const pm = new PackageManager({ context, forcePackageManager: packageManager })
+
+    log(`✨  Creating project in ${chalk.yellow(context)}.`)
+    this.emit('creation', { event: 'creating' })
+
+    // get latest CLI plugin version
+    const { latestMinor } = await getVersions()
+
+    // generate package.json with plugin dependencies
+    const pkg = {
+      name,
+      version: '0.1.0',
+      private: true,
+      devDependencies: {},
+      ...resolvePkg(context)
+    }
+    const deps = Object.keys(preset.plugins)
+    deps.forEach(dep => {
+      // 过滤掉 preset 插件
+      if (preset.plugins[dep]._isPreset) {
+        return
+      }
+
+      let { version } = preset.plugins[dep]
+
+      // 如果没有指定版本，则根据不同的插件类型，使用不同的默认版本
+      if (!version) {
+        if (isOfficialPlugin(dep) || dep === '@vue/cli-service' || dep === '@vue/babel-preset-env') {
+          version = isTestOrDebug ? `file:${path.resolve(__dirname, '../../../', dep)}` : `~${latestMinor}`
+        } else {
+          version = 'latest'
+        }
+      }
+
+      // 添加到依赖中
+      pkg.devDependencies[dep] = version
+    })
+
+    // write package.json
+    // 写入文件树，context为上下文，pkg为包信息
+    await writeFileTree(context, {
+      'package.json': JSON.stringify(pkg, null, 2)
+    })
+
+    // generate a .npmrc file for pnpm, to persist the `shamefully-flatten` flag
+    if (packageManager === 'pnpm') {
+      const pnpmConfig = hasPnpmVersionOrLater('4.0.0')
+        ? 'shamefully-hoist=true\n'
+        : 'shamefully-flatten=true\n'
+
+      await writeFileTree(context, {
+        '.npmrc': pnpmConfig
+      })
+    }
+
+    if (packageManager === 'yarn' && semver.satisfies(process.version, '8.x')) {
+      // Vue CLI 4.x should support Node 8.x,
+      // but some dependenices already bumped `engines` field to Node 10
+      // and Yarn treats `engines` field too strictly
+      await writeFileTree(context, {
+        '.yarnrc': '# Hotfix for Node 8.x\n--install.ignore-engines true\n'
+      })
+    }
+
+    // intilaize git repository before installing deps
+    // so that vue-cli-service can setup git hooks.
+    // 判断是否初始化git仓库
+    const shouldInitGit = this.shouldInitGit(cliOptions)
+    if (shouldInitGit) {
+      log(`🗃  Initializing git repository...`)
+      this.emit('creation', { event: 'git-init' })
+      await run('git init')//初始化git仓库
+    }
+
+    // install plugins
+    log(`⚙\u{fe0f}  Installing CLI plugins. This might take a while...`)
+    log()
+    this.emit('creation', { event: 'plugins-install' })
+
+    // 如果isTestOrDebug为true，且process.env.VUE_CLI_TEST_DO_INSTALL_PLUGIN为false，则执行setupDevProject函数，否则执行install函数
+    if (isTestOrDebug && !process.env.VUE_CLI_TEST_DO_INSTALL_PLUGIN) {
+      // in development, avoid installation process
+      await require('./util/setupDevProject')(context)
+    } else {
+      await pm.install()
+    }
+
+    // run generator
+    this.emit('creation', { event: 'invoking-generators' })
+    // 解析插件
+    const plugins = await this.resolvePlugins(preset.plugins, pkg)
+    // 创建生成器
+    const generator = new Generator(context, {
+      pkg,
+      plugins,
+      afterInvokeCbs,
+      afterAnyInvokeCbs
+    })
+    // 生成文件
+    await generator.generate({
+      extractConfigFiles: preset.useConfigFiles
+    })
+
+    // install additional deps (injected by generators)
+    log(`📦  Installing additional dependencies...`)
+    this.emit('creation', { event: 'deps-install' })
+    log()
+    // 判断是否是测试或者调试环境，或者VUE_CLI_TEST_DO_INSTALL_PLUGIN环境变量是否为true
+    if (!isTestOrDebug || process.env.VUE_CLI_TEST_DO_INSTALL_PLUGIN) {
+      // 安装插件
+      await pm.install()
+    }
+
+    // run complete cbs if any (injected by generators)
+    log(`⚓  Running completion hooks...`)
+    // 触发创建事件
+    this.emit('creation', { event: 'completion-hooks' })
+    // 执行afterInvokeCbs中的回调函数
+    for (const cb of afterInvokeCbs) {
+      await cb()
+    }
+    // 执行afterAnyInvokeCbs中的回调函数
+    for (const cb of afterAnyInvokeCbs) {
+      await cb()
+    }
+    // 生成  README.md
+    if (!generator.files['README.md']) {
+      // generate README.md
+      log()
+      log('📄  Generating README.md...')
+      await writeFileTree(context, {
+        'README.md': generateReadme(generator.pkg, packageManager)
+      })
+    }
+
+    // commit initial state
+    let gitCommitFailed = false
+    if (shouldInitGit) {
+      // 添加所有文件到 git
+      await run('git add -A')
+      if (isTestOrDebug) {
+        // 设置测试配置
+        await run('git', ['config', 'user.name', 'test'])
+        await run('git', ['config', 'user.email', 'test@test.com'])
+        await run('git', ['config', 'commit.gpgSign', 'false'])
+      }
+      const msg = typeof cliOptions.git === 'string' ? cliOptions.git : 'init'
+      try {
+        // 提交
+        await run('git', ['commit', '-m', msg, '--no-verify'])
+      } catch (e) {
+        // 如果提交失败，则设置gitCommitFailed为true
+        gitCommitFailed = true
+      }
+    }
+
+    // log instructions
+    log()
+    log(`🎉  Successfully created project ${chalk.yellow(name)}.`)
+    if (!cliOptions.skipGetStarted) {
+      log(
+        `👉  Get started with the following commands:\n\n` +
+        (this.context === process.cwd() ? `` : chalk.cyan(` ${chalk.gray('$')} cd ${name}\n`)) +
+        chalk.cyan(` ${chalk.gray('$')} ${packageManager === 'yarn' ? 'yarn serve' : packageManager === 'pnpm' ? 'pnpm run serve' : 'npm run serve'}`)
+      )
+    }
+    log()
+    this.emit('creation', { event: 'done' })
+
+    if (gitCommitFailed) {
+      warn(
+        `Skipped git commit due to missing username and email in git config, or failed to sign commit.\n` +
+        `You will need to perform the initial commit yourself.\n`
+      )
+    }
+
+    generator.printExitLogs()
+  }
+```
+
+> `Creator.create()` 方法主要逻辑：
+>
+> 1. preset 参数初始化；
+>
+> 2. 包管理器实例初始化；
+>
+> 3. 根据插件依赖生成 package.json 文件；
+>
+> 4. 根据包管理器生成对应管理器的 xxxrc 文件；
+>
+> 5. 判断是否初始化git仓库，并初始化git仓库；
+>
+> 6. 判断是否为是测试或调试环境：
+>
+>    * 是，则调用`setupDevProject` 启动开发服务；在开发过程中，避免安装过程；
+>    * 否，根据 package.json 文件安装项目依赖；
+>
+> 7. 生成项目文件： 解析插件对象，并创建生成器实例生成项目文件；
+>
+>    ```js
+>        // 解析插件
+>        const plugins = await this.resolvePlugins(preset.plugins, pkg)
+>        // 创建生成器
+>        const generator = new Generator(context, {
+>          pkg,
+>          plugins,
+>          afterInvokeCbs,
+>          afterAnyInvokeCbs
+>        })
+>        // 生成文件
+>        await generator.generate({
+>          extractConfigFiles: preset.useConfigFiles
+>        })
+>    ```
+>
+> 8. 安装由生成器实例注入的依赖；
+>
+> 9. 运行初始化后的回调；
+>
+> 10. 生成  README.md；
+>
+> 11. 暂存 git ；
+>
+> 12. 打印创建结果；
+
+`Creator.create()` 方法主要执行项目的参数初始化、包管理初始化、npm 初始化、仓库初始化，通过Generator生成项目文件，并安装项目依赖；
+
+### **Generator 生成项目文件**
+
+
 
 
 
