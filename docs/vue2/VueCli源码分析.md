@@ -2,19 +2,23 @@
 
 ## **是什么**
 
+Vue CLI（Vue Command Line Interface）是一个官方提供的命令行工具，用于快速搭建和管理Vue.js项目。
+
+它提供了一整套完整的开发解决方案，包括代码构建、热更新、代码分割、代码压缩、版本控制等功能，大大简化了Vue.js项目的开发过程。
+
 ## **为什么**
 
-## **怎么用**
+在开发Vue.js项目时，如果没有一个统一的构建工具，开发人员需要手动配置各种工具和插件，这不仅浪费时间，还容易出错。
 
-## **原理**
+而Vue CLI作为官方的构建工具，提供了预先配置好的最佳实践，使得开发人员可以专注于编写业务逻辑，而不是花费大量时间在配置上。
 
-## **源码分析**
+Vue CLI还可以自动化处理许多繁琐的任务，如代码压缩、热更新等，从而提高开发效率。
 
 
 
-## 基础
 
-### **Vue-cli 工程集成技术**
+
+## **Vue-cli 集成插件/库**
 
 | 技术           | 作用                                                         |
 | :------------- | :----------------------------------------------------------- |
@@ -36,51 +40,72 @@
 
 
 
-### **Vue-cli 工程常用的 npm 命令**
-
-* 下载 node_modules 资源包的命令：`npm install`
-* 启动 vue-cli 开发环境的 npm命令：`npm run dev`
-* vue-cli 生成 生产环境部署资源 的 npm命令：`npm run build`
-* 用于查看 vue-cli 生产环境部署资源文件大小的 npm命令：`npm run build --report`
-
-* 自定义脚本命令： 在 `script` 添加命令，使用 `npm run 命令` 执行命令。
 
 
+## 创建项目过程分析
 
-### **Vue-cli 目录解析**
+### **安装 Vue-Cli**
 
-* `build` 文件夹：用于存放 `webpack` 相关配置和脚本。开发中仅 偶尔使用 到此文件夹下 `webpack.base.conf.js`用于配置 `less`、`sass `等 `css `预编译库，或者配置一下 UI 库。
-* config 文件夹：主要存放配置文件，用于区分开发环境、线上环境的不同。 常用到此文件夹下 `config.js` 配置开发环境的 端口号、是否开启热加载 或者 设置生产环境的静态资源相对路径、是否开启gzip压缩、`npm run build` 命令打包生成静态资源的名称和路径等。
-* `dist` 文件夹：默认` npm run build` 命令打包生成的静态资源文件，用于生产部署。
-* `node_modules`：存放npm命令下载的开发环境和生产环境的依赖包。
-* `src`: 存放项目源码及需要引用的资源文件。
-* `src/assets`：存放项目中需要用到的资源文件，css、js、images等。
-* `src/componets`：存放vue开发中一些公共组件：`header.vue`、`footer.vue` 等。
-* `src/emit`：自己配置的vue集中式事件管理机制。
-* `src/router`：vue-router vue路由的配置文件。
-* `src/service`：自己配置的vue请求后台接口方法。
-* `src/page`：存在vue页面组件的文件夹。
-* `src/util`：存放vue开发过程中一些公共的.js方法。
-* `src/vuex`：存放 vuex 为vue专门开发的状态管理器。
-* `src/app.vue`：使用标签`<route-view></router-view>`渲染整个工程的.vue组件。
-* `src/main.js`：vue-cli工程的入口文件。
-* `index.html`：设置项目的一些meta头信息和提供`<div id="app"></div>`用于挂载 vue 节点。
-* `package.json`：用于 node_modules资源部 和 启动、打包项目的 npm 命令管理。
+可以使用下列任一命令安装这个新的包：
 
+```shell
+npm install -g @vue/cli
+# OR
+yarn global add @vue/cli
+```
 
+安装之后，你就可以在命令行中访问 `vue` 命令。
 
-## 原理
+以上通过全局安装 `vue-cli`，默认情况下 windows 会安装到 `C:\Users\{{YourUserName}}\AppData\Roaming\npm\node_modules\@vue\cli` 目录中;
 
-### **执行过程**
+### **命令解析**
 
-1. 终端输入`vue create vue-test-app`
-2. 终端解析出`vue`主命令
-3. 终端在环境变量中找到`vue`命令
-4. 终端根据`vue`命令链接到实际可执行文件vue.js
-5. 终端利用node执行vue.js
-6. vue.js解析command和option
-7. vue.js执行command
-8. 执行完毕，退出执行
+运行以下命令来创建一个新项目：(详细参考官方文档：[创建一个项目 | Vue CLI (vuejs.org)](https://cli.vuejs.org/zh/guide/creating-a-project.html#vue-create))
+
+```shell
+vue create hello-world
+```
+
+当运行 `vue create` 命令时，默认会执行安装的 `vue-cli` 项目下的 `/bin/vue.js` 文件（以下是全局安装的 `vue-cli` 项目目录）：
+
+![image-20240131164539288](../images/vue-cli.png)
+
+> `/bin/vue.js` 文件执行流程：
+>
+> 1. 检查 Node.js 版本；
+>
+> 2. 定义所有 vue 命令;
+>
+>    * vue 使用 commander 库定义命令的配置项，并在配置中指明命令的执行文件；
+>
+>    * `vue create` 命令在文件中的定义和执行路径如下：
+>
+>      ![image-20240131170240448](../images/vue-create文件执行.png)
+>
+> 3. 解析 shell 命令，并根据命令执行路径执行命令；
+
+### **`vue create` 命令执行过程**
+
+1. 终端输入`vue create vue-test-app`;
+2. 终端解析出`vue`主命令;
+3. 终端在环境变量中找到`vue`命令;
+4. 终端根据`vue`命令链接到实际可执行文件vue.js;
+5. 终端利用 node 执行 vue.js;
+6. vue.js 解析 command 和 option;
+7. vue.js 执行 command;
+8. 执行完毕，退出执行;
+
+### **`vue create` 命令解析**
+
+执行 `vue create` 命令时，最终是解析 `./@vue/cli/lib/create.js` 文件：
+
+![image-20240131171951445](../images/vue-create文件分析.png)
+
+> `vue create` 命令主要执行以下逻辑：
+>
+> 1. 检查输入的 projectName 是否符合规范；必须指定一个 `app-name `，否则会报错；
+> 2. 判断 target  目录是否存在，然后通过交互询问用户是否覆盖（对应的是操作是删除原目录;
+> 3. 创建 Creator 类,并执行`creator.create(options)`;
 
 
 
@@ -500,7 +525,7 @@ return fn(args, rawArgv)
 
 ![image-20240129200352382](../images/vue-cli-service内置插件.png)
 
-
+> 自定义开发插件可以参考官方文档： [插件开发指南 | Vue CLI (vuejs.org)](https://cli.vuejs.org/zh/dev-guide/plugin-dev.html#service-插件)
 
 ### **serve 命令解析**  
 
@@ -1009,10 +1034,285 @@ async function serve (args) {
 
 
 
+## **WebPack 配置原理**
+
+### **配置方式**
+
+在 `vue.config.js` 中的 `configureWebpack` 选项提供一个对象：
+
+```js
+// vue.config.js
+module.exports = {
+  configureWebpack: {
+    plugins: [
+      new MyAwesomeWebpackPlugin()
+    ]
+  }
+}
+```
+
+该对象将会被 [webpack-merge](https://github.com/survivejs/webpack-merge) 合并入最终的 webpack 配置。
+
+使用 Vue-Cli 创建的项目 `vue.config.js` 配置为：
+
+```js
+'use strict'
+const path = require('path')
+const defaultSettings = require('./src/settings/projectSettings.js')
+const LodashModuleReplacementPlugin = require('lodash-webpack-plugin')
+const UpdatePopup = require('@femessage/update-popup') // 版本更新提醒插件
+function resolve(dir) {
+  return path.join(__dirname, dir)
+}
+
+const name = defaultSettings.title page title
+
+// If your port is set to 80,
+// use administrator privileges to execute the command line.
+// For example, Mac: sudo npm run
+// You can change the port by the following methods:
+// port = 8080 npm run dev OR npm run dev --port = 8080
+const port = process.env.port || process.env.npm_config_port || 8080 // dev port
+
+// All configuration item explanations can be find in https://cli.vuejs.org/config/
+module.exports = {
+  /**
+   * You will need to set publicPath if you plan to deploy your site under a sub path,
+   * for example GitHub Pages. If you plan to deploy your site to https://foo.github.io/bar/,
+   * then publicPath should be set to "/bar/".
+   * In most cases please use '/' !!!
+   * Detail: https://cli.vuejs.org/config/#publicpath
+   */
+  publicPath: './',
+  outputDir: 'dist',
+  assetsDir: 'static',
+  lintOnSave: process.env.NODE_ENV === 'development',
+  productionSourceMap: false,
+  devServer: {
+    port: port,
+    open: true,
+    overlay: {
+      warnings: false,
+      errors: true
+    },
+    hot: true,
+    // websocket 配置代理
+    proxy: {
+      '/socket.io': {
+        target: 'http://localhost:3000', // target host
+        changeOrigin: true, // needed for virtual hosted sites
+        logLevel: 'debug'
+      }
+    }
+  },
+  configureWebpack: {
+    // provide the app's title in webpack's name field, so that
+    // it can be accessed in index.html to inject the correct title.
+    name: name,
+    resolve: {
+      alias: {
+        '@': resolve('src')
+      }
+    }
+  },
+  chainWebpack(config) {
+    // it can improve the speed of the first screen, it is recommended to turn on preload
+    config.plugin('preload').tap(() => [
+      {
+        rel: 'preload',
+        // to ignore runtime.js
+        // https://github.com/vuejs/vue-cli/blob/dev/packages/@vue/cli-service/lib/config/views/App.js#L171
+        fileBlacklist: [/\.map$/, /hot-update\.js$/, /runtime\..*\.js$/],
+        include: 'initial'
+      }
+    ])
+    // 版本更新提醒插件
+    config.plugin('femessage-update-popup').use(UpdatePopup, [{
+      auto: true
+    }])
+    // when there are many pages, it will cause too many meaningless requests
+    config.plugins.delete('prefetch')
+
+    // set svg-sprite-loader
+    config.module
+      .rule('svg')
+      .exclude.add(resolve('src/icons'))
+      .end()
+    config.module
+      .rule('icons')
+      .test(/\.svg$/)
+      .include.add(resolve('src/icons'))
+      .end()
+      .use('svg-sprite-loader')
+      .loader('svg-sprite-loader')
+      .options({
+        symbolId: 'icon-[name]'
+      })
+      .end()
+
+    config
+      .when(process.env.NODE_ENV !== 'development',
+        config => {
+          config
+            .plugin('ScriptExtHtmlWebpackPlugin')
+            .after('html')
+            .use('script-ext-html-webpack-plugin', [{
+            // `runtime` must same as runtimeChunk name. default is `runtime`
+              inline: /runtime\..*\.js$/
+            }])
+            .end()
+          config
+            .optimization.splitChunks({
+              chunks: 'all',
+              cacheGroups: {
+                libs: {
+                  name: 'chunk-libs',
+                  test: /[\\/]node_modules[\\/]/,
+                  priority: 10,
+                  chunks: 'initial' // only package third parties that are initially dependent
+                },
+                elementUI: {
+                  name: 'chunk-elementUI', // split elementUI into a single package
+                  priority: 20, // the weight needs to be larger than libs and app or it will be packaged into libs or app
+                  test: /[\\/]node_modules[\\/]_?element-ui(.*)/ // in order to adapt to cnpm
+                },
+                commons: {
+                  name: 'chunk-commons',
+                  test: resolve('src/components'), // can customize your rules
+                  minChunks: 3, //  minimum common number
+                  priority: 5,
+                  reuseExistingChunk: true
+                }
+              }
+            })
+          // https:// webpack.js.org/configuration/optimization/#optimizationruntimechunk
+          config.optimization.runtimeChunk('single')
+        }
+      )
+
+    config.plugin('loadshReplace').use(new LodashModuleReplacementPlugin())
+  },
+  css: {
+    loaderOptions: {
+      sass: {
+        prependData: `@import "~@/styles/variables.scss";`
+      }
+    }
+  }
+}
+
+```
+
+#### **`configureWebpack`  属性**
+
+> Type: `Object | Function`
+>
+> webpack 配置属性：
+>
+> * 如果这个值是一个对象，则会通过 [webpack-merge](https://github.com/survivejs/webpack-merge) 合并到最终的配置中。
+>
+> * 如果这个值是一个函数，则会接收被解析的配置作为参数。该函数既可以修改配置并不返回任何东西，也可以返回一个被克隆或合并过的配置版本。
+
+**原理**
+
+`configureWebpack` 属性在 CLI 服务对象 `Service` 类初始化 `init` 方法中，通过将用户配置的 webpack 项存储到 `webpackRawConfigFns`，最后通过 [webpack-merge](https://github.com/survivejs/webpack-merge) 合并到最终的配置中：
+
+![image-20240131135803195](../images/vue-cli-webpack配置项.png)
+
+### **链式操作 (高级)**
+
+Vue CLI 内部的 webpack 配置是通过 [webpack-chain](https://github.com/mozilla-neutrino/webpack-chain) 维护的。
+
+这个库提供了一个 webpack 原始配置的上层抽象，使其可以定义具名的 loader 规则和具名插件，并有机会在后期进入这些规则并对它们的选项进行修改。
+链式操作通过  `vue.config.js` 中的 `chainWebpack` 属性配置：
+
+#### **`chainWebpack` 属性**
+
+> Type: `Function`
+>
+> 是一个函数，会接收一个基于 [webpack-chain](https://github.com/mozilla-neutrino/webpack-chain) 的 `ChainableConfig` 实例。
+>
+> 允许对内部的 webpack 配置进行更细粒度的修改。
+
+ `chainWebpack` 属性使用方式参考 [webpack-chain](https://github.com/mozilla-neutrino/webpack-chain) 官方文档使用方式。
+
+####  **[webpack-chain](https://github.com/mozilla-neutrino/webpack-chain)** 
+
+**webpack-chain 是什么？**
+
+> `webpack-chain` 是一个工具，它通过链式 API 生成和简化 webpack 2-4 版本的配置的修改
+
+**为什么要使用 webpack-chain ？**
+
+> Webpack-chain 的出现是为了解决 webpack 配置的问题。
+>
+> Webpack 的配置过程极其复杂，需要输入大量的信息来保证打包结果符合预期。
+>
+> Webpack-chain 通过提供一个链式 API 来解决这个问题:
+>
+> 1. 它允许用户以链式方式创建和修改 webpack 配置，这使得配置过程更加直观和易于管理。
+> 2. API 的 Key 部分可以由用户指定的名称引用，这有助于标准化跨项目的配置修改方式。
+
+
+
+## **[模式和环境变量](https://cli.vuejs.org/zh/guide/mode-and-env.html#模式和环境变量)**
+
+### **模式**
+
+**模式**是 Vue CLI 项目中一个重要的概念。默认情况下，一个 Vue CLI 项目有三个模式：
+
+- 开发模式：`development` 字段表示，使用 `vue-cli-service serve` 命令启动；
+- 测试模式：`test` 字段表示，使用 `vue-cli-service test:unit` 命令启动；
+- 生产模式：`production` 字段表示，使用  `vue-cli-service build` 命令启动；
+
+你可以通过传递 `--mode` 选项参数为命令行覆写默认的模式。例如，如果你想要在构建命令中使用开发环境变量：
+
+```
+vue-cli-service build --mode development
+```
+
+当运行 `vue-cli-service` 命令时，所有的环境变量都从对应的[环境文件](https://cli.vuejs.org/zh/guide/mode-and-env.html#环境变量)中载入。
+
+通过以上 "serve 命令解析" 部分可知：`vue-cli-service` 中 `serve` 和 `build` 命令最终实际执行 `server.js` 和 `build` 插件，插件目录如下：![image-20240131160413569](../images/vue-cli-service-插件.png)
+
+
+
+### **环境变量**
+
+项目根目录中放置下列文件来指定环境变量：
+
+```shell
+.env                # 在所有的环境中被载入
+.env.local          # 在所有的环境中被载入，但会被 git 忽略
+.env.[mode]         # 只在指定的模式中被载入
+.env.[mode].local   # 只在指定的模式中被载入，但会被 git 忽略
+```
+
+一个环境文件只包含环境变量的“键=值”对：
+
+```shell
+FOO=bar
+VUE_APP_NOT_SECRET_CODE=some_value
+```
+
+
+
+### **源码分析**
+
+模式和环境变量初始化在 Service 类初始化时 `init` 方法中，通过 `loadEnv` 方法初始化：
+
+![image-20240131144841437](../images/vue-cli-service-loadEnv.png)
+
+`loadEnv` 方法定义：
+
+![image-20240131145425965](../images/loadEnv方法.png)
+
+
+
+
+
 ## **参考资料**
 
 [vue-cli](https://cli.vuejs.org/zh/guide/)
-
-[自己搭建vue开发环境](https://juejin.cn/post/6844903833160646663#heading-22)
 
 [剖析 Vue CLI 实现原理](https://cloud.tencent.com/developer/article/1781202#:~:text=Vue%20CLI%20%E6%98%AF%E4%B8%80%E4%B8%AA%E5%9F%BA%E4%BA%8E%20Vue.js%20%E8%BF%9B%E8%A1%8C%E5%BF%AB%E9%80%9F%E5%BC%80%E5%8F%91%E7%9A%84%E5%AE%8C%E6%95%B4%E7%B3%BB%E7%BB%9F%EF%BC%8C%E6%8F%90%E4%BE%9B%E4%BA%86%E7%BB%88%E7%AB%AF%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%B7%A5%E5%85%B7%E3%80%81%E9%9B%B6%E9%85%8D%E7%BD%AE%E8%84%9A%E6%89%8B%E6%9E%B6%E3%80%81%E6%8F%92%E4%BB%B6%E4%BD%93%E7%B3%BB%E3%80%81%E5%9B%BE%E5%BD%A2%E5%8C%96%E7%AE%A1%E7%90%86%E7%95%8C%E9%9D%A2%E7%AD%89%E3%80%82,%E6%9C%AC%E6%96%87%E6%9A%82%E4%B8%94%E5%8F%AA%E5%88%86%E6%9E%90%20%E9%A1%B9%E7%9B%AE%E5%88%9D%E5%A7%8B%E5%8C%96%20%E9%83%A8%E5%88%86%EF%BC%8C%E4%B9%9F%E5%B0%B1%E6%98%AF%E7%BB%88%E7%AB%AF%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%B7%A5%E5%85%B7%E7%9A%84%E5%AE%9E%E7%8E%B0%E3%80%82%200.%20%E7%94%A8%E6%B3%95)
