@@ -436,7 +436,56 @@ Creator 类是主要创建脚手架的类，该类定义如下：
 
 ### **Generator 生成项目文件**
 
+通过以上分析可知，`Creator.create()` 方法用于创建项目,Generator 对象创建生成项目文件：
 
+![image-20240131200047619](../images/vue-cli-文件生成对象定义.png)
+
+Generator 对象通过 `Generator.generate` 方法生成  Vue 项目文件：
+
+```js
+  //生成文件系统
+  async generate({
+    extractConfigFiles = false,
+    checkExisting = false
+  } = {}) {
+    //初始化插件
+    await this.initPlugins()
+
+    // save the file system before applying plugin for comparison
+    const initialFiles = Object.assign({}, this.files)
+    // extract configs from package.json into dedicated files.
+    //提取配置文件从 package.json 中，并将它们分解为单独的文件
+    this.extractConfigFiles(extractConfigFiles, checkExisting)
+    // wait for file resolve
+    //等待文件解析
+    await this.resolveFiles()
+    // set package.json
+    //排序 package.json 并将其添加到文件系统中
+    this.sortPkg()
+    this.files['package.json'] = JSON.stringify(this.pkg, null, 2) + '\n'
+    // write/update file tree to disk
+    //将文件系统写入磁盘
+    await writeFileTree(this.context, this.files, initialFiles)
+  }
+```
+
+> generate 方法用于生成文件系统。它接受一个对象作为参数，可以设置两个选项：`extractConfigFiles` 和 `checkExisting`。
+>
+> 函数的实现原理如下：
+>
+> 1. 首先，初始化插件。
+> 2. 从 `package.json` 中提取配置文件，并将它们分解为单独的文件。
+> 3. 等待文件解析。
+> 4. 排序 `package.json` 并将其添加到文件系统中。
+> 5. 将文件系统写入磁盘。
+>
+> 注意事项：
+>
+> - 确保在调用此函数之前已正确初始化上下文和文件系统。
+> - 设置 `extractConfigFiles` 为 `true` 以从 `package.json` 中提取配置文件。
+> - 设置 `checkExisting` 为 `true` 以在提取配置文件之前检查现有文件。
+> - 此函数为异步函数，应在适当的事件循环或回调函数中使用。
+> - 如果需要，可以在函数结束后检查错误并处理它们。
 
 
 
@@ -860,7 +909,7 @@ return fn(args, rawArgv)
 
 ### **serve 命令解析**  
 
-`vue-cli-service serve` 命令：
+`vue-cli-service serve` 命令用于开发环境，在本地启动一个 HTTP 服务：
 
 #### **使用**
 
@@ -1362,6 +1411,51 @@ async function serve (args) {
     })
   }
 ```
+
+
+
+### **`build` 命令解析**
+
+`vue-cli-service build` 命令用于生产环境，使用 webpack 对项目进行构建：
+
+#### **使用**
+
+```shell
+用法：vue-cli-service build [options] [entry|pattern]
+
+选项：
+
+  --mode        指定环境模式 (默认值：production)
+  --dest        指定输出目录 (默认值：dist)
+  --modern      面向现代浏览器带自动回退地构建应用
+  --target      app | lib | wc | wc-async (默认值：app)
+  --name        库或 Web Components 模式下的名字 (默认值：package.json 中的 "name" 字段或入口文件名)
+  --no-clean    在构建项目之前不清除目标目录的内容
+  --report      生成 report.html 以帮助分析包内容
+  --report-json 生成 report.json 以帮助分析包内容
+  --watch       监听文件变化
+```
+
+`vue-cli-service build` 会在 `dist/` 目录产生一个可用于生产环境的包，带有 JS/CSS/HTML 的压缩，和为更好的缓存而做的自动的 vendor chunk splitting。它的 chunk manifest 会内联在 HTML 里。
+
+这里还有一些有用的命令参数：
+
+- `--modern` 使用[现代模式](https://cli.vuejs.org/zh/guide/browser-compatibility.html#现代模式)构建应用，为现代浏览器交付原生支持的 ES2015 代码，并生成一个兼容老浏览器的包用来自动回退。
+- `--target` 允许你将项目中的任何组件以一个库或 Web Components 组件的方式进行构建。更多细节请查阅[构建目标](https://cli.vuejs.org/zh/guide/build-targets.html)。
+- `--report` 和 `--report-json` 会根据构建统计生成报告，它会帮助你分析包中包含的模块们的大小。
+
+通过 npm script 执行该命令：
+
+```js
+  "scripts": {
+    "build:prod": "git pull && vue-cli-service build && npm run upload prod",
+    "build:test": "git pull && vue-cli-service build --mode staging && npm run upload test",
+  },
+```
+
+
+
+#### **源码分析**
 
 
 
