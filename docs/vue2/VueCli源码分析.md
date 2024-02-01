@@ -389,15 +389,19 @@ Creator 类是主要创建脚手架的类，该类定义如下：
 
 > `Creator.create()` 方法主要逻辑：
 >
-> 1. preset 参数初始化；
+> 1. preset 预设参数初始化；
+>
+>    * Preset 是一个包含创建新项目所需预定义选项和插件的 JSON 对象，让用户无需在命令提示中选择它们。
 >
 > 2. 包管理器实例初始化；
 >
 > 3. 根据插件依赖生成 package.json 文件；
 >
-> 4. 根据包管理器生成对应管理器的 xxxrc 文件；
+>    * Vue CLI 在创建目录下写入一个基础的 `package.json`
 >
-> 5. 判断是否初始化git仓库，并初始化git仓库；
+> 4. 根据包管理器自动判断 NPM 源，生成对应管理器的 xxxrc 文件；
+>
+> 5. 判断是否初始化 Git 仓库，并初始化 Git 仓库环境；
 >
 > 6. 判断是否为是测试或调试环境：
 >
@@ -428,9 +432,24 @@ Creator 类是主要创建脚手架的类，该类定义如下：
 >
 > 10. 生成  README.md；
 >
-> 11. 暂存 git ；
+> 11. 暂存 git ，拉取远程 preset；
 >
 > 12. 打印创建结果；
+>
+> `Creator`  类是继承于 Node.js 的 `EventEmitter` 类,`events`  是 Node.js 中最重要的一个模块，而 `EventEmitter` 类就是其基础，是 Node.js 中事件触发与事件监听等功能的封装。
+>
+> 在 `create`  过程中 `emit`  一些事件：
+>
+> ```javascript
+> this.emit('creation', { event: 'creating' }); // 创建项目时
+> this.emit('creation', { event: 'git-init' }); // 初始化 git 时
+> this.emit('creation', { event: 'plugins-install' }); // 安装插件
+> this.emit('creation', { event: 'invoking-generators' }); // 调用 generator
+> this.emit('creation', { event: 'deps-install' }); // 安装额外的依赖
+> this.emit('creation', { event: 'completion-hooks' }); // 完成之后的回调
+> this.emit('creation', { event: 'done' }); // create 流程结束
+> this.emit('creation', { event: 'fetch-remote-preset' }); // 拉取远程 preset
+> ```
 
 `Creator.create()` 方法主要执行项目的参数初始化、包管理初始化、npm 初始化、仓库初始化，通过Generator生成项目文件，并安装项目依赖；
 
@@ -486,6 +505,119 @@ Generator 对象通过 `Generator.generate` 方法生成  Vue 项目文件：
 > - 设置 `checkExisting` 为 `true` 以在提取配置文件之前检查现有文件。
 > - 此函数为异步函数，应在适当的事件循环或回调函数中使用。
 > - 如果需要，可以在函数结束后检查错误并处理它们。
+
+### **初始化插件**
+
+ `Generator.generate` 方法生成  Vue 项目文件第一步中，先执行的是一个 `initPlugins`  方法，代码如下：
+
+```javascript
+async initPlugins () {
+  for (const id of this.allPluginIds) {
+    const api = new GeneratorAPI(id, this, {}, rootOptions)
+    const pluginGenerator = loadModule(`${id}/generator`, this.context)
+
+    if (pluginGenerator && pluginGenerator.hooks) {
+      await pluginGenerator.hooks(api, {}, rootOptions, pluginIds)
+    }
+  }
+}
+```
+
+在这里会给每一个 `package.json`  里的插件初始化一个 `GeneratorAPI`  实例，将实例传入对应插件的 `generator`  方法并执行:
+
+```js
+ loadModule(`${id}/generator`, this.context)
+```
+
+通过以上代码执行时，会加载两类插件：
+
+* `cli-service` 插件： Vue CLI 的核心插件；
+* `cli-plugin-xxx/`扩展插件：预选项插件，根据用户选择加载；
+
+**加载`cli-service` 核心插件：**
+
+加载`cli-service` 核心插件，会执行 `@vue/cli-service/generator/index.js` 目录：
+
+![image-20240201103647431](../images/image-20240201103647431.png)
+
+> `cli-service` 核心插件的 generator 方法主要逻辑：
+>
+> 1. 渲染 Vue 项目模板；
+>
+>    * Vue 项目模板位于  `@vue/cli-service/tempalte/` 目录，可以看到该目录下文件即为一个使用 vue-cli 创建的 vue 基础项目目录文件；
+>
+>    *  `api.render` 会通过 EJS 将模板文件渲染成字符串放在内存中。
+>
+>      
+>
+> 2. 通过 `extendPackage` 往 `pacakge.json` 中写入 `Vue`   的相关依赖和 script；
+>
+> 3. 通过 `extendPackage` 往 `pacakge.json` 中写入 `CSS` 预处理参数;
+>
+> 4. 调用 router 插件和 vuex 插件。
+>
+> 执行了 `generate`  的所有逻辑之后，内存中已经有了需要输出的各种文件，放在 `this.files`  里。 `generate`  的最后一步就是调用 `writeFileTree`  将内存中的所有文件写入到硬盘
+
+
+
+**加载`cli-plugin-xxx/`扩展插件：**
+
+加载`cli-plugin-xxx/`扩展插件，会去 `@vue/` 目录下加载对应 `cli-plugin-xxx/generator.js` 插件的  generator 方法。
+
+以加载 `@vue/cli-plugin-babel` 插件的  `@vue/cli-plugin-babel/generator.js` 为例：
+
+执行以上代码时候，会在当前项目的 `./node_modules/@vue/cli-plugin-babel/`  目录下加载 `generator.js` 文件：
+
+![image-20240201100829288](../images/vue-cli-babel-generator.png)
+
+> 这里 `api`  就是一个 `GeneratorAPI` 实例，这里用到了一个 `extendPackage`  方法：
+>
+> ```javascript
+> // GeneratorAPI.js
+> // 删减部分代码，只针对 @vue/cli-plugin-babel 分析
+> extendPackage (fields, options = {}) {
+>   const pkg = this.generator.pkg
+>   const toMerge = isFunction(fields) ? fields(pkg) : fields
+>   // 遍历传入的参数，这里是 babel 和 dependencies 两个对象
+>   for (const key in toMerge) {
+>     const value = toMerge[key]
+>     const existing = pkg[key]
+>     // 如果 key 的名称是 dependencies 和 devDependencies
+>     // 就通过 mergeDeps 方法往 package.json 合并依赖
+>     if (isObject(value) && (key === 'dependencies' || key === 'devDependencies')) {
+>       pkg[key] = mergeDeps(
+>         this.id,
+>         existing || {},
+>         value,
+>         this.generator.depSources,
+>         extendOptions
+>       )
+>     } else if (!extendOptions.merge || !(key in pkg)) {
+>       pkg[key] = value
+>     }
+>   }
+> }
+> 
+> ```
+
+通过`extendPackage`  方法加载 `cli-plugin-babel` 后，默认的 `package.json`  就变成：
+
+```javascript
+{
+  "babel": {
+    "presets": ["@vue/cli-plugin-babel/preset"]
+  },
+  "dependencies": {
+    "core-js": "^3.6.5"
+  },
+  "devDependencies": {},
+  "name": "test",
+  "private": true,
+  "version": "0.1.0"
+}
+```
+
+
 
 
 
