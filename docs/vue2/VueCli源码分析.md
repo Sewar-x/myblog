@@ -1,5 +1,7 @@
 # VueCli源码分析
 
+![](../images/VueCli.png)
+
 ## **是什么**
 
 Vue CLI（Vue Command Line Interface）是一个官方提供的命令行工具，用于快速搭建和管理Vue.js项目。
@@ -14,9 +16,7 @@ Vue CLI（Vue Command Line Interface）是一个官方提供的命令行工具�
 
 Vue CLI还可以自动化处理许多繁琐的任务，如代码压缩、热更新等，从而提高开发效率。
 
-
-
-
+ 
 
 ## **Vue-cli 集成插件/库**
 
@@ -38,9 +38,20 @@ Vue CLI还可以自动化处理许多繁琐的任务，如代码压缩、热更�
 | 懒加载         | 延迟加载页面中的资源，提高应用程序的性能                     |
 | `emit.js` 文件 | 用于 vue 事件机制的管理                                      |
 
+`Vue-CLi` 集成的所有内置插件位于 `./node_modules/@vue/`目录下：
+
+![image-20240201112118335](../images/vuecli集成的插件.png)
 
 
 
+## **功能**
+
+Vue-Cli 主要有两个核心功能：
+
+1. 快速搭建和管理Vue.js项目： `vue-cli` 内置 Vue 项目的脚手架模板，通过使用 `vue create` 即可创建一个 Vue 项目；
+2. 提供开发和部署服务：开发和部署解决方案通过 `vue-cli-service` 服务实现，`vue-cli-service` 服务对 webpack 进行了二次封装，内置 webpack dev server 开发服务和 webpack 构建部署服务。
+
+下面将通过分析 创建 `vue create` 项目模板（项目脚手架）过程和 `vue-cli-service` 服务过程源码，来了解 vue-cli 的两大核心功能的实现。
 
 ## 创建项目过程分析
 
@@ -1792,7 +1803,7 @@ async function build(args, api, options) {
 
 ### **配置方式**
 
-在 `vue.config.js` 中的 `configureWebpack` 选项提供一个对象：
+在 `vue.config.js` 中的 ` ` 选项提供一个对象：
 
 ```js
 // vue.config.js
