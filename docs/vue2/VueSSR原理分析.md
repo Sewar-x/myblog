@@ -1,22 +1,70 @@
 # VueSSR原理分析
 
-# VUE-SSR
 
-## 基础
 
-基础知识参考官方文档[Vue SSR](https://cn.vuejs.org/guide/scaling-up/ssr.html)
+## **SSR是什么？**
 
-## VUE SSR 流程
+Vue.js 是一个用于构建客户端应用的框架。
 
- 基于官文demo项目：[HackerNews Demo](https://github.com/vuejs/vue-hackernews-2.0/) 进行分析，项目结构等基础参考 [vue-ssr 文档](https://ssr.vuejs.org/zh/#%E4%BB%80%E4%B9%88%E6%98%AF%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%AB%AF%E6%B8%B2%E6%9F%93-ssr-%EF%BC%9F)。 
+默认情况下，Vue 组件的职责是在浏览器中生成和操作 DOM。
 
-* 开发环境下执行流程
+然而，Vue 也支持将组件在服务端直接渲染成 HTML 字符串，作为服务端响应返回给浏览器，最后在浏览器端将静态的 HTML“激活”(hydrate) 为能够交互的客户端应用。
+
+一个由服务端渲染的 Vue.js 应用也可以被认为是“同构的”(Isomorphic) 或“通用的”(Universal)，因为应用的大部分代码同时运行在服务端和客户端。
+
+> 基础知识参考官方文档[Vue SSR](https://cn.vuejs.org/guide/scaling-up/ssr.html)
+
+## 为什么要用 SSR？
+
+* **更好的 SEO**：搜索引擎爬虫可以直接看到完全渲染的页面。
+* **更快的首屏加载**：这一点在慢网速或者运行缓慢的设备上尤为重要。
+  * 服务端渲染的 HTML 无需等到所有的 JavaScript 都下载并执行完成之后才显示，所以你的用户将会更快地看到完整渲染的页面。
+  * 除此之外，数据获取过程在首次访问时在服务端完成，相比于从客户端获取，可能有更快的数据库连接。
+  * 这通常可以带来更高的[核心 Web 指标](https://web.dev/vitals/)评分、更好的用户体验，而对于那些“首屏加载速度与转化率直接相关”的应用来说，这点可能至关重要。
+
+## **前端渲染架构类型**
+
+前端架构演进方向： **CSR 一> SSR 一> NSR 一> ESR**
+
+具体参考博客：[前端渲染架构 | Sewen 博客 (sewar-x.github.io)](https://sewar-x.github.io/Front-end-Engineering/前端渲染架构/#多页面应用)
+
+
+
+## **原理分析**
+
+### **SSR架构**
+
+![SSR架构](../images/SSR架构.png)
+
+一个 SSR 应用包含以下几个服务：
+
+* 一个 HTTP 服务：
+* 服务端渲染入口文件 Server entry: 
+* 客户端渲染入口文件 Client entry: 
+
+### **SSR 执行流程**
+
+>  项目基于 Vue2 SSR 官文 demo 项目 [HackerNews](https://github.com/vuejs/vue-hackernews-2.0/)  进行分析，在阅读之前建议先阅读 [Vue.js 服务器端渲染指南 | Vue SSR 指南 (vuejs.org)](https://v2.ssr.vuejs.org/zh/#什么是服务器端渲染-ssr)
 
 ![](../flow-graph/ssr过程.png)
 
-* SSR 流程主要分为：
-  * 服务端渲染
-  * 客户端渲染
+> 渲染流程：服务端渲染的主要流程是在服务器端生成完整的HTML页面，并将其发送给浏览器展示。
+>
+> 1. 客户端请求：用户在浏览器中输入网址或点击链接，发送请求到服务器。
+> 2. 服务器接收请求：服务器接收到客户端的请求，并进行处理。
+> 3. 数据获取：服务器根据请求的内容，可能需要从数据库、API接口或其他数据源获取所需的数据。
+> 4. 模板渲染：服务器使用事先定义好的模板引擎或渲染框架，将数据注入到模板中，生成完整的HTML页面。
+>    - 在不同页面之间导航需要下载新的HTML，首页会从缓存中获取已渲染页面，为查找到则服务端重新渲染。
+> 5. 生成响应：服务器将渲染好的HTML页面作为响应的一部分，包括设置相应的HTTP状态码和头部信息。
+> 6. 响应发送：服务器将生成的响应发送回客户端，通过网络传输到浏览器。
+> 7. 客户端展示：浏览器接收到服务器发送的响应后，解析HTML并呈现页面内容。
+>    - 客户端所需要做的仅仅是html页面的展现和之后的DOM事件处理。
+> 8. 客户端交互：浏览器加载完初始页面后，可以执行JavaScript代码，处理用户交互、数据请求和动态更新等操作
+
+SSR 流程主要分为：
+* 服务端渲染
+* 客户端渲染
+
 * 服务端渲染
   * 渲染时机： 
     * 通过 express 服务渲染：浏览器输入 url 直接定向到某个页面，express 执行 `entry-server.js` 动态渲染 Html
@@ -50,3 +98,5 @@
 ## 参考资料
 
 [vue-ssr 文档](https://ssr.vuejs.org/zh/#%E4%BB%80%E4%B9%88%E6%98%AF%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%AB%AF%E6%B8%B2%E6%9F%93-ssr-%EF%BC%9F)
+
+[Vue.js 服务器端渲染指南 | Vue SSR 指南 (vuejs.org)](https://v2.ssr.vuejs.org/zh/#为什么使用服务器端渲染-ssr)

@@ -85,6 +85,7 @@ module.exports = config({
           { text: '前端渲染架构', link: '../Front-end-Engineering/前端渲染架构/' },
           { text: '前端架构实践', link: '../Front-end-Engineering/前端架构实践/' },
           { text: 'webpack专题', link: '../webpack/' },
+          { text: 'vite专题', link: '../vite/' },
           { text: 'npm', link: '../Front-end-Engineering/npm/' },
           { text: 'Git', link: '../git/' },
           { text: '自动构建和部署', link: '../Front-end-Engineering/自动构建和部署/' },
@@ -179,6 +180,9 @@ module.exports = config({
         'webpackAPI分析',
         'webpack项目实践',
         'Vue2.5项目webpack分析'
+      ],
+      'vite': [
+        ''
       ]
     },
 
