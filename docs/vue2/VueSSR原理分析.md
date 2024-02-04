@@ -228,13 +228,16 @@ if (window.__INITIAL_STATE__) {
 // 等到路由器在钩子和异步组件之前解析了所有的异步
 router.onReady(() => {
 
-  // 添加用于处理异步数据的路由器钩子。
-  // 在解析初始路由之后执行此操作，以便不会重复获取已有的数据。
-  // 使用 router.before Resolve ()解析所有异步组件。
+  // 添加路由钩子函数，用于处理 asyncData.
+  // 在初始路由 resolve 后执行，
+  // 以便我们不会二次预取(double-fetch)已有的数据。
+  // 使用 `router.beforeResolve()`，以便确保所有异步组件都 resolve。
   router.beforeResolve((to, from, next) => {
     // 获取路由匹配的进入和离开的异步组件
     const matched = router.getMatchedComponents(to)
     const prevMatched = router.getMatchedComponents(from)
+    // 我们只关心非预渲染的组件
+    // 所以我们对比它们，找出两个匹配列表的差异组件
     let diffed = false
     // 比较进入和离开组件是否相同
     const activated = matched.filter((c, i) => {
@@ -326,6 +329,12 @@ export default context => {
 }
 
 ```
+
+
+
+### `server.js`
+
+ Node Server，用于接受请求进行服务端渲染的 HTTP 服务。
 
 
 
