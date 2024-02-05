@@ -570,11 +570,11 @@ app.listen(port, () => {
 * `Server Bundle` 运行在 `Node Server`。
 * 服务端启动一个 Node HTTP 服务监听请求，请求将客户端 `Client Bundle` 和 HTML 页面发送到客户端。
 
-渲染时机： 
+**渲染时机：** 
 
 * 通过 Express 服务渲染：浏览器输入 url 直接定向到某个页面，Express  执行 `entry-server.js` 动态渲染 HTML；
 
-总体流程：
+**总体流程：**
 
 * 浏览器输入 `url -> Express 服务接受请求 -> 服务端获取数据 -> 数据注入 store -> SSR Renderer 渲染HTML页面 -> 返回浏览器`
 
@@ -583,7 +583,8 @@ app.listen(port, () => {
 * 通过 Wepack 构建 通用代码 `app.js` + 客户端端渲染代码 `client-entry.js` + 渲染模板 = `Client Bundle`;
 * 客户端激活：浏览器中 `Client Bundle` + 服务端数据`window.__INITIAL_STATE__` 变量 + HTML 静态页面。
 
-总体流程：
+**总体流程：**
+
 * 首次渲染：由服务端渲染输出 HTML 页面发送到浏览器，客户端激活后通过路由导航的页面再次通过客户端渲染。（客户端激活：指的是 Vue 在浏览器端接管由服务端发送的静态 HTML，使其变为由 Vue 管理的动态 DOM 的过程。）
 * 二次渲染（客户端渲染）：页面内点击链接 -> 客户端获取数据 -> 浏览器渲染页面。
 
@@ -625,6 +626,232 @@ app.listen(port, () => {
 ```
 
 ![image-20240205112213422](../images/vue-SSR-client-manifest.png)
+
+
+
+## **Webpack 配置**
+
+通过以上 Webpack 构建分析可知，webpack 需要构建两部分代码：客户端渲染和服务端渲染代码，并且在服务端中，分为开发环境和生产环境，开发环境下使用 `webpack-hot-middleware` 启动一个本地 HTTP 服务。
+
+Webpack 构建配置目录如下：
+
+![image-20240205114152151](../images/vue-ssr-webpack配置.png)
+
+
+
+### **`webpack.base.config`**
+
+`webpack.base.config` 配置为服务端渲染和客户端渲染的公共配置：
+
+```js
+const path = require('path')
+const webpack = require('webpack')
+const ExtractTextPlugin = require('extract-text-webpack-plugin')
+const FriendlyErrorsPlugin = require('friendly-errors-webpack-plugin')
+const { VueLoaderPlugin } = require('vue-loader')
+
+const isProd = process.env.NODE_ENV === 'production'
+
+module.exports = {
+  // 是否开启source map，开发模式下开启，生产模式下关闭
+  devtool: isProd
+    ? false
+    : '#cheap-module-source-map',
+  // 输出文件的位置
+  output: {
+    path: path.resolve(__dirname, '../dist'),
+    publicPath: '/dist/',
+    filename: '[name].[chunkhash].js'
+  },
+  // 解析模块的别名
+  resolve: {
+    alias: {
+      'public': path.resolve(__dirname, '../public')
+    }
+  },
+  module: {
+    // 是否解析es6-promise.js，避免使用webpack的shimming process
+    noParse: /es6-promise\.js$/, // avoid webpack shimming process
+    rules: [
+      {
+        test: /\.vue$/,
+        loader: 'vue-loader',
+        options: {
+          compilerOptions: {
+            preserveWhitespace: false
+          }
+        }
+      },
+      {
+        test: /\.js$/,
+        loader: 'babel-loader',
+        exclude: /node_modules/
+      },
+      {
+        test: /\.(png|jpg|gif|svg)$/,
+        loader: 'url-loader',
+        options: {
+          limit: 10000,
+          name: '[name].[ext]?[hash]'
+        }
+      },
+      {
+        test: /\.styl(us)?$/,
+        use: isProd
+          ? ExtractTextPlugin.extract({
+              use: [
+                {
+                  loader: 'css-loader',
+                  options: { minimize: true }
+                },
+                'stylus-loader'
+              ],
+              fallback: 'vue-style-loader'
+            })
+          : ['vue-style-loader', 'css-loader', 'stylus-loader']
+      },
+    ]
+  },
+  // 是否显示性能提示
+  performance: {
+    hints: false
+  },
+  plugins: isProd
+    ? [
+        new VueLoaderPlugin(), // vue-loader 插件
+        new webpack.optimize.UglifyJsPlugin({ // JS 代码压缩插件
+          compress: { warnings: false }
+        }),
+        new webpack.optimize.ModuleConcatenationPlugin(), // 代码优化插件
+        new ExtractTextPlugin({ // 提取 CSS 代码插件
+          filename: 'common.[chunkhash].css'
+        })
+      ]
+    : [
+        new VueLoaderPlugin(),
+        new FriendlyErrorsPlugin() // 错误处理插件
+      ]
+}
+```
+
+
+
+### **`webpack.client.config`**
+
+```js
+const webpack = require('webpack')
+const merge = require('webpack-merge')
+const base = require('./webpack.base.config')
+const SWPrecachePlugin = require('sw-precache-webpack-plugin')
+const VueSSRClientPlugin = require('vue-server-renderer/client-plugin')
+
+// 合并基础配置和当前配置
+const config = merge(base, {
+  entry: {
+    // 客户端入口文件
+    app: './src/entry-client.js'
+  },
+  resolve: {
+    // 解析别名
+    alias: {
+      'create-api': './create-api-client.js'
+    }
+  },
+  plugins: [
+    // strip dev-only code in Vue source
+    // 定义环境变量
+    new webpack.DefinePlugin({
+      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
+      'process.env.VUE_ENV': '"client"'
+    }),
+    // extract vendor chunks for better caching
+    // 提取公共代码
+    new webpack.optimize.CommonsChunkPlugin({
+      name: 'vendor',
+      minChunks: function (module) {
+        // a module is extracted into the vendor chunk if...
+        return (
+          // it's inside node_modules
+          /node_modules/.test(module.context) &&
+          // and not a CSS file (due to extract-text-webpack-plugin limitation)
+          !/\.css$/.test(module.request)
+        )
+      }
+    }),
+    // extract webpack runtime & manifest to avoid vendor chunk hash changing
+    // on every build.
+    new webpack.optimize.CommonsChunkPlugin({
+      name: 'manifest'
+    }),
+    new VueSSRClientPlugin()
+  ]
+})
+
+// 如果是生产环境，添加service worker
+if (process.env.NODE_ENV === 'production') {
+  config.plugins.push(
+    // auto generate service worker
+    new SWPrecachePlugin({
+      cacheId: 'vue-hn',
+      filename: 'service-worker.js',
+      minify: true,
+      dontCacheBustUrlsMatching: /./,
+      staticFileGlobsIgnorePatterns: [/\.map$/, /\.json$/],
+      runtimeCaching: [
+        {
+          urlPattern: '/',
+          handler: 'networkFirst'
+        },
+        {
+          urlPattern: /\/(top|new|show|ask|jobs)/,
+          urlPattern: '/top',
+          handler: 'networkFirst'
+        },
+        {
+          urlPattern: '/new',
+          handler: 'networkFirst'
+        },
+        {
+          urlPattern: '/show',
+          handler: 'networkFirst'
+        },
+        {
+          urlPattern: '/ask',
+          handler: 'networkFirst'
+        },
+        {
+          urlPattern: '/jobs',
+          handler: 'networkFirst'
+        },
+        {
+          urlPattern: '/item/:id',
+          handler: 'networkFirst'
+        },
+        {
+          urlPattern: '/user/:id',
+          handler: 'networkFirst'
+        }
+      ]
+    })
+  )
+}
+
+module.exports = config
+```
+
+> 以下是配置的主要原理和用途：
+>
+> 1. 原理：这段代码使用了 `webpack-merge` 模块来合并 base 配置和具体的配置项。这样可以确保在合并过程中不会覆盖或添加重复的配置项。
+> 2. 用途：这段代码的目的是为 Vue.js 项目提供一个production环境的 Webpack 配置，以便更好地处理打包、优化和缓存等操作。
+> 3. 注意事项：
+>    - 确保已经安装了所需的依赖包，包括 `webpack`、`webpack-merge`、`sw-precache-webpack-plugin` 和 `vue-server-renderer` 等。
+>    - 配置文件应该位于项目的 `webpack.config.js` 文件中。
+>    - 配置文件应该使用 ES6 的模块导出而不是直接导出。
+>    - 对于 `SWPrecachePlugin` 的配置，建议参考其官方文档进行定制。
+
+### **`webpack.server.config`**
+
+### **`setup-dev-server`**
 
 
 
