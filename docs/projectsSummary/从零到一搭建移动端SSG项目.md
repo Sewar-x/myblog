@@ -31,13 +31,7 @@
 
 
 
-
-
-
-
 ## 技术栈
-
-## 
 
 项目基于 Vue SSR 官方demo：[ vue-hackernews-2.0](https://github.com/vuejs/vue-hackernews-2.0) 进行二次开发，项目结构等基础参考 [vue-ssr 文档](https://ssr.vuejs.org/zh/#%E4%BB%80%E4%B9%88%E6%98%AF%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%AB%AF%E6%B8%B2%E6%9F%93-ssr-%EF%BC%9F)。
 
@@ -180,17 +174,14 @@ npm run generate:s3 -- --target=routeName --lang=** --env=** --webpack=true  --s
     * 静态化通过 cli-generate context 注入 secondLang，再传到业务代码 entry-server 传参
     * 业务逻辑中通过 this.$route.meta 获取第二语言参数
 
-## webpack 构建
+## Webpack 构建
 
-* 作用： 执行 *`npm run build `*相关命令，生成 dist-ssr 目录
+* 命令： 执行 *`npm run build `*相关命令，生成 dist-ssr 目录
 
 * 总体流程:
-
-  * 构建 client
-    * 流程： 获取 client webpack 配置  -> webpack 构建 -> 输出 app.js/app.css/chunk 文件/客户端清单文件(vue-ssr-client-manifest.json)
-
-  * 构建 server
-    * 流程： 获取 server webpack 配置  -> webpack 构建 -> 输出服务端清单文件(vue-ssr-server-bundle.json)
+  1. 构建 client 流程： 获取 `client webpack` 配置  -> webpack 构建 -> 输出 `app.js/app.css/chunk` 文件/客户端清单文件(vue-ssr-client-manifest.json)；
+  2. 构建 server 流程： 获取 `server webpack` 配置  -> webpack 构建 -> 输出服务端清单文件(`vue-ssr-server-bundle.json`)；
+  
 
 ### 生成路由表
 
