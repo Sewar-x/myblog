@@ -1165,9 +1165,25 @@ app.get('*', isProd ? render : (req, res) => {
 > `vue-server-renderer` 包通过对外暴露 `createBundleRenderer` 方法，该方法接受以下参数：
 >
 > * bundle：  一个已经预先编译好的服务器端 Vue.js 应用程序,该应用程序已经被打包成一系列的模块并可能已经过优化。
-> * options： 创建包的可选项。
->   * template： 渲染的 HTML 模板。
->   * clientManifest： 使用的客户端清单。
+>
+> * options： 创建包的可选项。options 类型定义如下：
+>
+>   ```js
+>   export type RenderOptions = {
+>     modules?: Array<(vnode: VNode) => ?string>;
+>     directives?: Object;
+>     isUnaryTag?: Function;
+>     cache?: RenderCache;
+>     template?: string | (content: string, context: any) => string;
+>     inject?: boolean;
+>     basedir?: string;
+>     shouldPreload?: Function;
+>     shouldPrefetch?: Function;
+>     clientManifest?: ClientManifest;
+>     serializer?: Function;
+>     runInNewContext?: boolean | 'once';
+>   };
+>   ```
 >
 > `createBundleRenderer` 方法返回一个 `render` 实例，该实例通过调用 `renderToString` 方法渲染HTML；
 >
@@ -1180,7 +1196,209 @@ app.get('*', isProd ? render : (req, res) => {
 
 ### **`vue-server-renderer`  源码分析**
 
+`vue-server-renderer` 包位于 `./node_modules/vue-server-renderer` 下，该包是通过 vue 核心代码自动生成，完整代码位于 vue2 源码中 [src/platforms/web/entry-server-renderer.js](https://github.com/vuejs/vue/blob/dev/src/platforms/web/entry-server-renderer.js).，该项目位于 vue 项目的 `origin/dev` 分支，在查看源码前需要克隆该项目，并切换到 `origin/dev` 分支。
 
+#### **入口文件 **
+
+![image-20240205165442252](../images/image-20240205165442252.png)
+
+入口文件主要返回 `_createRenderer ` 方法创建一个 render。
+
+#### `create-renderer.js` **文件**
+
+该文件主要用于生成一个 render 对象，render 对象中包含两个方法:
+
+* `renderToString` : 它将自动执行「由 bundle 创建的应用程序实例」所导出的函数（传入`上下文`作为参数），然后渲染。
+* `renderToStream` 流式渲染 (Streaming) API,返回的值是 [Node.js stream (opens new window)](https://nodejs.org/api/stream.html) 
+  * 在流式渲染模式下，当 renderer 遍历虚拟 DOM 树 (virtual DOM tree) 时，会尽快发送数据。这意味着我们可以尽快获得"第一个 chunk"，并开始更快地将其发送给客户端。
+  * 然而，当第一个数据 chunk 被发出时，子组件甚至可能不被实例化，它们的生命周期钩子也不会被调用。这意味着，如果子组件需要在其生命周期钩子函数中，将数据附加到渲染上下文 (render context)，当流 (stream) 启动时，这些数据将不可用。这是因为，大量上下文信息 (context information)（如头信息 (head information) 或内联关键 CSS(inline critical CSS)）需要在应用程序标记 (markup) 之前出现，我们基本上必须等待流(stream)完成后，才能开始使用这些上下文数据。
+  * 因此，如果你依赖由组件生命周期钩子函数填充的上下文数据，则**不建议**使用流式传输模式。
+
+**源码：**
+
+![image-20240205171655843](../images/create-renderer.png)
+
+通过以上的《`vue-server-renderer`  使用》 章节可知，在创建 render 之后，通过调用 `renderer.renderToString` 方法进行渲染。下面分析该方法。
+
+#### **`renderToString` 方法**
+
+ `renderToString` 方法参数：
+
+* component：渲染组件。
+* context： 渲染上下文。提供插值数据。
+* callback:  回调函数。
+
+完整代码：
+
+```js
+    renderToString(
+      component: Component,//组件对象
+      context: any,//渲染上下文
+      cb: any //回调函数
+    ): ?Promise<string> {
+      //判断 context 是否为函数，如果是，则将 cb 赋值为 context，并将 context 设置为空对象。
+      if (typeof context === 'function') {
+        cb = context
+        context = {}
+      }
+      //如果 context 存在，则调用 templateRenderer.bindRenderFns 方法将其绑定到 context 上。
+      if (context) {
+        templateRenderer.bindRenderFns(context)
+      }
+
+      //判断 cb 是否为空，如果是，则调用 createPromiseCallback 函数创建一个包含 promise 和 cb 的对象。
+      let promise
+      if (!cb) {
+        ({ promise, cb } = createPromiseCallback())
+      }
+      //初始化 result 为空字符串
+      let result = ''
+      //调用 createWriteFunction 方法，传入一个回调函数，用于将渲染结果拼接成字符串。
+      const write = createWriteFunction(text => {
+        result += text
+        return false
+      }, cb)
+      try {
+        render(component, write, context, err => {
+          //如果渲染过程中发生错误，则调用回调函数处理错误。
+          if (err) {
+            return cb(err)
+          }
+          //如果 context 存在，并且 context.rendered 方法存在，则调用 context.rendered 方法处理渲染结果。
+          if (context && context.rendered) {
+            context.rendered(context)
+          }
+          //如果 template（模板）存在，则调用 templateRenderer.render 方法渲染模板，并将结果传递给回调函数。
+          if (template) {
+            try {
+              const res = templateRenderer.render(result, context)
+              if (typeof res !== 'string') {
+                // function template returning promise
+                res
+                  .then(html => cb(null, html))
+                  .catch(cb)
+              } else {
+                cb(null, res)
+              }
+            } catch (e) {
+              cb(e)
+            }
+          } else {
+            //如果 template 不存在，则调用回调函数处理渲染结果。
+            cb(null, result)
+          }
+        })
+      } catch (e) {
+        cb(e)
+      }
+      //函数返回 promise。
+      return promise
+    }
+```
+
+> 将一个组件渲染成字符串，并且支持传入一个回调函数进行处理。它的实现原理是通过递归调用和 Promise 处理异步操作，以便在渲染过程中实时返回结果。
+>
+> 该方法主要逻辑为：
+>
+> 1. 判断 context 是否为函数，如果是，则将 cb 赋值为 context，并将 context 设置为空对象。
+> 2. 如果 context 存在，则调用 templateRenderer.bindRenderFns 方法将其绑定到 context 上。
+> 3. 调用 createWriteFunction 方法，传入一个回调函数，用于将渲染结果拼接成字符串。
+> 4.  调用 `render` 方法渲染组件。该方法通过 `createRenderFunction()` 创建。
+
+因此 `renderToString` 方法主要是对 context 做预处理，然后调用 `createRenderFunction` 方法创建的 render 实例渲染组件。
+
+
+
+#### **`createRenderFunction` 方法**
+
+该方法用于创建一个渲染函数，该函数可以渲染传入的`component`对象。
+
+```js
+export function createRenderFunction (
+  modules: Array<(node: VNode) => ?string>, //一个包含函数的数组，用于渲染虚拟节点（VNode）。
+  directives: Object,//一个对象，包含各种指令（directive），用于处理VNode。
+  isUnaryTag: Function,//一个函数，用于判断一个标签是否是单例标签。
+  cache: any //一个任意类型的对象，用于存储缓存数据。
+) {
+  return function render (
+    component: Component, //一个Component类型的对象，表示要渲染的组件。
+    write: (text: string, next: Function) => void, //一个函数，用于将文本写入渲染上下文。
+    userContext: ?Object, //一个可选的对象，用于提供用户自定义上下文。
+    done: Function //一个函数，用于表示渲染完成。
+  ) {
+    //定义一个warned对象，用于存储警告信息。
+    warned = Object.create(null)
+    //创建一个RenderContext对象，用于存储渲染上下文。
+    const context = new RenderContext({
+      activeInstance: component,
+      userContext,
+      write, done, renderNode,
+      isUnaryTag, modules, directives,
+      cache
+    })
+    //调用installSSRHelpers函数，用于安装SSR辅助函数。
+    installSSRHelpers(component)
+    //调用normalizeRender函数，用于规范化渲染。
+    normalizeRender(component)
+    //实际渲染组件。
+    const resolve = () => {
+      renderNode(component._render(), true, context)
+    }
+    //等待服务器预取。
+    waitForServerPrefetch(component, resolve, done)
+  }
+}
+```
+
+> 实现原理：
+>
+> 1. 根据传入的参数，创建一个`RenderContext`对象，并在其中安装SSR辅助函数和规范化渲染。
+> 2. 然后，根据组件的`_render`方法，调用`renderNode`函数渲染VNode。
+> 3. 如果组件有服务器端预取的属性，则等待服务器预取完成后再进行渲染。
+
+该方法的核心渲染方法是 `renderNode`
+
+#### **`renderNode 方法`**
+
+```js
+/**
+ * 
+ * @param {*} node 节点对象。
+ * @param {*} isRoot 是否为根节点，用于判断是否需要渲染组件的根元素。
+ * @param {*} context 渲染上下文，包含写入的方法和处理next回调函数。
+ */
+function renderNode (node, isRoot, context) {
+  if (node.isString) { //字符串节点：节点的内容是一个字符串，直接输出到模板。
+    renderStringNode(node, context)
+  } else if (isDef(node.componentOptions)) { //定义组件选项：这是一个组件节点，需要渲染组件。
+    renderComponent(node, isRoot, context)
+  } else if (isDef(node.tag)) { //定义标签：这是一个HTML标签节点，需要渲染元素。
+    renderElement(node, isRoot, context) 
+  } else if (isTrue(node.isComment)) { //定义注释：这是一个注释节点，需要根据异步工厂函数是否存在来决定是渲染注释还是输出注释文本。
+    if (isDef(node.asyncFactory)) {
+      // async component
+      renderAsyncComponent(node, isRoot, context)
+    } else {
+      context.write(`<!--${node.text}-->`, context.next)
+    }
+  } else { //其他：未知类型的节点，输出节点的内容。
+    context.write(
+      node.raw ? node.text : escape(String(node.text)),
+      context.next
+    )
+  }
+}
+```
+
+> 渲染一个节点，根据节点的类型和属性进行相应的处理。节点可以分为以下几种类型：
+>
+> 1. 字符串节点：节点的内容是一个字符串，直接输出到模板。
+> 2. 定义组件选项：这是一个组件节点，需要渲染组件。
+> 3. 定义标签：这是一个HTML标签节点，需要渲染元素。
+> 4. 定义注释：这是一个注释节点，需要根据异步工厂函数是否存在来决定是渲染注释还是输出注释文本。
+> 5. 其他：未知类型的节点，输出节点的内容。
+
+`renderNode` 方法中核心的渲染方法为 `renderComponent`, 该方法用于渲染组件。
 
 
 
