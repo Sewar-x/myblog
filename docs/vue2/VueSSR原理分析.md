@@ -1084,6 +1084,106 @@ module.exports = function setupDevServer(app, templatePath, cb) {
 
 
 
+## **`vue-server-renderer` 分析**
+
+这个包为 Vue 2.0提供了 Node.js 服务器端渲染。完整代码可以参考 [src/platforms/web/entry-server-renderer.js](https://github.com/vuejs/vue/blob/dev/src/platforms/web/entry-server-renderer.js).
+
+在 `server.js` 服务端中，使用 `vue-server-renderer` 创建一个服务器端Vue组件渲染器 `renderer`，在收到客户端请求时，通过 `renderer.renderToString` 方法将页面渲染成静态 HTML 页面。
+
+
+
+### **`vue-server-renderer`  使用**
+
+在 `server.js` 文件中，`vue-server-renderer`  渲染 HTML  核心代码如下：
+
+```js
+// 省略无关代码...
+const { createBundleRenderer } = require('vue-server-renderer')//创建一个服务器端Vue组件渲染器
+// 省略无关代码...
+/**
+ * 创建一个服务器端渲染器（server-side rendering
+ * @param {*} bundle 一个已经预先编译好的服务器端 Vue.js 应用程序,这个应用程序已经被打包成一系列的模块，并且可能已经过优化。
+ * @param {*} options 
+ * @returns 
+ */
+function createRenderer (bundle, options) {
+  //通过使用 webpack 的自定义插件，server bundle 将生成为可传递到 bundle renderer 的特殊 JSON 文件
+  return createBundleRenderer(bundle, Object.assign(options, {
+    // LRU 为最近最近未使用缓存，用于组件缓存
+    cache: LRU({
+      max: 1000,
+      maxAge: 1000 * 60 * 15
+    }),
+    //只有当 vue-server-renderer 与 npm 链接时才需要这样做
+    basedir: resolve('./dist'),
+    /**recommended for performance
+     * true: 新上下文模式。创建新上下文并重新评估捆绑包在每个渲染上。确保每个应用程序的整个应用程序状态都是新的渲染，但会产生额外的评估成本。
+     * false:直接模式。每次渲染时，它只调用导出的函数。而不是在上重新评估整个捆绑包模块评估成本较高，但需要结构化源代码
+     * once: 初始上下文模式。 仅用于收集可能的非组件vue样式加载程序注入的样式。
+    */
+    runInNewContext: false,
+    clientManifest // （可选）客户端构建 manifest
+  }))
+}
+// 省略无关代码...
+const templatePath = resolve('./src/index.template.html')
+if (isProd) {
+  // 在生产环境，使用 HTML模板和服务端 bundle 创建一个服务渲染服务，服务资源通过 vue-ssr-webpack-plugin 插件生成
+  const template = fs.readFileSync(templatePath, 'utf-8')
+  // 一个已经预先编译好的服务器端 Vue.js 应用程序,这个应用程序已经被打包成一系列的模块，并且可能已经过优化。
+  const bundle = require('./dist/vue-ssr-server-bundle.json')
+  // 客户端清单,可选。它允许呈现程序自动推断预加载/预取链接，并直接为渲染期间使用的任何异步块添加 < script > 标记，从而避免了瀑布式请求。
+  const clientManifest = require('./dist/vue-ssr-client-manifest.json')
+  // 创建模板渲染实例
+  renderer = createRenderer(bundle, {
+    template,
+    clientManifest
+  })
+} 
+
+// 省略无关代码...
+
+// 创建渲染 HTML 函数
+function render (req, res) {
+  // 省略无关代码...
+  renderer.renderToString(context, (err, html) => {
+    // 省略无关代码...
+    res.send(html)
+   // 省略无关代码...
+  })
+}
+
+// 监听服务请求，渲染 HTML 
+app.get('*', isProd ? render : (req, res) => {
+  readyPromise.then(() => render(req, res))
+})
+
+```
+
+> 通过以上分析可知：
+>
+> `vue-server-renderer` 包通过对外暴露 `createBundleRenderer` 方法，该方法接受以下参数：
+>
+> * bundle：  一个已经预先编译好的服务器端 Vue.js 应用程序,该应用程序已经被打包成一系列的模块并可能已经过优化。
+> * options： 创建包的可选项。
+>   * template： 渲染的 HTML 模板。
+>   * clientManifest： 使用的客户端清单。
+>
+> `createBundleRenderer` 方法返回一个 `render` 实例，该实例通过调用 `renderToString` 方法渲染HTML；
+>
+>  `renderToString` 方法参数：
+>
+> * context： 渲染上下文。提供插值数据。
+> * callback:  回调函数。
+
+
+
+### **`vue-server-renderer`  源码分析**
+
+
+
+
+
 ## 注意事项
 
 * 服务端渲染时，将数据进行响应式的过程在服务器上是多余的，所以默认情况下禁用响应式数据。避免将「数据」转换为「响应式对象」的性能开销。
@@ -1099,8 +1199,6 @@ module.exports = function setupDevServer(app, templatePath, cb) {
     
 * 对于仅浏览器可用的 API，通常方式是，在「纯客户端 (client-only)」的生命周期钩子函数 `beforeMounte`、`mounted` 中惰性访问 (lazily access) 它们。
 
-
-
 * 应该避免在 `beforeCreate` 和 `created` 生命周期时产生全局副作用的代码。
   * 例如在其中使用 `setInterval` 设置 time，由于在 SSR 期间并不会调用销毁钩子函数，所以 timer 将永远保留下来。
 
@@ -1112,15 +1210,9 @@ module.exports = function setupDevServer(app, templatePath, cb) {
   
 * 大多数自定义指令直接操作 DOM，因此会在服务器端渲染 (SSR) 过程中导致错误；
 
-
-
 * 静态函数 `asyncData`无法访问 `this`，因为此函数会在组件实例化之前调用；
 
-
-
 * 服务端渲染时不需要响应式数据，默认禁用响应式数据，可以避免将「数据」转换为「响应式对象」的性能开销；
-
-
 
 * 模板中的`<!--vue-ssr-outlet-->` 注释 部分是 renderer 渲染 HTML 字符串插入的位置；
 
