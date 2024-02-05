@@ -563,31 +563,68 @@ app.listen(port, () => {
 
 以上渲染流程中，设计客户端和服务端代码的 Webpack 编译过程:
 
-**服务端 Webpack 编译：**
+### **服务端构建流程**
 
 * 通过 Wepack 构建 通用代码 `app.js` + 服务端渲染代码 `server-entry.js` + 渲染模板 = `Server Bundle`;
 
 * `Server Bundle` 运行在 `Node Server`。
-* 渲染时机： 
-  * 通过 express 服务渲染：浏览器输入 url 直接定向到某个页面，express 执行 `entry-server.js` 动态渲染 HTML；
-  * 静态化页面时，通过执行 `entry-client.js` 渲染出 HTML 页面。
-* 总体流程：
-  * 浏览器输入 `url -> express 服务接受请求 -> 服务端获取数据 -> 数据注入 store -> SSR Renderer 渲染HTML页面 -> 返回浏览器`
+* 服务端启动一个 Node HTTP 服务监听请求，请求将客户端 `Client Bundle` 和 HTML 页面发送到客户端。
 
-**客户端  Webpack 编译：**
+渲染时机： 
+
+* 通过 Express 服务渲染：浏览器输入 url 直接定向到某个页面，Express  执行 `entry-server.js` 动态渲染 HTML；
+
+总体流程：
+
+* 浏览器输入 `url -> Express 服务接受请求 -> 服务端获取数据 -> 数据注入 store -> SSR Renderer 渲染HTML页面 -> 返回浏览器`
+
+### **客户端构建流程**
 
 * 通过 Wepack 构建 通用代码 `app.js` + 客户端端渲染代码 `client-entry.js` + 渲染模板 = `Client Bundle`;
-* 在浏览器中 `Client Bundle` + `Server Bundle`   =  HTML 静态页面。
-* 渲染时机： 通过页面中链接切换路由；
-* 总体流程：
-  * 首次渲染：由服务端渲染输出 HTML 页面发送到浏览器，客户端激活后通过路由导航的页面再次通过客户端渲染。（客户端激活：指的是 Vue 在浏览器端接管由服务端发送的静态 HTML，使其变为由 Vue 管理的动态 DOM 的过程。）
-  * 页面内点击链接 -> 客户端获取数据 -> 浏览器渲染页面。
+* 客户端激活：浏览器中 `Client Bundle` + 服务端数据`window.__INITIAL_STATE__` 变量 + HTML 静态页面。
+
+总体流程：
+* 首次渲染：由服务端渲染输出 HTML 页面发送到浏览器，客户端激活后通过路由导航的页面再次通过客户端渲染。（客户端激活：指的是 Vue 在浏览器端接管由服务端发送的静态 HTML，使其变为由 Vue 管理的动态 DOM 的过程。）
+* 二次渲染（客户端渲染）：页面内点击链接 -> 客户端获取数据 -> 浏览器渲染页面。
 
 
 
-## **编译产物分析**
+### **编译产物分析**
 
+经过 webpack 打包之后会有两个 bundle 产物：`Server Bundle` 和 `Client Bundle`。
 
+1. `Server Bundle` 用于生成 `vue-ssr-server-bundle.json`， sourceMap 和需要在服务端运行的代码列表都在这个产物中。
+
+`vue-ssr-server-bundle.json` 简化代码如下：
+
+```js
+{ 
+  "entry": , 
+  "files": {
+    A：包含了所有要在服务端运行的代码列表
+    B：入口文件
+  } 
+}
+```
+
+![image-20240205111853861](../images/vue-ssr-server-bundle.png)
+
+2. `Client Bundle` 用于生成`vue-SSR-client-manifest.json`:包含所有的静态资源，首次渲染需要加载的 script 标签，以及需要在客户端运行的代码。
+
+`vue-SSR-client-manifest.json`简化代码如下：
+
+```javascript
+
+{ 
+  "publicPath": 公共资源路径文件地址, 
+  "all": 资源列表
+  "initial":输出 html 字符串
+  "async": 异步加载组件集合
+  "modules": moduleIdentifier 和 all 数组中文件的映射关系
+}
+```
+
+![image-20240205112213422](../images/vue-SSR-client-manifest.png)
 
 
 
