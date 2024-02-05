@@ -641,7 +641,7 @@ Webpack 构建配置目录如下：
 
 ### **`webpack.base.config`**
 
-`webpack.base.config` 配置为服务端渲染和客户端渲染的公共配置：
+`webpack.base.config` 配置为服务端渲染和客户端渲染的基本配置，基本配置 (base config) 包含在两个环境共享的配置，例如，输出路径 (output path)，别名 (alias) 和 loader
 
 ```js
 const path = require('path')
@@ -736,6 +736,73 @@ module.exports = {
 
 
 
+
+
+### **`webpack.server.config`**
+
+```js
+const webpack = require('webpack')
+const merge = require('webpack-merge')
+const base = require('./webpack.base.config')
+const nodeExternals = require('webpack-node-externals')
+const VueSSRServerPlugin = require('vue-server-renderer/server-plugin')
+
+module.exports = merge(base, {
+  // 这允许 webpack 以 Node 适用方式(Node-appropriate fashion)处理动态导入(dynamic import)，
+  // 并且还会在编译 Vue 组件时，告知 `vue-loader` 输送面向服务器代码(server-oriented code)。
+  target: 'node',
+  // 对 bundle renderer 提供 source map 支持
+  devtool: '#source-map',
+  // 将 entry 指向应用程序的 server entry 文件
+  entry: './src/entry-server.js',
+  // 此处告知 server bundle 使用 Node 风格导出模块(Node-style exports)
+  output: {
+    filename: 'server-bundle.js',
+    libraryTarget: 'commonjs2'
+  },
+  // 指定别名
+  resolve: {
+    alias: {
+      'create-api': './create-api-server.js'
+    }
+  },
+  // https://webpack.js.org/configuration/externals/#function
+  // https://github.com/liady/webpack-node-externals
+  // 外置化应用程序依赖模块。可以使服务器构建速度更快，并生成较小的 bundle 文件。
+  externals: nodeExternals({
+  	// 不要外置化 webpack 需要处理的依赖模块。
+    // 你可以在这里添加更多的文件类型。例如，未处理 *.vue 原始文件，
+    // 你还应该将修改 `global`（例如 polyfill）的依赖模块列入白名单
+    whitelist: /\.css$/
+  }),
+  // 这是将服务器的整个输出
+  // 构建为单个 JSON 文件的插件。
+  // 默认文件名为 `vue-ssr-server-bundle.json`
+  plugins: [
+    new webpack.DefinePlugin({
+      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
+      'process.env.VUE_ENV': '"server"'
+    }),
+    new VueSSRServerPlugin()
+  ]
+})
+```
+
+通过以上 webpack 构建 `entry-server.js` 文件后，将生成 `vue-ssr-server-bundle.json` 文件。
+
+在生成 `vue-ssr-server-bundle.json` 之后，在 `server.js` 文件中，只需将文件路径传递给 `createBundleRenderer`方法：
+
+```js
+const { createBundleRenderer } = require('vue-server-renderer')
+const renderer = createBundleRenderer('/path/to/vue-ssr-server-bundle.json', {
+  // ……renderer 的其他选项
+})
+```
+
+
+
+
+
 ### **`webpack.client.config`**
 
 ```js
@@ -778,11 +845,12 @@ const config = merge(base, {
         )
       }
     }),
-    // extract webpack runtime & manifest to avoid vendor chunk hash changing
-    // on every build.
+    // 重要信息：这将 webpack 运行时分离到一个引导 chunk 中，以便可以在之后正确注入异步 chunk。
+    // 这也为你的 应用程序/vendor 代码提供了更好的缓存。
     new webpack.optimize.CommonsChunkPlugin({
       name: 'manifest'
     }),
+    // 此插件在输出目录中生成 `vue-ssr-client-manifest.json`。
     new VueSSRClientPlugin()
   ]
 })
@@ -791,13 +859,14 @@ const config = merge(base, {
 if (process.env.NODE_ENV === 'production') {
   config.plugins.push(
     // auto generate service worker
+    // 用于在构建过程中自动生成Service Worker（服务worker）文件
     new SWPrecachePlugin({
-      cacheId: 'vue-hn',
-      filename: 'service-worker.js',
-      minify: true,
-      dontCacheBustUrlsMatching: /./,
-      staticFileGlobsIgnorePatterns: [/\.map$/, /\.json$/],
-      runtimeCaching: [
+      cacheId: 'vue-hn',// 缓存ID，用于识别不同的预缓存配置。
+      filename: 'service-worker.js',// 服务worker文件的名称。
+      minify: true,// 是否对服务worker文件进行压缩。
+      dontCacheBustUrlsMatching: /./,//避免缓存 bust 的 URL 模式。
+      staticFileGlobsIgnorePatterns: [/\.map$/, /\.json$/], //忽略的静态文件 glob 模式。
+      runtimeCaching: [ //运行时缓存配置。
         {
           urlPattern: '/',
           handler: 'networkFirst'
@@ -839,39 +908,220 @@ if (process.env.NODE_ENV === 'production') {
 module.exports = config
 ```
 
-> 以下是配置的主要原理和用途：
+> 以下是配置的主要原理：
 >
 > 1. 原理：这段代码使用了 `webpack-merge` 模块来合并 base 配置和具体的配置项。这样可以确保在合并过程中不会覆盖或添加重复的配置项。
-> 2. 用途：这段代码的目的是为 Vue.js 项目提供一个production环境的 Webpack 配置，以便更好地处理打包、优化和缓存等操作。
-> 3. 注意事项：
+> 2. 注意事项：
 >    - 确保已经安装了所需的依赖包，包括 `webpack`、`webpack-merge`、`sw-precache-webpack-plugin` 和 `vue-server-renderer` 等。
 >    - 配置文件应该位于项目的 `webpack.config.js` 文件中。
 >    - 配置文件应该使用 ES6 的模块导出而不是直接导出。
 >    - 对于 `SWPrecachePlugin` 的配置，建议参考其官方文档进行定制。
 
-### **`webpack.server.config`**
+通过以上客户端构建 `client-entry.js` 文件后，生成客户端构建清单 (client build manifest) `clientManifest`，使用客户端清单 (client manifest) 和服务器 bundle(server bundle)，renderer 现在具有了*服务器和客户端*的构建信息，因此它可以自动推断和注入[资源预加载 / 数据预取指令(preload / prefetch directive) (opens new window)](https://css-tricks.com/prefetching-preloading-prebrowsing/)，以及 css 链接 / script 标签到所渲染的 HTML。
+
+好处是双重的：
+
+1. 在生成的文件名中有哈希时，可以取代 `html-webpack-plugin` 来注入正确的资源 URL。
+2. 在通过 webpack 的按需代码分割特性渲染 bundle 时，我们可以确保对 chunk 进行最优化的资源预加载/数据预取，并且还可以将所需的异步 chunk 智能地注入为 `<script>` 标签，以避免客户端的瀑布式请求 (waterfall request)，以及改善可交互时间 (TTI - time-to-interactive)。
+
+通过以上构建出的客户端清单 (client manifest) 以及页面模板，在 `server.js` 中创建渲染器，渲染 HTML 页面：
+
+`server.js` 文件部分代码：
+
+```js
+const { createBundleRenderer } = require('vue-server-renderer')
+
+const template = require('fs').readFileSync('/path/to/template.html', 'utf-8')
+const serverBundle = require('/path/to/vue-ssr-server-bundle.json')
+const clientManifest = require('/path/to/vue-ssr-client-manifest.json')
+
+const renderer = createBundleRenderer(serverBundle, {
+  template,
+  clientManifest
+})
+```
+
+通过以上设置，使用代码分割特性构建后的服务器渲染的 HTML 代码，将看起来如下（所有都是自动注入）：
+
+```html
+<html>
+  <head>
+    <!-- 用于当前渲染的 chunk 会被资源预加载(preload) -->
+    <link rel="preload" href="/manifest.js" as="script">
+    <link rel="preload" href="/main.js" as="script">
+    <link rel="preload" href="/0.js" as="script">
+    <!-- 未用到的异步 chunk 会被数据预取(prefetch)（次要优先级） -->
+    <link rel="prefetch" href="/1.js" as="script">
+  </head>
+  <body>
+    <!-- 应用程序内容 -->
+    <div data-server-rendered="true"><div>async</div></div>
+    <!-- manifest chunk 优先 -->
+    <script src="/manifest.js"></script>
+    <!-- 在主 chunk 之前注入异步 chunk -->
+    <script src="/0.js"></script>
+    <script src="/main.js"></script>
+  </body>
+</html>
+```
+
+
+
+
 
 ### **`setup-dev-server`**
+
+该文件主要用于构建本地开发服务，在 Node HTTP 服务中，使用 ` webpack-dev-middleware` 启动一个本地开发服务。
+
+```js
+const fs = require('fs')
+const path = require('path')
+const MFS = require('memory-fs')//内存文件系统，用于在内存中模拟文件系统，常用于单元测试
+const webpack = require('webpack')
+const chokidar = require('chokidar')//一个文件监听库，用于在文件发生变化时触发事件。Webpack的watch模式会使用这个库来监听文件变化。
+const clientConfig = require('./webpack.client.config')
+const serverConfig = require('./webpack.server.config')
+
+const readFile = (fs, file) => {
+  try {
+    // 使用fs.readFileSync读取文件，并使用utf-8编码
+    return fs.readFileSync(path.join(clientConfig.output.path, file), 'utf-8')
+  } catch (e) { }
+}
+
+module.exports = function setupDevServer(app, templatePath, cb) {
+  // 声明变量
+  let bundle
+  let template
+  let clientManifest
+
+  let ready
+  /**
+   * 创建一个名为 readyPromise 的 Promise 对象，该对象的状态为 pending，并在未来的某个时间点执行 resolve 方法。
+   * 这个 Promise 是为了在未来的某个时间点，如果其他依赖这个 Promise 的代码还没有准备好，那么就可以通过 await 或 then 来等待这个 Promise 被执行。
+   * 创建一个异步操作，但是在其他代码没有准备好之前，不需要等待其完成。
+   * 使用await关键字来等待一个Promise的结果，或者在then方法中处理Promise的成功解决。
+   * 作为模块导入时的延迟加载Promise，确保模块在加载时不会因为其他依赖而阻塞。
+   */
+  const readyPromise = new Promise(r => { ready = r })
+  // 判断 bundle 和 clientManifest 是否存在，存在则执行 ready 函数，并调用cb函数，传入 bundle 和 clientManifest
+  // 通过 webpack 构建服务端渲染代码生成 bundle，构建客户端代码生成 clientManifest
+  const update = () => {
+    if (bundle && clientManifest) {
+      ready()
+      cb(bundle, {
+        template,
+        clientManifest
+      })
+    }
+  }
+
+  // read template from disk and watch
+  template = fs.readFileSync(templatePath, 'utf-8')
+  //监听模板变化，在文件发生变化时，读取模板文件
+  chokidar.watch(templatePath).on('change', () => {
+    template = fs.readFileSync(templatePath, 'utf-8')
+    console.log('index.html template updated.')
+    update()
+  })
+
+  // modify client config to work with hot middleware
+  // 修改热更新模块的客户端配置
+  clientConfig.entry.app = ['webpack-hot-middleware/client', clientConfig.entry.app]
+  clientConfig.output.filename = '[name].js'
+  clientConfig.plugins.push(
+    new webpack.HotModuleReplacementPlugin(), // 使用热更新插件
+    new webpack.NoEmitOnErrorsPlugin()
+  )
+
+  // dev middleware
+  const clientCompiler = webpack(clientConfig)
+  // 使用开发服务插件
+  const devMiddleware = require('webpack-dev-middleware')(clientCompiler, {
+    publicPath: clientConfig.output.publicPath,
+    noInfo: true
+  })
+  app.use(devMiddleware)
+  // 监听插件完成事件，执行回调，更新文件
+  clientCompiler.plugin('done', stats => {
+    stats = stats.toJson()
+    stats.errors.forEach(err => console.error(err))
+    stats.warnings.forEach(err => console.warn(err))
+    if (stats.errors.length) return
+    clientManifest = JSON.parse(readFile(
+      devMiddleware.fileSystem,
+      'vue-ssr-client-manifest.json'
+    ))
+    update()
+  })
+
+  // hot middleware
+  app.use(require('webpack-hot-middleware')(clientCompiler, { heartbeat: 5000 }))
+
+  // watch and update server renderer
+  const serverCompiler = webpack(serverConfig)
+  const mfs = new MFS()
+  serverCompiler.outputFileSystem = mfs
+  serverCompiler.watch({}, (err, stats) => {
+    if (err) throw err
+    stats = stats.toJson()
+    if (stats.errors.length) return
+
+    // read bundle generated by vue-ssr-webpack-plugin
+    bundle = JSON.parse(readFile(mfs, 'vue-ssr-server-bundle.json'))
+    update()
+  })
+
+  return readyPromise
+}
+```
+
+> 以上本地开发服务主要逻辑：
+>
+> 1. 使用客户端模块热替换插件 `webpack-hot-middleware/client`  和 本地开发服务插件 `webpack-dev-middleware` 启动一个本地开发服务，监听模板文件变化；
+> 2. 使用本地开发服务插件 `webpack-dev-middleware` 启动一个本地开发服务，监听模板文件变化服务端文件变化；
+> 3. 文件变化后，传入重新编译产物：客户端清单文件`vue-ssr-client-manifest.json` 和  `vue-ssr-server-bundle.json` 服务端构建文件，执行 `update` 方法， `update` 方法中执行回调（回调为 `server.js`  中传入，实际为重新渲染 HTML 页面方法 `createRenderer`）
 
 
 
 ## 注意事项
 
 * 服务端渲染时，将数据进行响应式的过程在服务器上是多余的，所以默认情况下禁用响应式数据。避免将「数据」转换为「响应式对象」的性能开销。
+
+
+
 * 所有的生命周期钩子函数中，只有 `beforeCreate` 和 `created` 会在服务器端渲染 (SSR) 过程中被调用。任何其他生命周期钩子函数中的代码（例如 `beforeMount` 或 `mounted`），只会在客户端执行。
   * 为什么只有`beforeCreate` 和 `created` 会在服务器端渲染 (SSR) 过程中被调用？
     *  服务端渲染过程中不需要响应式数据，没有动态更新过程；
     *  服务端渲染在VUE初始化时仅仅 new VUE 实例，不需要挂载（$mount）实例，因此不会执行 $mount 之后流程；
     *  客户端动态请求的数据/内容 需要在 mounted 函数中执行（如：动态获取用户数据） 
+    
+    
 * 对于仅浏览器可用的 API，通常方式是，在「纯客户端 (client-only)」的生命周期钩子函数 `beforeMounte`、`mounted` 中惰性访问 (lazily access) 它们。
+
+
+
 * 应该避免在 `beforeCreate` 和 `created` 生命周期时产生全局副作用的代码。
-  * 例如在其中使用 `setInterval` 设置 time，由于在 SSR 期间并不会调用销毁钩子函数，所以 timer 将永远保留下来
+  * 例如在其中使用 `setInterval` 设置 time，由于在 SSR 期间并不会调用销毁钩子函数，所以 timer 将永远保留下来。
+
+  
 * 服务端和浏览器通用代码不可接受特定平台的 API：
   * 如果通用代码中，直接使用了仅浏览器可用的全局变量 `window` 或 `document`，则会在 Node.js 中执行时抛出错误；
   * 通用代码使用 Node.js 平台特定 API，如`global`，则会在浏览器中执行报错；
+
+  
 * 大多数自定义指令直接操作 DOM，因此会在服务器端渲染 (SSR) 过程中导致错误；
+
+
+
 * 静态函数 `asyncData`无法访问 `this`，因为此函数会在组件实例化之前调用；
+
+
+
 * 服务端渲染时不需要响应式数据，默认禁用响应式数据，可以避免将「数据」转换为「响应式对象」的性能开销；
+
+
+
 * 模板中的`<!--vue-ssr-outlet-->` 注释 部分是 renderer 渲染 HTML 字符串插入的位置；
 
 ## 参考资料
