@@ -296,7 +296,7 @@ if ('https:' === location.protocol && navigator.serviceWorker) {
 >    * 比较进入和离开组件是否相同；
 >    * 过滤获取激活组件获取数据 asyncData  钩子；
 >    * 根据 asyncData 获取数据；
->    * 完成后进入路由页面。
+> 6. 进入路由页面，客户端渲染页面。
 
 
 
@@ -528,25 +528,15 @@ app.listen(port, () => {
 
 ## **编译流程**
 
-**服务端编译：**
+参考SSR 架构一节的架构图，**SSR 渲染流程如下**：
 
-* 通过 Wepack 构建 通用代码 `app.js` + 服务端渲染代码 `server-entry.js` + 渲染模板 = `Server Bundle`;
-
-* `Server Bundle` 运行在 `Node Server`。
-* 渲染时机： 
-  * 通过 express 服务渲染：浏览器输入 url 直接定向到某个页面，express 执行 `entry-server.js` 动态渲染 HTML；
-  * 静态化页面时，通过执行 `entry-client.js` 渲染出 HTML 页面。
-* 总体流程：
-  * 浏览器输入 `url -> express 服务接受请求 -> 服务端获取数据 -> 数据注入 store -> SSR Renderer 渲染HTML页面 -> 返回浏览器`
-
-**客户端编译：**
-
-* 通过 Wepack 构建 通用代码 `app.js` + 客户端端渲染代码 `client-entry.js` + 渲染模板 = `Client Bundle`;
-* 在浏览器中 `Client Bundle` + `Server Bundle`   =  HTML 静态页面。
-* 渲染时机： 通过页面中链接切换路由；
-* 总体流程：
-  * 首次渲染：由服务端渲染输出 HTML 页面发送到浏览器，客户端激活后通过路由导航的页面再次通过客户端渲染。（客户端激活：指的是 Vue 在浏览器端接管由服务端发送的静态 HTML，使其变为由 Vue 管理的动态 DOM 的过程。）
-  * 页面内点击链接 -> 客户端获取数据 -> 浏览器渲染页面。
+1. 使用 Webpack 构建服务端渲染和客户端渲染代码，生成 `Server Bundle ` 、 `Client Bundle` 和 HTML 页面；
+2. 启动一个 Node HTTP  服务，监听请求；
+3. 服务端 `Server Bundle `  运行在 Node HTTP  服务中；
+4. 首次请求，将客户端 `Client Bundle` 和 HTML 页面发送到客户端；
+5. 二次请求， Node HTTP  服务解析 URL 匹配组件，获取异步数据，注入到 Store 和 HTML 页面中的 `window.__INITIAL_STATE__` 变量中，渲染 HTML 页面；
+6. 将渲染的 HTML 页面返回客户端；
+7. 客户端接受到 HTML 页面后，进行客户端激活，客户端监听路由，异步获取数据，并解析 `window.__INITIAL_STATE__` 变量，再次渲染 HTML 页面；
 
 
 
@@ -561,9 +551,9 @@ app.listen(port, () => {
 >    - 在不同页面之间导航需要下载新的HTML，首页会从缓存中获取已渲染页面，为查找到则服务端重新渲染。
 > 5. 生成响应：服务器将渲染好的HTML页面作为响应的一部分，包括设置相应的HTTP状态码和头部信息。
 > 6. 响应发送：服务器将生成的响应发送回客户端，通过网络传输到浏览器。
-> 7. 客户端展示：浏览器接收到服务器发送的响应后，解析HTML并呈现页面内容。
+> 7. 客户端激活：浏览器接收到服务器发送的响应后，解析HTML并呈现页面内容。
 >    - 客户端所需要做的仅仅是html页面的展现和之后的DOM事件处理。
-> 8. 客户端交互：浏览器加载完初始页面后，可以执行JavaScript代码，处理用户交互、数据请求和动态更新等操作
+> 8. 客户端交互：浏览器加载完初始页面后，可以执行JavaScript代码，处理用户交互、数据请求和动态更新等操作。
 
 
 
@@ -571,7 +561,31 @@ app.listen(port, () => {
 
 ## **Webpack 构建**
 
-## **编译产物**
+以上渲染流程中，设计客户端和服务端代码的 Webpack 编译过程:
+
+**服务端 Webpack 编译：**
+
+* 通过 Wepack 构建 通用代码 `app.js` + 服务端渲染代码 `server-entry.js` + 渲染模板 = `Server Bundle`;
+
+* `Server Bundle` 运行在 `Node Server`。
+* 渲染时机： 
+  * 通过 express 服务渲染：浏览器输入 url 直接定向到某个页面，express 执行 `entry-server.js` 动态渲染 HTML；
+  * 静态化页面时，通过执行 `entry-client.js` 渲染出 HTML 页面。
+* 总体流程：
+  * 浏览器输入 `url -> express 服务接受请求 -> 服务端获取数据 -> 数据注入 store -> SSR Renderer 渲染HTML页面 -> 返回浏览器`
+
+**客户端  Webpack 编译：**
+
+* 通过 Wepack 构建 通用代码 `app.js` + 客户端端渲染代码 `client-entry.js` + 渲染模板 = `Client Bundle`;
+* 在浏览器中 `Client Bundle` + `Server Bundle`   =  HTML 静态页面。
+* 渲染时机： 通过页面中链接切换路由；
+* 总体流程：
+  * 首次渲染：由服务端渲染输出 HTML 页面发送到浏览器，客户端激活后通过路由导航的页面再次通过客户端渲染。（客户端激活：指的是 Vue 在浏览器端接管由服务端发送的静态 HTML，使其变为由 Vue 管理的动态 DOM 的过程。）
+  * 页面内点击链接 -> 客户端获取数据 -> 浏览器渲染页面。
+
+
+
+## **编译产物分析**
 
 
 
