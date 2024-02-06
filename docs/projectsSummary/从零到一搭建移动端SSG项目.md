@@ -138,11 +138,13 @@
 
 ## **构建流程**
 
+**构建总流程**
+
 
 
 ![img](../images/总体流程图.png)
 
-## **构建详细流程**
+**构建详细流程**
 
 
 
@@ -1004,17 +1006,405 @@ module.exports = function ({
 
 #### **`webpack.client.config.js`**
 
+该文件用于构建 client 文件的 webpack 配置代码，通过 `webpack-merge` 插件，将 webpack 基础配置项和 client 端 webpack 配置项合并：
 
+```js
+const webpack = require('webpack')
+const merge = require('webpack-merge')
+const chalk = require('chalk')
+const consola = require('consola')
+const ProgressBarPlugin = require('progress-bar-webpack-plugin')
+const VueSSRClientPlugin = require('vue-server-renderer/client-plugin')
+
+/**
+ * get client webpack config
+ * @param {String} lang 主要语言（第一语言），默认为 'my-en'
+ * @param {String} env 开发环境，测服/正式服，默认测服
+ * @param {Boolean} localDev 本地开发还是静态化打包。本地开发是为 true。默认为 false
+ */
+module.exports = function ({
+  lang = 'my-en',
+  env = 'development',
+  localDev = false,
+  staticSource = 's3'
+}) {
+  try {
+    // webpack 公共配置项
+    const baseConfig = require('./webpack.base.config')({ lang, env, localDev, staticSource })
+    // 合并 webpack 配置
+    return merge(baseConfig, {
+      entry: {
+        app: './src/entry-client.js'
+      },
+      resolve: {
+        alias: {
+          'create-api': './create-api-client.js'
+        }
+      },
+      plugins: [
+        // 进度条插件
+        new ProgressBarPlugin({
+          format: 'Build Client [:bar] ' + chalk.green.bold(':percent') + ' (:current/:total)',
+          clear: false,
+          complete: '█',
+          incomplete: '░'
+        }),
+        // 在 process 对象中定义不同的环境变量
+        new webpack.DefinePlugin({
+          'process.env': {
+            LANG: JSON.stringify(lang),
+            API_ENV: JSON.stringify(env),
+            VUE_ENV: '"client"'
+          }
+        }),
+        // vue 客户端渲染插件
+        new VueSSRClientPlugin()
+      ]
+    })
+  } catch (error) {
+    consola.error(error)
+  }
+}
+
+```
+
+使用该 webpack 构建的文件为 `./src/entry-client.js`。
 
 #### **`webpack.server.config.js`**
 
+该文件用于构建 server 文件的 webpack 配置代码，通过 `webpack-merge` 插件，将 webpack 基础配置项和 server 端 webpack 配置项合并：
 
+```js
+const webpack = require('webpack')
+const merge = require('webpack-merge')
+const nodeExternals = require('webpack-node-externals')
+const chalk = require('chalk')
+const consola = require('consola')
+const ProgressBarPlugin = require('progress-bar-webpack-plugin')
+const VueSSRServerPlugin = require('vue-server-renderer/server-plugin')
+
+/**
+ * get server webpack config
+ * @param {String} lang 主要语言（第一语言），默认为 'my-en'
+ * @param {String} env 开发环境，测服/正式服，默认测服
+ * @param {Boolean} localDev 本地开发还是静态化打包。本地开发是为 true。默认为 false
+ */
+module.exports = function ({
+  lang = 'my-en',
+  env = 'development',
+  localDev = false,
+  staticSource = 's3'
+}) {
+  try {
+    // webpack 公共配置项
+    const baseConfig = require('./webpack.base.config')({ lang, env, localDev, staticSource })
+    // 合并 webpack 配置
+    return merge(baseConfig, {
+      target: 'node', // 指定目标环境，这里设置为Node.js
+      devtool: '#source-map', //开发过程中查看源代码maps
+      entry: './src/entry-server.js',
+      output: {
+        filename: 'server-bundle.js',
+        libraryTarget: 'commonjs2'
+      },
+      resolve: {
+        alias: { // 路径别名
+          'create-api': './create-api-server.js'
+        }
+      },
+      //使用nodeExternals插件来外部化某些模块，避免在构建过程中包含不必要的依赖
+      externals: nodeExternals({
+        //whitelist 参数中被指定为忽略CSS文件的外部化，以及vant/lib模块的不外部化。
+        whitelist: [/\.css$/, /vant\/lib/]
+      }),
+      plugins: [
+        //添加一个进度条来显示构建过程中的进度。
+        new ProgressBarPlugin({
+          format: 'Build Server [:bar] ' + chalk.green.bold(':percent') + ' (:current/:total)',
+          clear: false,
+          complete: '█',
+          incomplete: '░'
+        }),
+        //定义一些环境变量，这些变量在编译时会被替换为实际的值。
+        new webpack.DefinePlugin({
+          'process.env': {
+            LANG: JSON.stringify(lang),
+            API_ENV: JSON.stringify(env),
+            VUE_ENV: '"server"'
+          }
+        }),
+        //使用VueSSRServerPlugin插件来处理Vue组件的SSR（服务器端渲染）。
+        new VueSSRServerPlugin(),
+        // 解决 mini-css-extract-plugin 静态化 render route 时 document is not defined 问题
+        new webpack.optimize.LimitChunkCountPlugin({
+          maxChunks: 1
+        })
+      ]
+    })
+  } catch (error) {
+    consola.error(error)
+  }
+}
+
+```
+
+使用该 webpack 构建的文件为 `./src/entry-server.js`。
+
+
+
+### **构建入口文件**
+
+构建文件是指，通过 webpack 进行构建的代码入口，根据以上 webpack 配置分析可知，在不同平台下构建不同的入口文件：
+
+* `Client`:  构建的文件为 `./src/entry-client.js`;
+* `Server`:  构建的文件为 `./src/entry-server.js`。
+
+关于入口文件详细解释，可以参考 [VueSSR原理分析 | Sewen 博客 (sewar-x.github.io)](https://sewar-x.github.io/vue2/VueSSR原理分析/)
+
+#### **`entry-client.js`**
+
+```js
+import Vue from 'vue'
+import 'es6-promise/auto'
+import { createApp } from '@/app'
+import './plugin/index.js' // 登录插件
+import lgs from '@/directives/lgs' // 埋点上报插件
+import link from '@/directives/link'
+import analysis from '@/directives/analysis' // 数据分析插件
+import scroll from '@/directives/scroll.js'
+import '@/common/firebaseInit.js'
+import '@/assets/font/arrow/iconfont.css'
+Vue.directive('lgs', lgs)
+Vue.directive('link', link)
+Vue.directive('analysis', analysis)
+Vue.directive('scroll', scroll)
+
+// 全局 mixin：当组件参数发生变化时，调用组件内的 asyncData，用于预获取路由页面客户端渲染数据 
+// 此函数会在组件实例化之前调用，所以它无法访问 this
+Vue.mixin({
+  beforeRouteUpdate(to, from, next) {
+    const { asyncData } = this.$options
+    if (asyncData) {
+      asyncData({
+        store: this.$store,
+        route: to
+      })
+        .then(next)
+        .catch(next)
+    } else {
+      next()
+    }
+  }
+})
+
+const { app, router, store } = createApp()
+
+// 当使用 template 时，context.state 将作为 window.__INITIAL_STATE__ 状态，自动嵌入到最终的 HTML 中
+if (window.__INITIAL_STATE__) {
+  store.replaceState(window.__INITIAL_STATE__)
+}
+
+// 等到路由器在钩子和异步组件之前解析了所有的异步
+router.onReady(() => {
+  // 添加路由钩子函数，用于处理 asyncData.
+  // 在初始路由 resolve 后执行，以便我们不会二次预取(double-fetch)已有的数据。
+  // 使用 `router.beforeResolve()`，以便确保所有异步组件都 resolve。
+  router.beforeResolve((to, from, next) => {
+    // 获取路由匹配的进入和离开的异步组件
+    const matched = router.getMatchedComponents(to)
+    const prevMatched = router.getMatchedComponents(from)
+    // 我们只关心非预渲染的组件， 所以我们对比它们，找出两个匹配列表的差异组件
+    let diffed = false
+    // 比较进入和离开组件是否相同
+    const activated = matched.filter((c, i) => {
+      return diffed || (diffed = prevMatched[i] !== c)
+    })
+    // 过滤获取激活组件异步获取数据钩子
+    const asyncDataHooks = activated.map((c) => c.asyncData).filter((_) => _)
+    // 不存在获取数据钩子，直接进入导航页面
+    if (!asyncDataHooks.length) {
+      return next()
+    }
+    //根据 asyncData 获取数据
+    Promise.all(asyncDataHooks.map((hook) => hook({ store, route: to })))
+      .then(() => {
+        next()
+      })
+      .catch(next)
+  })
+
+  //挂载 dom 
+  app.$mount('#app')
+})
+
+```
+
+> 客户端渲染主要逻辑：
+>
+> 1. 获取 app、router 和 store 实例；
+> 2. 获取 `window.__INITIAL_STATE__` 状态，注入到store 中；（`window.__INITIAL_STATE__` 是通过服务端渲染预先获取的数据，并注入在 HTML 页面中的 `window.__INITIAL_STATE__` 变量中）；
+> 3. 全局 mixin：在客户端激活后，当组件参数发生变化时，调用组件内的 asyncData 钩子，用于预获取路由页面客户端渲染的数据；
+> 4. 挂载 dom ；
+> 5. 监听路由变化，当路由变化时：
+>    - 获取路由匹配的进入和离开的异步组件；
+>    - 比较进入和离开组件是否相同；
+>    - 过滤获取激活组件获取数据 asyncData 钩子；
+>    - 根据 asyncData 获取数据；
+> 6. 进入路由页面，客户端渲染页面。
+
+
+
+#### **`entry-server.js`**
+
+```js
+import { createApp } from './app'
+
+const isDev = process.env.NODE_ENV !== 'production'
+
+// 暴露一个方法用于 bundleRenderer 调用。在服务端渲染时主要执行数据预取，定义应用状态。
+// 一旦数据完成同步，该方法将返回一个 Promise app 实例。
+export default context => {
+  return new Promise((resolve, reject) => {
+    const s = isDev && Date.now() // 记录请求时间
+    const { app, router, store } = createApp() // 每次请求获取新的 app 、 router、 store  对象
+    const { url } = context // 请求 url
+    const { fullPath } = router.resolve(url).route // 解析 url 获取路由路径
+
+    if (fullPath !== url) {
+      return reject({ url: fullPath })
+    }
+
+    // 设置服务器端 router 的位置
+    router.push(url)
+
+    // 等到 router 将可能的异步组件和钩子函数解析完
+    router.onReady(() => {
+      // 获取路由匹配的组件
+      const matchedComponents = router.getMatchedComponents()
+      // 没有匹配的组件，返回 404
+      if (!matchedComponents.length) {
+        return reject({ code: 404 })
+      }
+ 
+      // 调用路由匹配到的组件的 asyncData 钩子，asyncData 钩子分发 store action，当异步动作完成并 store 同步状态完成则返回 Promise。
+      Promise.all(matchedComponents.map(({ asyncData }) => asyncData && asyncData({
+        store,
+        route: router.currentRoute
+      }))).then(() => {
+        // 开发环境下控制台输出获取数据时间
+        isDev && console.log(`data pre-fetch: ${Date.now() - s}ms`)
+        // 在所有预取钩子(preFetch hook) resolve 后，我们的 store 现在已经填充入渲染应用程序所需的状态。
+        // 当我们将状态附加到上下文， 并且 `template` 选项用于 renderer 时，
+        // 状态将自动序列化为 `window.__INITIAL_STATE__`，并注入 HTML。
+        context.state = store.state
+        resolve(app)
+      }).catch(reject)
+    }, reject)
+  })
+}
+
+
+```
+
+> 服务端渲染过程主要执行逻辑：
+>
+> 1. 解析 url 获取路由路径；
+> 2. 获取路由匹配的组件；
+> 3. 调用路由匹配到的组件的 asyncData 钩子预先获取组件数据；
+> 4. 获取异步数据后，将数据填入 store，并自动序列化为 `window.__INITIAL_STATE__`，注入到 HTML。
 
 ## **生成路由表**
 
-- 静态路由表：根据路由文件 routes.js 中的 path 生成文件目录结构。
-- 动态路由表：根据 `/static-addition-config/routeHooks/routeName.js` 中的 `createDynamicRoutes` 函数生成路由表，该函数返回路由表数组。（动态路由必须有该文件，文件名称对应 routes.js 中的 name）
-- 动态路由表：根据 *`/static-addition-config/routeHooks/routeName.js`* *中的钩子 `createDynamicRoutes* 进行更改。输入：{ params: ... }，输出：路由表数组。
+### **路由表分类**
+
+在Vue.js中，路由是指根据不同的URL地址展示不同的内容或页面。
+
+根据 URL 地址是固定配置还是动态参数生成，将路由分为静态路由和动态路由：
+
+* 静态路由：指的是在路由配置中，提前定义好所有的路由规则，包括路径和对应的组件。
+  * 静态路由规则在应用**启动时就已经确定**，不会随着应用的运行而改变；
+  * 例如，在Vue Router中，可以通过定义`routes`数组来配置静态路由，每个路由对象都包含`path`和`component`属性，分别表示路径和对应的组件。
+* 动态路由：指在应用运行过程中，根据用户的操作或其他条件动态地添加、删除或修改路由规则。
+  * 动态路由更加灵活，可以根据不同的需求加载不同的路由，实现不同的页面渲染；
+  * 例如，在Vue中，可以使用路由参数用户 id 获取不同用户信息 `user/id` ; 
+
+### **路由表生成规则**
+
+#### **静态路由表**
+
+根据路由文件 `routes.js` 中的 `path` 生成文件目录结构。
+
+- 如某活动页面路由表配置：
+
+  ```js
+  // npm run generate:test -- --target=Campaign --lang=my-en --env=test --webpack=0
+  // npm run generate:test -- --target=Wheel --lang=my-en --env=test --webpack=0
+  const activityLibrary = function (route) {
+    return [
+      {
+        path: `/activity/xxx1`,
+        name: 'Campaign',
+        component: () => import(/* webpackChunkName: "Campaign" */'@/views/activity/campaign')
+      },
+      {
+        path: `/activity/xxx2`,
+        name: 'Wheel',
+        component: () => import(/* webpackChunkName: "Wheel" */'@/views/activity/wheel')
+      }
+  
+    ]
+  }
+  export default activityLibrary
+  ```
+
+  
+
+#### **动态路由表**
+
+根据 `/static-addition-config/routeHooks/routeName.js` 中的 `createDynamicRoutes` 函数生成路由表，该函数返回路由表数组。（动态路由必须有该文件，文件名称对应 routes.js 中的 name）
+
+- 输入：{ params: ... }
+- 输出：路由表数组。
+
+如某新闻资讯页面的动态路由，路由为 `/news/新闻id` ，通过新闻 id 动态区分资源内容，因此在静态化所有新闻资讯页面的路由时候，需要预先获取所有新闻资讯的 id 和新闻资讯内容，将内容传入组件中进行静态化。
+
+创建新闻资源的方法如下：
+
+```js
+  /**
+       * 创建动态路由表
+       * @param {*} options
+       */
+  async createDynamicRoutes(options = {}) {
+    try {
+      const { params = '', host = '', lang = '', secondLang = '' } = options
+      const languageCode = lang
+      const countryCode = lang.split('-')[0]
+      const isGenerateSingleRoutes = params !== 'all' && params !== null && params !== ''
+      if (isGenerateSingleRoutes) { // 单个情况，从输入的参数无法直接得出资讯title，需要先实行一次请求详情
+        const detailRes = await getNewsDetail({ host, countryCode, languageCode, id: params })
+        const singleParams = {
+          title: detailRes.data.data.title,
+          id: params
+        }
+        return [
+          await this.createSingleNewsRoute({
+            languageCode,
+            secondLang,
+            params: singleParams
+          })
+        ]
+      } else {
+        return await this.createAllNewsRoutes({ host, languageCode, secondLang, countryCode })
+      }
+    } catch (error) {
+      console.log('error :>> ', error)
+      return Promise.reject(error)
+    }
+  },
+```
+
+
 
 ## **生成 vue-server-render 对象**
 
