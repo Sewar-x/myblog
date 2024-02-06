@@ -1372,66 +1372,580 @@ export default context => {
 
 ```js
   /**
-       * 创建动态路由表
-       * @param {*} options
-       */
+   * 创建动态路由表
+   * @param {*} options
+   */
   async createDynamicRoutes(options = {}) {
     try {
+      // 获取命令行参数
       const { params = '', host = '', lang = '', secondLang = '' } = options
       const languageCode = lang
       const countryCode = lang.split('-')[0]
       const isGenerateSingleRoutes = params !== 'all' && params !== null && params !== ''
-      if (isGenerateSingleRoutes) { // 单个情况，从输入的参数无法直接得出资讯title，需要先实行一次请求详情
+      if (isGenerateSingleRoutes) { // 单个路由情况，从输入的参数无法直接得出资讯title，需要先实行一次请求详情
+        //  根据新闻资讯 id 获取资讯详细内容
         const detailRes = await getNewsDetail({ host, countryCode, languageCode, id: params })
         const singleParams = {
           title: detailRes.data.data.title,
           id: params
         }
         return [
-          await this.createSingleNewsRoute({
+          // 创建单个路由
+          await createSingleNewsRoute({
             languageCode,
             secondLang,
             params: singleParams
           })
         ]
       } else {
-        return await this.createAllNewsRoutes({ host, languageCode, secondLang, countryCode })
+        // 创建所有新闻页面路由
+        return await createAllNewsRoutes({ host, languageCode, secondLang, countryCode })
       }
     } catch (error) {
       console.log('error :>> ', error)
       return Promise.reject(error)
     }
-  },
+  }
+
+  /**
+   * 创建单个路由
+   * @param {*} params carModelCode,brandCode
+   */
+  async createSingleNewsRoute({ languageCode = '', secondLang = '', params = { title: '', id: '' } }) {
+    const useLang = (secondLang && secondLang !== '') ? secondLang : languageCode
+    return url[useLang].news(params.title, params.id)
+  }
+
+  /**
+   * 创建全部路由
+   * @param {*} host
+   */
+  async createAllNewsRoutes({ host = '', languageCode = '', secondLang = '', countryCode }) {
+    try {
+      const listParams = {
+        host,
+        countryCode,
+        languageCode,
+        secondLang: secondLang,
+        pageNo: 1,
+        pageSize: 99999,
+        sortType: 1
+      }
+      // 获取新闻资讯列表
+      const {
+        list: newsList = []
+      } = await getNewsList(listParams).then(res => handleNewsList(res.data))
+      if (!newsList.length) {
+        return []
+      }
+      const routeList = []
+      // 遍历新闻资讯列表，获取创建新闻资讯列表路由
+      for (let i = 0; i < newsList.length; i += 1) {
+        const { title = '', id = '' } = newsList[i]
+        const route = await this.createSingleNewsRoute({
+          languageCode,
+          secondLang,
+          params: {
+            title,
+            id
+          }
+        })
+        routeList.push(route)
+      }
+      // 返回所有路由列表
+      return routeList
+    } catch (error) {
+      return Promise.reject(error)
+    }
+  }
 ```
 
 
 
-## **生成 vue-server-render 对象**
 
-* `vue-server-render`  对象` serverRender ` (`static-cli/generator/cli-server`)
-* 作用： 用于生成 html
-* 获取打包生成的 `vue-ssr-server-bundle.json `   和  `vue-ssr-client-manifest.json` 和模板文件
-* 通过 *`dist-ssr/vue-ssr-server-bundle.json`和*`dist-ssr/vue-ssr-client-manifest.json `生成 `serverRender` 对象，同时设置 preload、prefetch 等配置。
-* 注意： 服务端代码静态化时执行，客户端代码浏览器中执行。静态化生成 HTML 文件时，执行的是服务端入口代码 `entry-server.js` 打包结果；客户端入口代码 `entry-client.js` 被打包后的文件 `app.js` 不会执行，而是在浏览器请求到 html  doc 文件后加载后浏览器执行。
 
-## **生成 HTML**
+### **生成路由表**
 
-* 遍历路由表，通过 serverRender 对象生成 html 数据。
+通过以上方法获取到静态路由和动态路由之后，下一步生成路由。
+
+生成路由脚本在 `./static-cli/generator/cli-generator.js` 中：
+
+```js
+// support ECMAScript module loader
+require = require('esm')(module/*, options */)
+
+const Server = require('./cli-server')
+const fse = require('fs-extra')
+const config = require('../common/publishConfig')
+const consola = require('consola')
+const ora = require('ora')
+const path = require('path')
+const {
+  resolve,
+  readFileData,
+  writeFileData,
+  copyData
+} = require('../common/util')
+const {
+  _ROUTES_NULL, // 路由表为空
+  _STATIC_ROUTE, // 静态路由
+  _DYNAMIC_ROUTE // 动态路由
+} = require('../common/routeState')
+
+class Generator {
+  /**
+   * @param {String} target 静态化目标路由名称，对应 src/router/routes.js 中的 name
+   * @param {String} params 参数（构建动态路由或者处理页面发布路径用）
+   * @param {String} lang 默认 'my-en'
+   * @param {String} env 默认 'production', 'test' or 'production'
+   * @param {Boolean} webpack 是否执行 webpack 流程
+   * @param {String} params
+   * @param {*} groupCount 静态化页面打包每次分组数量
+   */
+  constructor({ target = '', params = null, lang = 'my-en', env = 'production', host = '', webpack = true, groupCount = 10, secondLang = '' }) {
+    this._generator = null // Generator  实例
+
+    this.options = { ...arguments[0] }
+    this.routerName = target // 静态化目标路由名称，对应 src/router/routes.js 中的 name
+    this.params = params // 参数（构建动态路由或者处理页面发布路径用）
+    this.lang = lang // 国家语言标识
+    this.secondLang = secondLang // 国家第二语言标识
+    this.env = env // 构建环境
+    this.host = host // 发布服务地址
+    this.webpack = webpack // 是否需要 webpack 构建
+    this.config = config[env] // 发布路径配置等
+    this.groupCount = groupCount // 并发构建数量
+    this.routeList = require(resolve('../../src/router/routes'))({ lang }) // 所有的路由表
+    this.renderRouteList = [] // 当前需要进行 render 的路由表
+  }
+  // 执行生成
+  static run(options = {}) {
+    return Generator.from(options).run()
+  }
+  // 生成 Generator 单例
+  static from(options = {}) {
+    if (this._generator instanceof Generator) {
+      return this._generator
+    }
+    this._generator = new Generator(options)
+    return this._generator
+  }
+  // 执行静态化生成器
+  async run() {
+    return new Promise(async (resolve, reject) => {
+      try {
+        switch (this.options.routeState) {
+          case _ROUTES_NULL:  // 路由表为空
+            return Promise.reject('Route List is Null!')
+          case _STATIC_ROUTE: // 静态路由
+            // 获取当前需要进行 render 静态路由表
+            this.routeList = await this.getStaticRoutesMap()
+            break
+          case _DYNAMIC_ROUTE: // 动态路由
+            // 获取当前需要进行 render 动态路由表
+            this.routeList = await this.getDynamicRoutesMap()
+            break
+          default:
+            break
+        }
+        // 路由表长度
+        const routeLen = this.routeList.length
+        if (routeLen) {
+          consola.info(`>>>> 总共 ${routeLen} 个静态页面! `)
+          const server = await new Server(this.options) // 构建服务对象
+          const generatePerCount = this.groupCount // 并发构建数量
+          for (let i = 0; i < routeLen; i += generatePerCount) {
+            const curRouteGroup = this.routeList.slice(i, i + generatePerCount)
+            // 生成路由
+            await this.generateGroupRoutes(curRouteGroup, server)
+            if (i + generatePerCount >= routeLen) {
+              consola.success(`>>>> 静态化页面构建进度: ${routeLen} / ${routeLen}`)
+              consola.success(`>>>> 所有静态化页面构建已完成!`)
+              return resolve(true)
+            } else {
+              consola.success(`>>>> 静态化页面构建进度: ${i + generatePerCount} / ${routeLen}`)
+            }
+          }
+        }
+      } catch (error) {
+        return reject(error)
+      }
+    })
+  }
+  // 获取当前需要进行 render 静态路由表
+  async getStaticRoutesMap() {
+    if (!this.options.target) { // 命令行参数没有生命需要进行 render 的路由 name
+      return Promise.reject('>>>> target is null! 【目标路由名不能为空】')
+    }
+    const routeList = this.routeList.reduce((prev, cur) => {
+      const isTargetRoute = cur.name === this.options.target // 是否命中目标路由
+      if (isTargetRoute) {
+        prev = prev.concat(cur)
+      }
+      return prev
+    }, [])
+    return routeList
+  }
+  // 获取当前需要进行 render 动态路由表
+  async getDynamicRoutesMap() {
+    return new Promise(async (resolve, reject) => {
+      try {
+        /** ********** 生成动态路由表，非框架逻辑 start ***********/
+        // 调用 createDynamicRoutes 钩子，createDynamicRoutes 钩子通常返回动态路由列表
+        let routesList = await this.callRouteHook(this.routerName, 'createDynamicRoutes', this.options)
+        /** ********** 生成动态路由表，非框架逻辑 end ***********/
+
+        // 转化数据接口 [] => [{}]
+        routesList = routesList.map(item => {
+          return {
+            path: item,
+            routeState: _DYNAMIC_ROUTE
+          }
+        })
+        return resolve(routesList)
+      } catch (error) {
+        return reject(error)
+      }
+    })
+  }
+  // 生成路由表组
+  async generateGroupRoutes(routeList = [], server = null) {
+    return Promise.all(routeList.map(item => {
+      return this.generateSingleRoute({
+        route: item,
+        payload: {},
+        errors: []
+      }, server)
+    })).catch(err => {
+      consola.error(err)
+      return Promise.resolve(err)
+    })
+  }
+  // 生成单个路由
+  async generateSingleRoute({ route, payload = {}, errors = [] }, server = null) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        if (!server) { return reject('Render Object null!') }
+        // render to html, 获取目标路由 html
+        let htmlData = await server.renderHtml({ url: route.path })
+
+        /** ********** 非框架层面处理函数调用 start **************/
+        htmlData = await this.callRouteHook(this.routerName, 'createHtml', { html: htmlData, routeName: this.options.target, routePath: route.path, ...this.options })
+        const targetPagePath = await this.callRouteHook(this.routerName, 'createPublishPath', { route: route.path, params: this.params, ...this.options })
+        /** ********** 非框架层面处理函数调用 end **************/
+
+        let routePublishPath // html 目录文件（路由发布路径）
+        const lang = this.secondLang || this.lang
+        const country = lang.split('-')[0]
+        if (this.env === 'production') {
+          // 为了打包到旧项目 html 目录的临时处理
+          const langMapPrefixPath = {
+            'my-en': '',
+            'id-id': '/id',
+            'th-th': '/th',
+            'my-zh': '/my-zh',
+            'my-my': '/my-my',
+            'ph-en': '/ph'
+          }
+          routePublishPath = path.join(this.config.publicPath, `${langMapPrefixPath[lang]}${targetPagePath}`)
+        } else {
+          routePublishPath = path.join(__dirname, '../../', this.config.publicPath, country, targetPagePath) // html 目录文件（路由发布路径）
+        }
+        fse.ensureDirSync(routePublishPath)
+        await writeFileData(path.join(routePublishPath, 'index.html'), htmlData)
+        // ora(`>>>> ${targetPagePath} 静态化页面构建完成!`).succeed()
+        consola.success(`>>>> ${targetPagePath} 静态化页面构建完成!`)
+        return resolve(true)
+      } catch (error) {
+        consola.error(error)
+        return resolve(error)
+      }
+    })
+  }
+  // 调用路由钩子
+  async callRouteHook(routeName = '', hookName = '', payload = {}) {
+    try {
+      // 获取路由钩子路径，默认存放在 ../../static-addition-config/routeHooks/ 目录下，通过路由名称定义文件名称，文件对外暴露 hookName 方法
+      const hookPath = `../../static-addition-config/routeHooks/${routeName}.js`
+      if (fse.existsSync(resolve(hookPath))) { //判断是否存在文件，存在则调用路由钩子
+        const lifeCycle = require(`../../static-addition-config/routeHooks/${routeName}.js`)
+        const hookObj = lifeCycle.default || lifeCycle
+        // 获取文件指定钩子的函数名称
+        // eslint-disable-next-line no-prototype-builtins
+        if (hookObj.hasOwnProperty(hookName)) {
+          switch (hookName) {
+            case 'createDynamicRoutes': // 调用 createDynamicRoutes 钩子
+              return hookObj.createDynamicRoutes(payload) || []
+            case 'createHtml': // 调用 createHtml 钩子
+              return hookObj.createHtml(payload) || payload.html
+            case 'createPublishPath': // 调用 createPublishPath 钩子
+              return hookObj.createPublishPath(payload) || payload.route
+            default:
+              break
+          }
+        }
+      }
+      // 其他情况返回原有数据
+      switch (hookName) {
+        case 'createDynamicRoutes':
+          return []
+        case 'createHtml':
+          return payload.html
+        case 'createPublishPath':
+          return payload.route
+        default:
+      }
+    } catch (error) {
+      return Promise.reject(error)
+    }
+  }
+}
+
+module.exports = Generator
+
+```
+
+> 以上代码主要逻辑为：
+>
+> 1. 定义 Generator 对象，用于生成路由表；
+> 2. 调用 `Generator.run`  方法时，执行路由静态化生成器：
+> 3. 匹配路由状态，获取当前需要进行 render 路由表；
+>    * 动态路由中调用自定义路由方法钩子函数 `createDynamicRoutes` 创建路由表；
+>    * 静态路由直接根据路由配置表获取路由；
+> 4. 路由表分组，生成页面数据；
+> 5. 对路由组切片，调用生成单个路由方法 `generateSingleRoute`；
+> 6. 生成单个路由方法时，创建 `Server ` 对象：
+>    * 调用自定义 `createHtml` 钩子，生成目标路由的 THML 字符串。
+>    * 调用自定义 `createPublishPath` 钩子，生成目标路由的 发布路径。
+>    * 获取路由钩子路径，默认存放在 `./static-addition-config/routeHooks/` 目录下，通过路由名称定义文件名称，文件对外暴露 `hookName `方法。
+> 7. 创建 HTML 文件，将 THML 字符串写入并将文件写入到发布路径。
+
+
+
+## **渲染 HTML 页面**
+
+以上生成路由表时，根据路由表创建 `Server ` 对象，用于生成 HTML 字符串。
+
+### **生成 vue-server-render 对象**
+
+* `vue-server-render`  对象 ` serverRender ` (`static-cli/generator/cli-server`)
+* 作用： 用于生成 HTML 字符串。
+* 流程：
+  * 获取打包生成的 `vue-ssr-server-bundle.json `   和  `vue-ssr-client-manifest.json` 和模板文件；
+  * 通过 `dist-ssr/vue-ssr-server-bundle.json `和 `dist-ssr/vue-ssr-client-manifest.json `生成 `serverRender` 对象，同时设置 `preload`、`prefetch` 等配置。
+
+* 注意： 服务端代码静态化时执行，客户端代码浏览器中执行。
+  * 静态化生成 HTML 文件时，执行的是服务端入口代码 `entry-server.js` 打包结果；客户端入口代码 `entry-client.js` 被打包后的文件 `app.js` 不会执行，而是在浏览器请求到 html  doc 文件后加载后浏览器执行。
+
+
+ `Server ` 对象实际为 `vue-server-render` 对象，位于 `static-cli/generator/cli-server` 目录下:
+
+```js
+const { resolve } = require('../common/util')
+const fse = require('fs-extra')
+const { createBundleRenderer } = require('vue-server-renderer')
+const consola = require('consola')
+const getDefaultTDK = require('../common/getDefaultTDK')
+
+class Server {
+  /**
+   *
+   * @param {String} lang 语言
+   */
+  constructor({ lang = 'my-en', env = 'production', secondLang = '' }) {
+    // this.app = express() 
+    this._server = null // node 服务器对象
+    this.lang = lang // 国家语言标识
+    this.serverBundle = null // 使用 webpack 构建 entry-server 获取的服务端资源
+    this.clientManifest = null // 使用 webpack 构建 entry-client 获取的客户端清单资源
+    this.renderer = null // 渲染器对象
+    this.secondLang = secondLang // 国家语言第二语言参数
+    this.isProd = env === 'production' // 是否为生产环境
+    this._init() // 开始初始化
+  }
+
+  async _init() {
+    try {
+      // 使用 webpack 构建 entry-server 获取的服务端资源 vue-ssr-server-bundle.json
+      this.serverBundle = require(resolve(`../../dist-static/${this.lang}/vue-ssr-server-bundle.json`))
+      // 使用 webpack 构建 entry-client 获取的客户端清单资源 vue-ssr-client-manifest.json
+      this.clientManifest = require(resolve(`../../dist-static/${this.lang}/vue-ssr-client-manifest.json`))
+      // HTML 模板资源
+      const templatePath = resolve('../../src/index.template.html')
+      // 创建渲染器实例
+      this.renderer = this._createRenderer(this.serverBundle, {
+        template: fse.readFileSync(templatePath, 'utf-8'),
+        clientManifest: this.clientManifest,
+        shouldPreload: (file, type) => {
+          // https://fetch.spec.whatwg.org/#concept-request-destination
+          return false
+        },
+        shouldPrefetch: (file, type) => {
+          return false
+        },
+        runInNewContext: 'once'
+      })
+    } catch (error) {
+      consola.error(error)
+    }
+  }
+  // 渲染组件成 HTML 字符串
+  renderHtml({ url = '' }) {
+    return new Promise((resolve, reject) => {
+      if (!url) { // 没有路由 url 时报错
+        return reject('Not router render url!')
+      }
+      // 获取渲染上下文
+      const context = {
+        ...getDefaultTDK(this.lang, this.isProd), // 获取 TDK, SEO 三大关键： title、discription、 key
+        lang: this.lang.split('-')[1],
+        secondLang: this.secondLang,
+        url
+      }
+      // 调用渲染器对象 renderToString 方法将组件渲染成 HTML 字符串
+      this.renderer.renderToString(context, (err, html) => {
+        if (err) {
+          return reject(err)
+        }
+        // 返回 HTML 字符串
+        return resolve(html)
+      })
+    })
+  }
+  // 创建渲染器对象
+  _createRenderer(bundle, options) {
+    return createBundleRenderer(bundle, Object.assign(options, {}))
+  }
+}
+
+module.exports = Server
+
+```
+
+> 以上 `Server` 对象主要逻辑:
+>
+> 1. 初始化参数；
+> 2. 获取使用 webpack 构建 `entry-server.js `获取的服务端资源 `vue-ssr-server-bundle.json` 文件；
+> 3. 获取使用 webpack 构建 `entry-client.js` 获取的客户端清单资源 ` vue-ssr-client-manifest.json` 文件；
+> 4. 获取HTML 模板；
+> 5. 创建渲染器实例；
+> 6. 获取渲染上下文，调用渲染器对象 `renderToString` 方法将组件渲染成 HTML 字符串；
+> 7.  返回 HTML 字符串;
+
+
 
 ## **HTML 处理**
 
-* 处理任务如：amp，资讯页面内容等。通过 *`/static-addition-config/routeHooks/routeName.js`* 中的*钩子 createHtml* 进行处理，该函数输入 { html: ... } ，输出 html 数据。（文件名称对应 routes.js 中的 name）
+* **HTML 处理时机**：
+  * 在以上生成路由表过程中，生成单个路由方法时，调用自定义 `createHtml` 钩子中，在该钩子中开发者自定义对 HTML 进行特殊处理。
+
+* **` createHtml `钩子**：
+  * 钩子` createHtml ` 位于`/static-addition-config/routeHooks/routeName.js` 目录中;
+  * 输入` { html: ... } `；
+  * 输出 `html` 字符串数据
+  * 文件名称对应 `routes.js` 中的 name
+
+
+
+**` createHtml `钩子使用示例：**
+
+假如在生成 HTML 页面时，同时需要生成 APM 页面，则将 HTML 转化为 APM 时需要删除 `script` 外链和脚本并添加默认配置；
+
+因此在生成  HTML 页面时，可以在 `/static-addition-config/routeHooks/routeName.js` 目录中 自定义 `createHtml` 钩子，钩子如下：
+
+```js
+// 钩子函数
+createHtml({ html = '', routeName = '', routePath }) {
+   return convertHtmlToAMP({ html, routeName, ampCustomEleScripts: NewsAmp, routePath })
+}
+
+/**
+ * 将 html 转化为 amp（删除 script 外链和脚本，添加默认配置）
+ * @param {*} html
+ */
+const convertHtmlToAMP = async function ({ html = '', routeName = '', removeScriptLink = true, inlineCss = false, ampCustomEleScripts = [], routePath, hostType = 'main' }) {
+  // console.trace('-----convertHtmlToAMP', routeName, isProd, inlineCss)
+  if (!html) {
+    return ''
+  }
+  const allCss = getAllCss(html, inlineCss) || ''
+
+  // 【注意，在计算散列时包括前导和后导空白，并且必须与内联脚本中使用的空白精确匹配。】
+  // https://www.npmjs.com/package/@ampproject/toolbox-script-csp
+  // 生成脚本 meta hash 值
+  let { metaHash = '', html: newHtml = '' } = await generateMetaHash(routeName, html)
+  const genHtmlByRoute = replaceAmpHtmlByRoute[routeName]
+  if (genHtmlByRoute) {
+    newHtml = genHtmlByRoute(newHtml)
+  }
+  newHtml = newHtml
+    .replace(/<(html[\s\S]+?)>/g, ($1, $2) => `<${$2} amp>`) // 添加 amp 标志
+    .replace(/<style[\s\S]+?<\/style>/g, '') // 删除 style 标签
+    .replace(/<link\s*rel="stylesheet"\s*href="([\s\S]*?)">/g, '') // 删除 link css 标签
+    .replace(/<link\s+?rel="preload"[\s\S]+?>/g, '') // 删除 preload
+    .replace(/<link\s+?rel="prefetch"[\s\S]+?>/g, '') // 删除 prefetch
+    .replace(/amp\-template/g, 'template')
+    .replace(
+      /<\/head>/, // 添加 amp 所需内容
+      `${ampCustomEleScripts.reduce((a, s) => a + s, '')}<script async src="https://cdn.ampproject.org/v0.js"></script>
+    <meta name="amp-script-src" content="${metaHash}">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style>
+    <noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <style amp-custom type="text/css">${allCss}</style></head>`
+    )
+    .replace(/\!important/g, '') // 删除 !important
+  if (removeScriptLink) { // 只有生产环境才执行的逻辑
+    newHtml = newHtml
+      .replace(/<script\s+?src[\s\S]*?<\/script>/g, '') // 开发环境不处理外链，生产环境删除外链
+      // .replace(/<script>window\.__INITIAL_STATE__[\s\S]+?<\/script>/, '') // 删除window.__INITIAL_STATE__的内容
+      .replace(/\<img(.*?)src\=\"(.*?)\"(.*?)\>/g, ($0, $1, $2, $3) => { // 把img标签转为amp-img
+        if ($0.match(/layout/g)) {
+          return `<amp-img${$1}src="${$2}"${$3}></amp-img>`
+        }
+        return `<amp-img${$1}src="${$2}" layout="fixed" ${$3}></amp-img>`// 如果img标签没有指定layout的话主动加上一个layout
+      })
+      .replace(/<script>[\s\S]*?<\/script>/g, '') // 删除内嵌 script，包括window.__INITIAL_STATE__的内容
+    // await ampValidator(newHtml, routePath, hostType)
+  }
+  return newHtml
+}
+```
+
+
 
 ## **页面发布路径处理**
 
-* 处理页面发布路径，默认根据路由生成页面发布目录结构。
-* 如果需要更改，在 *`/static-addition-config/routeHooks/routeName.js`*` 中的钩子 createPublishPath 进行处理`，该函数输入{ route: ... } ，输出新路由 url。（文件名称对应 routes.js 中的 name）
-* 如： 资讯页面路由`"/news/how-is-this-possible-proton-x50-is-cheaper-than-taxfree-honda-hrv-7508"`，需要将发布路径替换为` "/news/7508"`
-* 将文件写入到发布路径
+* **页面发布路径处理时机**：
+  * 在以上生成路由表过程中，生成单个路由方法时，调用自定义 `createPublishPath` 钩子中，在该钩子中开发者自定义对 发布路径进行特殊处理。
 
-### **~~AMP 数据处理~~**
+* **` createPublishPath `钩子**：
+  * 钩子` createHtml ` 位于 `/static-addition-config/routeHooks/routeName.js` 目录中;
+  * 输入` { route: ... } `；
+  * 输出新路由 url；
+  * 文件名称对应 `routes.js` 中的 name；
+  * 处理页面发布路径，默认根据路由生成页面发布目录结构。
 
-~~命令行参数`--amp=true`时执行，通过 `/static-addition-config/amp/routeName.js` 中的函数进行处理，该函数输入 html 数据，输出 html 数据。（文件名称对应 routes.js 中的 name）~~
+
+
+**` createPublishPath `钩子使用示例：**
+
+如： 资讯页面路由`"/news/how-is-this-possible-proton-x50-is-cheaper-than-taxfree-honda-hrv-7508"`，需要将发布路径替换为` "/news/7508"`并将文件写入到发布路径。
+
+```js
+  async createPublishPath({ route }) {
+    // route: "/news/how-is-this-possible-proton-x50-is-cheaper-than-taxfree-honda-hrv-7508"
+    const getNewRouteRes = route.match(/(\/[^\/]*\/).*-(\d+)$/)
+    if (getNewRouteRes && getNewRouteRes[1] && getNewRouteRes[2]) {
+      // newRoute: "/news/7508"
+      return `${getNewRouteRes[1]}${getNewRouteRes[2]}`
+    }
+    return route
+  }
+```
+
+
+
+
 
 ### **上传静态资源到 s3**
 
