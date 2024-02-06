@@ -1,6 +1,6 @@
 # 从零到一搭建SSR项目
 
-## **SSR是什么？**
+## **SSR是什么**？
 
 Vue.js 是一个用于构建客户端应用的框架。
 
@@ -538,7 +538,7 @@ app.listen(port, () => {
 
 
 
-![](D:\MyData\Blog\docs\flow-graph\ssr过程.png)
+![](../images/ssr过程.png)
 
 > 渲染流程：服务端渲染的主要流程是在服务器端生成完整的HTML页面，并将其发送给浏览器展示。
 >
