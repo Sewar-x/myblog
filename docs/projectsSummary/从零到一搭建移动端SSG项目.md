@@ -33,6 +33,10 @@
 
 ## **项目特性**
 
+* **注重 SEO**: 项目偏向内容类站点，主要通过 Google、Biying 等国外搜索引擎增加曝光度。
+* **静态展示网站**：站点偏向于媒体资讯类静态内容的站点。
+* **国际化**：站点面向多个国家，不同国家站点有不同的皮肤风格设计。
+
 
 
 ## **技术栈**
@@ -124,15 +128,21 @@
 |      eslint-config-standard       | `^14.1.1` |             ESLint的配置，遵循标准风格             |      |
 |        eslint-plugin-html         | `^6.0.2`  |                    ESLint的插件                    |      |
 
-## **Webpack 构建**
 
-### **构建流程**
+
+## **项目目录**
+
+![image-20240206144049713](../images/SSG项目目录.png)
+
+
+
+## **构建流程**
 
 
 
 ![img](../images/总体流程图.png)
 
-### **构建详细流程**
+## **构建详细流程**
 
 
 
@@ -140,12 +150,23 @@
 
 
 
-**总体流程:**
+**流程**
 
-1. 构建 client 流程： 获取 `client webpack` 配置  -> webpack 构建 -> 输出 `app.js/app.css/chunk` 文件/客户端清单文件(vue-ssr-client-manifest.json)；
-2. 构建 server 流程： 获取 `server webpack` 配置  -> webpack 构建 -> 输出服务端清单文件(`vue-ssr-server-bundle.json`)；
+1. 获取命令行参数，解析参数；
+2. 是否通过 webpack 构建？
+   * 是，构建webpack，生成资源目录；
+   * 否，进入静态路由判断
+3. 是否为静态页面路由？
+   * 是，生成静态路由表；
+   * 否，生成动态路由表；
+4. 生成 `vue-server-render` 对象；
+5. 生成 HTML ;
+6. 上传静态资源到 S3；
+7. HTML 处理，如：AMP 处理、资源页面内容等逻辑处理；
+8. 页面发布目录路径处理；
+9. 写入文件；
 
-### **构建命令**
+## **构建命令**
 
 | 命令                  | 说明              | api                                                    | S3                                                     |
 | --------------------- | ----------------- | ------------------------------------------------------ | ------------------------------------------------------ |
@@ -156,76 +177,165 @@
 | npm run generate:test | 静态化生成 html   | 测服                                                   | 测服(test-cdn-car-static)，自动上传                    |
 | npm run generate      | 静态化生成 html   | 正服                                                   | 正服(cdn-car-static)，手动上传                         |
 
-#### **参数格式**
+所有构建命令在 `package.json` 文件中的 `script` 字段：
+
+```js
+  "scripts": {
+    "dev": "node server.js --localDev=true",
+    "build:client:test": "node ./build/webpack.client.build.js --env=development",
+    "build:server:test": "node ./build/webpack.server.build.js --env=development",
+    "build:client": "node ./build/webpack.client.build.js --env=production",
+    "build:server": "node ./build/webpack.server.build.js --env=production",
+    "lint": "eslint --ext .js --ext .vue src/ build/ public/ static-cli/",
+    "lint-fix": "eslint --fix --ext .js --ext .vue src/ build/ public/ static-cli/ script-amp/",
+    "static-server": "node static-server.js",
+    "generate:test": "cross-env node -r esm generate.js --env=test",
+    "generate": "cross-env node -r esm generate.js --env=production",
+    "deploy-s3": "node deployS3.js",
+    "build-ssr:test": "node ./build/webpack.ssr.build.js --env=development --staticSource=dist",
+    "build-ssr": "node ./build/webpack.ssr.build.js --env=production --staticSource=dist",
+    "deploy-not-CDN": "node notCDNPublic/deploy.js"
+  }
+```
+
+通过执行构建命令: `npm run generate  --target=routeName --lang=国家语言标识 --env=test --webpack=true  --seconedLang=一国多语言标识 --params=** ` 后，将执行项目中 `./generate.js` 脚本：
+
+```js
+#!/usr/bin/env node
+
+/**
+ * #!/usr/bin/env node 为系统环境头，表示使用当前环境 node 的命令行脚本
+ * 运行命令
+ * 静态路由: node -r esm generate.js --target=index --lang=my-en --env=test --webpack=false
+ * 动态路由: node -r esm generate.js --target=newsInfo --params=1234 --lang=my-en  --env=test --webpack=true
+ * esm 文档：https://www.npmjs.com/package/esm
+ */
+// 立即执行函数
+(function() {
+  // 引入静态化脚手架对象，调用 run 方法开始静态化
+  require('./static-cli/cli')
+    .run()
+    .catch((err) => {
+      require('consola').fatal(err)
+      require('exit')(2)
+    })
+})()
+
+```
+
+> 该入口文件使用立即执行函数：引入静态化脚手架，并执行 run 方法，立即执行脚本；
+
+静态化脚手架脚本位于 `./static-cli/cli.js` 中：
+
+```js
+const Argv = require('./argv/cli-argv') //处理命令行参数
+const Builer = require('./builder/cli-builder') // 静态化构建脚本
+const Generator = require('./generator/cli-generator')// 生成静态化页面
+const consola = require('consola')
+
+exports.run = async function () {
+  try {
+    const argvs = await Argv.run(require('yargs').argv) // 命令行参数处理
+    consola.info(`>>>> 命令行参数:\n${JSON.stringify(argvs, null, 1)}`)
+    if (argvs.webpack) {
+      await require('./clean/cli-clean')(argvs) // 删除dist目录
+      await Builer.run(argvs) // 执行 npm run build 脚本命令
+    }
+    await Generator.run(argvs) // 生成静态化页面
+    if (argvs.env === 'test') {
+      const { uploadToS3 } = require('./s3/cli-s3')
+      await uploadToS3(argvs) // 测试服上传静态资源到 s3
+    }
+    consola.success('>>>> All Finish!')
+  } catch (err) {
+    return Promise.reject(err)
+  }
+}
+
+```
+
+> 该脚本主要执行以下逻辑：
+>
+> 1. **命令行参数梳理**
+> 2. **根据参数是否需要执行 webpack 构建，决定是否执行 webpack 流程；**
+> 3. **生成静态化页面；**
+> 4. **上传到 S3;**
+
+以下将详细分析以上四个步骤。
+
+## **参数处理**
+
+> 参数处理库：[yargs](https://github.com/yargs/yargs)
+
+### **参数格式**
+
+生成静态化站点命令：
 
 ```javascript
-node -r esm generate.js --target=routeName --lang=my-en --env=test --webpack=true  --seconedLang=my-my --params=**
+node -r esm generate.js --target=routeName --lang=国家语言标识 --env=test --webpack=true  --seconedLang=一国多语言标识 --params=**
 ```
 
 ```javascript
 s3 测试服链接：
-npm run generate -- --target=routeName --lang=***  *--env=** --webpack=true --seconedLang=** --params=**
+npm run generate -- --target=routeName --lang=***  *--env=** --webpack=true --seconedLang=一国多语言标识  --params=**
 ```
 
 ```javascript
 s3 正式服链接：
-npm run generate:s3 -- --target=routeName --lang=** --env=** --webpack=true  --seconedLang=** --params=**
+npm run generate:s3 -- --target=routeName --lang=** --env=** --webpack=true  --seconedLang=一国多语言标识  --params=**
 ```
 
 【注意格式：*npm run generate –- 参数*】
 
-- target：静态化目标路由名称，对应 *`src/router/routes.js`* 中的 name 字段（webpackChunkName 不可省略）
-- params：静态化静态路由可不传。用于静态化动态路由生成路由表的时候使用。
-- lang：语言，默认 my-en。格式：国家-语言。
-- seconedLang： 一国多语言参数，同一国家第二种语言参数。
-- env：环境，test 或者 production，默认 production，用于区别接口请求域名。
-- webpack：是否执行 webpack 生成 dist-ssr 目录。默认 true，不执行 webpack 值为 false 或者 0。
-- groupCount: 静态化页面打包每次分组数量
+- `target`：静态化目标路由名称（必填）。
+  - 对应 *`src/router/routes.js`* 中的 name 字段（webpackChunkName 不可省略）
+
+- `params`：静态化静态路由（可选）。用于静态化动态路由生成路由表的时候使用。
+- `lang`：国家语言标识，默认 `my-en`。格式：国家-语言。
+- `seconedLang`： 一国多语言参数，同一国家第二种语言参数。
+- `env`：部署环境，test 或者 production，默认 production，用于区别接口请求域名。
+- `webpack`：是否执行 webpack 生成 `dist-ssr` 目录。默认 true，不执行 webpack 值为 false 或者 0。
+- `groupCount`: 静态化页面打包每次分组数量，并发执行打包数量。
 - ~~amp：是否是 amp 页面。默认为 false。~~
 
-### **参数处理**
 
-* 参数处理库：[yargs](https://github.com/yargs/yargs)
 
-#### **参数处理流程**
+### **参数说明**
 
-* 格式化命令行参数
-* 获取 target 路由对象
-* 合并路由对象和参数对象
+#### **静态路由参数**
 
-#### **参数类型**
+* 字段： `--target` = 静态化目标路由名称
+* 作用： 查找路由对象；
 
-##### **路由参数**
+* 问题： 不同国家路由模式相同，路由不同；
+* 解决方案：
+  * 建立国家和路由的map，根据当前打包的国家参数获取路由；
 
-* 字段： --target=静态化目标路由名称
-* 作用： 查找路由对象
+  * 判断路由对象方法：
+    * 参数 tartget 对应路由 name 字段；
+    * 注意：webpackChunkName 不可省略，并且路由 name 与 webpackChunkName 相同；
 
-* 问题： 不同国家路由模式相同，路由不同
-  * 建立国家和路由的map，根据当前打包的国家参数获取路由
-* 判断路由对象方法：
-  * 参数 tartget 对应路由 name 字段
-  * 注意：webpackChunkName 不可省略，并且路由 name 与 webpackChunkName 相同
 
-##### **动态路由参数**
+#### **动态路由参数**
 
-* 字段： --params
-* options: 
-  * all： 静态化所有页面，如 生成所有车系页面 
-  * 页面自定义参数： 静态化指定页面，如: 静态化 proton X50 特定车系，传入 brandCode, modelCode
+* 字段：` --params`
+* 选项: 
+  * all： 静态化所有页面，如 生成所有xx页面 ;
+  * 页面自定义参数： 静态化指定页面，如: 静态化 proton X50 特定车系，传入 brandCode, modelCode;
 * 静态化静态路由可不传。用于静态化动态路由生成路由表的时候使用。
 
-##### **语言参数**
+#### **语言参数**
 
-* 字段： --lang
+* 字段：`--lang`
 * 作用： 指定静态化国家页面和默认语言文案（静态化默认使用指定国家的默认语言）
 
-##### **一国多语言参数**
+#### **一国多语言参数**
 
-* 字段： --secondLang
+* 字段： `--secondLang`
 
-* 作用： 指定国家的第二语言，第二语言参数指定使用文案
+* 作用： 指定国家的第二语言，第二语言参数指定使用文案;
 
-* 问题： 第一语言 lang 指定语言和主题，第二语言 secondLang 仅仅使用在部分路由页面中，如资讯文案 bm路由使用马来语，zh路由使用中文；seconedLand 不能覆盖 lang 参数 
+* 问题： 第一语言 lang 指定语言和主题，第二语言 secondLang 仅仅使用在部分路由页面中，如资讯文案 bm 路由使用马来语，zh路由使用中文；seconedLand 不能覆盖 lang 参数 
 
 * 解决方案：
 
@@ -251,28 +361,28 @@ npm run generate:s3 -- --target=routeName --lang=** --env=** --webpack=true  --s
 
   * 方案三: 配置多个 npm script 命令。
 
-  * ```javascript
-    {
-      "scripts": {
-        "dev": "node server",
-        "dev:my-en": "node server --PAGE_LANG=my-en",
-        "dev:th-th": "node server --PAGE_LANG=th-th",
-        "start": "cross-env NODE_ENV=production && npm run dev",
-        "start:my-en": "cross-env NODE_ENV=production && npm run dev:my-en",
-        "start:th-th": "cross-env NODE_ENV=production && npm run dev:th-th",
-        "build": "rimraf dist-ssr && npm run build:client && npm run build:server",
-        "build:client": "cross-env NODE_ENV=production webpack --config build/webpack.client.config.js --progress --hide-modules",
-        "build:server": "cross-env NODE_ENV=production webpack --config build/webpack.server.config.js --progress --hide-modules",
-        "build:my-en": "rimraf dist-ssr && npm run build:client:my-en && npm run build:server:my-en",
-        "build:client:my-en": "cross-env NODE_ENV=production PAGE_LANG=my-en webpack --config build/webpack.client.config.js --progress --hide-modules",
-        "build:server:my-en": "cross-env NODE_ENV=production PAGE_LANG=my-en webpack --config build/webpack.server.config.js --progress --hide-modules",
-        "build:th-th": "rimraf dist-ssr && npm run build:client:th-th && npm run build:server:th-th",
-        "build:client:th-th": "cross-env NODE_ENV=production PAGE_LANG=th-th webpack --config build/webpack.client.config.js --progress --hide-modules",
-        "build:server:th-th": "cross-env NODE_ENV=production PAGE_LANG=th-th webpack --config build/webpack.server.config.js --progress --hide-modules"
-      }
-    ```
+    * ```js
+      {
+        "scripts": {
+          "dev": "node server",
+          "dev:my-en": "node server --PAGE_LANG=my-en",
+          "dev:th-th": "node server --PAGE_LANG=th-th",
+          "start": "cross-env NODE_ENV=production && npm run dev",
+          "start:my-en": "cross-env NODE_ENV=production && npm run dev:my-en",
+          "start:th-th": "cross-env NODE_ENV=production && npm run dev:th-th",
+          "build": "rimraf dist-ssr && npm run build:client && npm run build:server",
+          "build:client": "cross-env NODE_ENV=production webpack --config build/webpack.client.config.js --progress --hide-modules",
+          "build:server": "cross-env NODE_ENV=production webpack --config build/webpack.server.config.js --progress --hide-modules",
+          "build:my-en": "rimraf dist-ssr && npm run build:client:my-en && npm run build:server:my-en",
+          "build:client:my-en": "cross-env NODE_ENV=production PAGE_LANG=my-en webpack --config build/webpack.client.config.js --progress --hide-modules",
+          "build:server:my-en": "cross-env NODE_ENV=production PAGE_LANG=my-en webpack --config build/webpack.server.config.js --progress --hide-modules",
+          "build:th-th": "rimraf dist-ssr && npm run build:client:th-th && npm run build:server:th-th",
+          "build:client:th-th": "cross-env NODE_ENV=production PAGE_LANG=th-th webpack --config build/webpack.client.config.js --progress --hide-modules",
+          "build:server:th-th": "cross-env NODE_ENV=production PAGE_LANG=th-th webpack --config build/webpack.server.config.js --progress --hide-modules"
+        }
+      ```
 
-    
+      
 
   * 方案四：webpack 使用 nodejs 方式重构，这样各种参数可以使用 nodejs 命令行参数进行传递，而不用通过 cross-env 进行设置。
 
@@ -285,13 +395,184 @@ npm run generate:s3 -- --target=routeName --lang=** --env=** --webpack=true  --s
 
 
 
-### **生成路由表**
+### **参数处理流程**
+
+* 格式化命令行参数;
+* 获取 target参数路由对象;;
+* 合并路由对象和参数对象;
+
+参数处理逻辑位于静态化脚手架目录 `./static-cli/argv/cli-argv.js` 文件中：
+
+```js
+const { argv } = require('yargs')
+const consola = require('consola')
+
+const {
+  _ROUTES_NULL, // 路由表为空
+  _STATIC_ROUTE, // 静态路由
+  _DYNAMIC_ROUTE // 动态路由
+} = require('../common/routeState')
+
+// host
+const hostMap = require('../../src/api/hostMap')
+
+class Argv {
+  /**
+   * @param {String} target 静态化目标路由名称，对应 src/router/routes.js 中的 name
+   * @param {String} params 参数（构建动态路由或者处理页面发布路径用）
+   * @param {String} lang 国家语言标识默认 'my-en'
+   * @param {String} secondLang 一国多语言标识，第二语言，默认为空
+   * @param {String} env 发布环境，默认 'production', 'test' or 'production'
+   * @param {Boolean} webpack 是否执行 webpack 流程
+   * @param {*} groupCount 静态化页面打包每次分组数量
+   */
+  constructor ({ target = '', params = null, lang = 'my-en', secondLang = '', env = 'production', webpack = true, groupCount = 10 }) {
+    this._argvs = null
+
+    this.routerName = target //静态化目标路由名称，对应 src/router/routes.js 中的 name
+    this.params = params //参数（构建动态路由或者处理页面发布路径用）
+    this.lang = lang // 国家语言标识
+    this.secondLang = secondLang //一国多语言标识，第二语言，默认为空
+    this.env = Array.isArray(env) ? env[env.length - 1] : env //发布环境，默认 'production', 'test' or 'production'
+    this.host = hostMap[env === 'production' ? env : 'development'][lang] // 发布站点 url
+    this.webpack = webpack != 'false' && webpack != 0 // 是否执行 webpack 流程
+    this.groupCount = Number(groupCount) // 静态化页面打包每次分组数量，并发执行打包数量
+    this.routes = require('../../src/router/routes')({ lang }) // 静态路由
+  }
+  // 参数格式化
+  static run (options = {}) {
+    return Argv.from(options).run()
+  }
+  // 参数格式化
+  static from (options = {}) {
+    if (this._argvs instanceof Argv) {
+      return this._argvs
+    }
+    this._argvs = new Argv(options)
+    return this._argvs
+  }
+
+  async run () {
+    // 获取路由对象和状态
+    const routeStateObj = this._getRouteState()
+    const cmdOptions = { // 参数选项
+      target: this.routerName,
+      params: this.params,
+      lang: this.lang,
+      env: this.env,
+      host: this.host,
+      webpack: this.webpack,
+      secondLang: this.secondLang,
+      groupCount: this.groupCount
+    }
+    switch (routeStateObj.routeState) {
+      case _ROUTES_NULL: // 路由表为空
+        return Promise.reject('Route List is Null!')
+      case _STATIC_ROUTE: // 静态路由，返回参数选项和路由状态对象
+        return Promise.resolve({
+          ...routeStateObj,
+          ...cmdOptions
+        })
+      case _DYNAMIC_ROUTE:// 动态路由，返回参数选项和路由状态对象
+        return Promise.resolve({
+          ...routeStateObj,
+          ...cmdOptions
+        })
+      default:
+        break
+    }
+  }
+
+  /**
+   * 获取路由对象和状态
+   */
+  _getRouteState () {
+    // 路由对象为空，返回路由状态标识
+    if (!this.routes.length) {
+      return { routeState: _ROUTES_NULL }
+    }
+    // 从项目中定义的路由对象中查找参数指定的路由对象，并返回路由状态
+    const routeStateObj = this.routes.find(item => {
+      if (item.name === this.routerName) {
+        const ifDynamicRoute = item.name === this.routerName && item.path.includes(':') // 动态路由
+        delete item.component
+        item.routeState = ifDynamicRoute ? _DYNAMIC_ROUTE : _STATIC_ROUTE
+        return item
+      }
+    })
+    return routeStateObj
+  }
+}
+
+module.exports = Argv
+```
+
+> 以上代码主要逻辑：
+>
+> 定义一个 Argv 对象，该对象主要作用：
+>
+> 1. 格式化命令行参数;
+> 2. 获取 target参数路由对象;
+> 3. 合并路由对象和参数对象;
+
+
+
+## **Webpack 构建**
+
+在执行参数处理后，根据命令行参数 `--webpack=true` ,执行 webpack 构建流程。
+
+执行 webpack 构建之前，会先将构建模板的本地静态资源删除，删除脚本在 `./static-cli/clean/cli-clean.js` 文件中：
+
+```js
+const fse = require('fs-extra')
+const path = require('path')
+const consola = require('consola')
+
+/**
+ * 删除 dist-srr/${lang} 目录
+ * @param {String} lang
+ */
+module.exports = function ({
+  lang = '',
+  staticSource = 's3'
+}) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if (!lang) {
+        return resolve(true)
+      }
+      const distPath = staticSource === 's3' ? 'dist-static' : 'dist-ssr'
+      const targetPath = path.resolve(__dirname, `../../${distPath}/${lang}`)
+      fse.emptyDirSync(targetPath)
+      fse.rmdirSync(targetPath)
+      consola.success(`>>>> 删除 /${distPath}/${lang} 目录成功!`)
+      return resolve(true)
+    } catch (error) {
+      return reject(error)
+    }
+  })
+}
+
+```
+
+> 以上删除脚本会根据 国家语言标识作为文件夹名称区分静态资源目录：
+>
+> 1. 根据命令行参数 `--lang` 获取国家语言标识，获取资源目录；
+> 2. 删除目标目录资源；
+
+
+
+
+
+
+
+## **生成路由表**
 
 - 静态路由表：根据路由文件 routes.js 中的 path 生成文件目录结构。
 - 动态路由表：根据 `/static-addition-config/routeHooks/routeName.js` 中的 `createDynamicRoutes` 函数生成路由表，该函数返回路由表数组。（动态路由必须有该文件，文件名称对应 routes.js 中的 name）
 - 动态路由表：根据 *`/static-addition-config/routeHooks/routeName.js`* *中的钩子 `createDynamicRoutes* 进行更改。输入：{ params: ... }，输出：路由表数组。
 
-### **生成 vue-server-render 对象**
+## **生成 vue-server-render 对象**
 
 * `vue-server-render`  对象` serverRender ` (`static-cli/generator/cli-server`)
 * 作用： 用于生成 html
@@ -299,15 +580,15 @@ npm run generate:s3 -- --target=routeName --lang=** --env=** --webpack=true  --s
 * 通过 *`dist-ssr/vue-ssr-server-bundle.json`和*`dist-ssr/vue-ssr-client-manifest.json `生成 `serverRender` 对象，同时设置 preload、prefetch 等配置。
 * 注意： 服务端代码静态化时执行，客户端代码浏览器中执行。静态化生成 HTML 文件时，执行的是服务端入口代码 `entry-server.js` 打包结果；客户端入口代码 `entry-client.js` 被打包后的文件 `app.js` 不会执行，而是在浏览器请求到 html  doc 文件后加载后浏览器执行。
 
-### **生成 HTML**
+## **生成 HTML**
 
 * 遍历路由表，通过 serverRender 对象生成 html 数据。
 
-### **html 处理**
+## **HTML 处理**
 
 * 处理任务如：amp，资讯页面内容等。通过 *`/static-addition-config/routeHooks/routeName.js`* 中的*钩子 createHtml* 进行处理，该函数输入 { html: ... } ，输出 html 数据。（文件名称对应 routes.js 中的 name）
 
-### **页面发布路径处理**
+## **页面发布路径处理**
 
 * 处理页面发布路径，默认根据路由生成页面发布目录结构。
 * 如果需要更改，在 *`/static-addition-config/routeHooks/routeName.js`*` 中的钩子 createPublishPath 进行处理`，该函数输入{ route: ... } ，输出新路由 url。（文件名称对应 routes.js 中的 name）
@@ -322,11 +603,11 @@ npm run generate:s3 -- --target=routeName --lang=** --env=** --webpack=true  --s
 
 * 根据 S3 标志，将打包的静态资源上传到对应的 S3 Bucket。
 
-### **写进文件**
+## **写进文件**
 
 * 写进根目录下的 `/html` 文件中。
 
-### **打包后的 html 目录结构**
+## **打包后的 html 目录结构**
 
 ```
 html        
