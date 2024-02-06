@@ -443,7 +443,7 @@ class Argv {
   static run (options = {}) {
     return Argv.from(options).run()
   }
-  // 参数格式化
+  // 创建 Argv 单例
   static from (options = {}) {
     if (this._argvs instanceof Argv) {
       return this._argvs
@@ -521,6 +521,8 @@ module.exports = Argv
 
 在执行参数处理后，根据命令行参数 `--webpack=true` ,执行 webpack 构建流程。
 
+### **清除静态资源**
+
 执行 webpack 构建之前，会先将构建模板的本地静态资源删除，删除脚本在 `./static-cli/clean/cli-clean.js` 文件中：
 
 ```js
@@ -560,9 +562,451 @@ module.exports = function ({
 > 1. 根据命令行参数 `--lang` 获取国家语言标识，获取资源目录；
 > 2. 删除目标目录资源；
 
+### **启动构建**
+
+在移除静态资源目录后，开始 webpack 构建。webpack 构建脚本位于 `./static-cli/builder/cli-builder.js` 目录下，详细代码如下：
+
+```js
+const { execCmd } = require('../common/util')
+const ora = require('ora')
+const consola = require('consola')
+const path = require('path')
+
+class Builder {
+  /**
+   *
+   * @param {String} lang 语言
+   * @param {String} env 环境
+   * @param {String} secondLang 第二语言，默认为空
+   */
+  constructor({ lang = 'my-en', env = 'test', secondLang = '' }) {
+    this._builder = null
+    this.lang = lang // 国家语言标识
+    this.env = env // 发布环境
+    this.secondLang = secondLang // 一国多语言，第二语言
+  }
+  // 参数格式化
+  static run(options = {}) {
+    return Builder.from(options).run()
+  }
+  // 创建 builder 单例
+  static from(options = {}) {
+    if (this._builder instanceof Builder) {
+      return this._builder
+    }
+    this._builder = new Builder(options)
+    return this._builder
+  }
+
+  async run() {
+    let spinnerBuild
+    try {
+      // shell 输出构建信息
+      spinnerBuild = ora(
+        `>>>> 正在构建: client \n`
+      ).start()
+      // 执行 client 脚本构建
+      await this.runWebpackBuild('client')
+      spinnerBuild.stop()
+      // shell 输出构建信息
+      spinnerBuild = ora(
+        `>>>> 正在构建: server \n`
+      ).start()
+      // 执行 server 脚本构建
+      await this.runWebpackBuild('server')
+      spinnerBuild.stop()
+      consola.success(`>>>> Build${this.env === 'test' ? ' test ' : ' '}bundles successfully!`)
+    } catch (error) {
+      spinnerBuild.stop()
+      return Promise.reject(error)
+    } finally {
+      spinnerBuild.stop()
+    }
+  }
+
+  // 执行 webpack 构建
+  async runWebpackBuild(platform = '') {
+    return new Promise(async (resolve, reject) => {
+      try {
+        // 构建脚本路径，根据平台参数获取
+        const builderPath = path.resolve(__dirname, `../../build/webpack.${platform}.build.js`)
+        // node 脚本参数
+        const nodeCmd = `node ${builderPath} --lang=${this.lang} --secondLang=${this.secondLang} --env=${this.env === 'test' ? 'development' : 'production'}`
+        // 执行 node 命令
+        await execCmd(nodeCmd)
+        consola.info(`>>>> 构建完成: ${platform} \n`)
+        return resolve(true)
+      } catch (error) {
+        return reject(error)
+      }
+    })
+  }
+}
+
+module.exports = Builder
+```
+
+> 以上脚本主要逻辑：
+>
+> 1. 实例化 Builder 类单例；
+> 2. 根据不同平台，对平台脚本使用 node 启动构建；
 
 
 
+### **根据平台构建**
+
+webpack 构建会根据不同平台（client 浏览器包和 server 包）进行构建产生不同的包。
+
+SSR 架构如下：
+
+![SSR架构](../images/SSR架构.png)
+
+Vue SSR 框架为同构框架，应用代码编译过程 Vue SSR 提供了两个编译入口，服务端应用和客户端应用，作为抹平由于环境不同的代码差异；
+
+由于用例和平台 API 的差异，当运行在不同环境中时，代码将不会完全相同。
+
+通过 webpack 构建将产生两个包： `Server Bundle`  和 `Client Bundle`。
+
+* `Server Bundle` 用于生成 `vue-ssr-server-bundle.json`， `sourceMap` 和需要在服务端运行的代码列表都在这个产物中。`Server Bundle` 运行在 Node Server。
+* `Client Bundle` 用于生成 `vue-ssr-client-manifest.json`，包含所有的静态资源，首次渲染需要加载的 script 标签，以及需要在客户端运行的代码。
+
+
+
+**构建文件目录**
+
+构建文件位于 `./build/` 目录下，该目录下包含所有 webpack 构建的脚本：
+
+![image-20240206161117549](../images/SSG-webpack目录.png)
+
+
+
+构建入口文件为：
+
+* 浏览器构建： `webpack.client.build.js`
+* 服务端构建： `webpack.server.build.js`
+
+这两个文件逻辑相同，只是引入的配置脚本不同，以  `webpack.client.build.js` 讲解：
+
+```js
+const { Compiler } = require('./common')
+const consola = require('consola')
+const clientWebpack = require('./webpack.client.config')
+
+// 立即执行函数
+;(async function () {
+  try {
+    // 获取命令行参数
+    const argvs = require('yargs').argv
+    // 获取 Client webpack 构建配置
+    const clientConfig = clientWebpack(argvs)
+    // 创建 webpack 实例
+    const ClientCmpiler = new Compiler(clientConfig)
+    // 启动 webpack 构建
+    await ClientCmpiler.run()
+  } catch (error) {
+    consola.error(error)
+  }
+})()
+```
+
+> 以上构建主要逻辑：
+>
+> 1. 获取命令行参数;
+> 2.  获取 webpack 构建配置;
+> 3. 创建 webpack 实例;
+> 4. 启动 webpack 构建;
+
+
+
+### **Webpack 实例**
+
+以上通过 `Compiler` 对象为 webpack 构建实例，该实例在 `./build/common.js` 文件中定义：
+
+```js
+const webpack = require('webpack')
+// const consola = require("consola");
+const { COUNTRY_MAP_CDN_HOST } = require('../src/enum')
+
+
+// Compiler 类，用于执行 webpack 构建
+class Compiler {
+  constructor(options) {
+    // 构建参数
+    this.options = options
+  }
+  // 执行构建
+  run() {
+    return new Promise((resolve, reject) => {
+      // 通过 webpack 对象执行构建
+      webpack(this.options).run((err, stat) => {
+        if (err || stat.hasErrors()) {
+          // 获取构建结果信息
+          const info = stat.toJson()
+          return reject({
+            error: err || info.errors,
+            warning: info.warnings
+          })
+        }
+        return resolve(true)
+      })
+    })
+  }
+}
+
+/**
+ * 获取命令行传入的国家语言标识
+ * @param {*} argvLang 1. npm run dev/start: 通过 node 环境获取，--PAGE_LANG=** 传入，require('yargs').argv.PAGE_LANG 获取
+ * @param {*} processLang 2. npm run build: 通过 cross-env 设置，PAGE_LANG=** 传入，process.env.PAGE_LANG 获取
+ */
+function getCmdLang(argvLang = '', processLang = '') {
+  return argvLang || processLang
+}
+
+/**
+ * 获取主题样式标识
+ * @param {*} lang
+ */
+function getStyleVarByLang(lang) {
+  switch (lang) {
+    case 'th-th':
+    case 'id-id':
+    case 'ph-en':
+      return 'autofun'
+    default:
+      return 'main'
+  }
+}
+
+/**
+ * 获取 S3 发布域名
+ * @param {*} env
+ * @param {*} lang
+ */
+function getPublishPath({ env = 'development', lang = 'my-en' }) {
+  const countryCode = lang.split('-')[0]
+  return env === 'production'
+    ? `${COUNTRY_MAP_CDN_HOST[countryCode]}/${lang}/`
+    : `https://xxxx.amazonaws.com/${lang}/`
+}
+
+module.exports = {
+  getCmdLang,
+  getStyleVarByLang,
+  getPublishPath,
+  Compiler
+}
+
+```
+
+> 以上代码定义了 Compiler 类，用于执行 webpack 构建，并对外暴露了几个方法：
+>
+> * `getCmdLang`: 获取命令行传入的国家语言标识；
+> * `getStyleVarByLang`:  获取主题样式标识;
+> * `getPublishPath`: 获取 S3 发布域名;
+
+通过以上 webapck 构建实例构建之前，需要获取 webpack 构建配置参数，以下分析不同平台下 webpack 构建配置参数。
+
+
+
+### **Webpack 构建配置**
+
+#### **`webpack.base.config.js`**
+
+该文件为 浏览器和服务端 webpack 公共配置项
+
+```js
+const path = require('path')// 处理文件路径的Node.js模块。 
+const px2rem = require('postcss-px2rem') //一个PostCSS插件，用于将像素值转换为rem。
+const TerserPlugin = require('terser-webpack-plugin') //用于优化和压缩JavaScript代码的Webpack插件。
+const FriendlyErrorsPlugin = require('friendly-errors-webpack-plugin') //用于提供更友好的错误输出的Webpack插件。
+const MiniCssExtractPlugin = require('mini-css-extract-plugin') //用于将CSS文件提取到单独的文件中的Webpack插件。
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin') //用于在Webpack中检查TypeScript代码的Webpack插件。
+const CopyPlugin = require('copy-webpack-plugin') //用于在Webpack构建过程中复制文件的插件。
+const { VueLoaderPlugin } = require('vue-loader') //用于处理Vue.js文件的Webpack加载器
+const commonTool = require('./common')
+
+/**
+   * get client webpack config
+   * @param {String} lang 主要语言（第一语言），默认为 'my-en'
+   * @param {String} env 开发环境，测服/正式服，默认测服
+   * @param {Boolean} localDev 本地开发还是静态化打包。本地开发是为 true。默认为 false
+   */
+module.exports = function ({
+  lang = 'my-en',
+  env = 'development',
+  localDev = false,
+  staticSource = 's3'
+}) {
+  // 获取主题样式标识
+  const styleLang = commonTool.getStyleVarByLang(lang)
+  // 静态化页面静态资源在s3上，这里和ssr页面做一个区分
+  const distPath = staticSource === 's3' ? 'dist-static' : 'dist-ssr'
+  return {
+    mode: localDev ? 'development' : 'production', // 发布环境
+    devtool: localDev ? '#cheap-module-source-map' : false, // 本地开发环境下需要 sourceMap
+    output: {
+      // 输出文件路径
+      path: path.resolve(__dirname, `../${distPath}/${lang}`),
+      // 静态资源发布路径
+      publicPath: !localDev && staticSource === 's3'
+        ? commonTool.getPublishPath({ env, lang: lang })
+        : `/${distPath}/${lang}/`,
+      // 块文件名
+      chunkFilename: 'common/[name].[chunkhash:8].js',
+      // 文件名
+      filename: 'common/[name].[chunkhash:8].js'
+    },
+    resolve: {
+      // 文件扩展名
+      extensions: ['.js', '.json', '.vue', '.scss', '.css'],
+      // 别名
+      alias: {
+        public: path.resolve(__dirname, '../public'),
+        '@': path.resolve(__dirname, '..', 'src')
+      }
+    },
+    // 配置 webpack 的 optimization 属性，用于配置 webpack 的优化规则
+    optimization: {
+      minimize: !localDev,
+      minimizer: [
+        new TerserPlugin({ //插件用于在生产环境中对打包的 JavaScript 代码进行压缩优化。
+          parallel: true,//并发处理,这样可以提高压缩效率。
+          sourceMap: localDev, // 如果在生产环境中使用 source-maps，必须设置为 true
+          terserOptions: {
+            // https://github.com/webpack-contrib/terser-webpack-plugin#terseroptions
+            compress: {//配置压缩选项
+              warnings: false,
+              drop_console: env !== 'development',//在生产环境中删除控制台和调试代码。
+              drop_debugger: env !== 'development'//在生产环境中删除控制台和调试代码。
+            },
+            output: {
+              comments: false //禁用输出注释
+            }
+          },
+          extractComments: false //不提取注释到source-maps
+        })
+      ],
+      splitChunks: {//控制代码分
+        cacheGroups: {//定义不同的分割规则
+          vanUI: {
+            name: 'vanUI',//分割后的chunk的名称prefix
+            test: /[\\/]node_modules[\\/](.*vant.*)[\\/](lib)[\\/](toast|icon|popup|overlay|info|loading|style)[\\/]/,//正则表达式用于匹配vanUI组件的相关代码
+            chunks: 'all',//这个属性表示将匹配到的所有代码都打包成一个chunk。如果设置为'async'，则只会将匹配到的代码打包成一个chunk，但这个chunk会异步加载，并不会影响页面的初始加载速度。
+            enforce: true//当没有找到对应的chunk时，强制创建一个chunk
+          }
+        }
+      }
+    },
+    module: {
+      noParse: /es6-promise\.js$/, // avoid webpack shimming process
+      rules: [
+        {
+          test: /\.(vue|js)$/,
+          loader: 'eslint-loader',
+          exclude: /node_modules/,
+          enforce: 'pre',
+          options: {
+            fix: true
+          }
+        },
+        {
+          test: /\.vue$/,
+          loader: 'vue-loader',
+          options: {
+            compilerOptions: {
+              preserveWhitespace: false
+            }
+          }
+        },
+        {
+          test: /\.js$/,
+          loader: 'babel-loader',
+          exclude: /node_modules/
+        },
+        {
+          test: /\.(png|jpg|jpeg|gif|svg|eot|woff2?|ttf|otf)/,
+          loader: 'url-loader',
+          options: {
+            limit: 1024,
+            name: 'static/img/[name].[contenthash:8].[ext]'
+          }
+        },
+        {
+          test: /\.(ts|tsx)?$/,
+          loader: 'ts-loader',
+          options: {
+            appendTsSuffixTo: [/\.vue$/] // 为 script 有 lang='ts' 标识的脚本文件添加 ts 后缀
+          }
+        },
+
+        {
+          test: /\.(c|sa|sc)ss$/,
+          use: [
+            localDev ? 'vue-style-loader' : MiniCssExtractPlugin.loader,
+            {
+              loader: 'css-loader',
+              options: { minimize: !localDev }
+            },
+            {
+              loader: 'postcss-loader',
+              options: {
+                postcssOptions: {
+                  plugins: [
+                    px2rem({
+                      remUnit: 100
+                    })
+                  ]
+                }
+              }
+            },
+            {
+              loader: 'sass-loader',
+              options: {
+                // data: `@import '~@/assets/index.scss'; @import '~@/assets/scss/variables/${styleLang}.scss';`,
+                data: `@import '~@/assets/scss/variables/${styleLang}.scss';`,
+                outputStyle: 'expanded' // https://github.com/neilgao000/blog/issues/15
+              }
+            }
+          ]
+        }
+      ]
+    },
+    performance: {
+      hints: false //关闭 Webpack 的性能提示。
+    },
+    plugins: !localDev 
+      ? [ // 生产环境下 webpack 插件
+        new VueLoaderPlugin(), // Vue.js 加载器。
+        new MiniCssExtractPlugin({ //使用 MiniCSS 插件来提取 CSS 文件。
+          filename: 'common/[name].[contenthash:8].css',
+          ignoreOrder: true
+        }),
+        new CopyPlugin({ //使用 CopyPlugin 插件来复制静态文件
+          patterns: [
+            {
+              from: path.resolve(__dirname, `../public/`),
+              to: path.resolve(__dirname, `../${distPath}/${lang}/public`)
+            }
+          ]
+        })
+      ]
+      : [ // 开发环境下 webpack 插件
+        new VueLoaderPlugin(), // Vue.js 加载器。
+        new FriendlyErrorsPlugin(), //使用 FriendlyErrors 插件来处理错误。
+        new ForkTsCheckerWebpackPlugin() //使用 ForkTsCheckerWebpack 插件来检查 TypeScript 文件。
+      ]
+  }
+}
+
+```
+
+
+
+#### **`webpack.client.config.js`**
+
+
+
+#### **`webpack.server.config.js`**
 
 
 
