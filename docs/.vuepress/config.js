@@ -182,7 +182,8 @@ module.exports = config({
         'Vue2.5项目webpack分析'
       ],
       'vite': [
-        ''
+        '',
+        'Vite原理解析'
       ]
     },
 
