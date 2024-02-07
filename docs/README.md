@@ -44,7 +44,7 @@ footer:  MIT Licensed | Copyright © 2023-present
 |                    |                            | Vue2.x 原理和源码分析                                  | 💯        |
 |                    |                            | VueX 原理分析                                          | 💯        |
 |                    |                            | Vue-Router 原理分析                                    | 💯        |
-|                    |                            | Vue-SSR 原理分析                                       | 💦        |
+|                    |                            | Vue-SSR 原理分析                                       | 💯        |
 |                    |                            | Vue-Cli 分析                                           | 💯        |
 |                    |                            |                                                        |          |
 |                    | Vue3.x                     |                                                        | ❌        |
@@ -77,8 +77,10 @@ footer:  MIT Licensed | Copyright © 2023-present
 |                    |                            | WebPack 原理解析                                       | 💯        |
 |                    |                            | WebPack 优化                                           | 💯        |
 |                    |                            | WebPackAPI                                             | 💯        |
-|                    |                            | WebPack 项目实践                                       | 💦        |
-|                    | Vite                       |                                                        | ❌        |
+|                    |                            | WebPack 项目实践                                       | 💯        |
+|                    | Vite                       |                                                        | 💦        |
+|                    |                            | Vite 基础                                              | 💦        |
+|                    |                            | Vite 原理及源码分析                                    | ❌        |
 |                    | Git                        |                                                        |          |
 |                    |                            | Git 基础和操作                                         | 💯        |
 |                    |                            | Git 流程实践                                           | 💯        |
@@ -86,8 +88,8 @@ footer:  MIT Licensed | Copyright © 2023-present
 | **项目实践**       |                            |                                                        |          |
 |                    | 从零到一搭建Vue2工程化项目 |                                                        | ❌        |
 |                    | 从零到一搭建Vue3工程化项目 |                                                        | 💯        |
-|                    | 从零到一搭建SSR项目        |                                                        | 💦        |
-|                    | 移动端SSG项目实践          |                                                        | ❌        |
+|                    | 从零到一搭建SSR项目        |                                                        | 💯        |
+|                    | 移动端SSG项目实践          |                                                        | 💯        |
 |                    | 搭建低代码平台             |                                                        | ❌        |
 |                    | 组件和组件封装实践         |                                                        | 💯🔥       |
 |                    | 登录与单点登录             |                                                        | 💯        |
