@@ -1,5 +1,7 @@
 # 从零到一搭建移动端SSG项目
 
+> 详细项目代码参考： [Sewar-x/SSG-Demo: 《从零到一搭建移动端SSG项目实践》| Sewen 博客 示例项目，项目仅作学习使用 (github.com)](https://github.com/Sewar-x/SSG-Demo)
+
 ## **预渲染 (SSG )**
 
 ### **概念**
@@ -1945,12 +1947,6 @@ const convertHtmlToAMP = async function ({ html = '', routeName = '', removeScri
 
 
 
-
-
-### **上传静态资源到 s3**
-
-* 根据 S3 标志，将打包的静态资源上传到对应的 S3 Bucket。
-
 ## **写进文件**
 
 * 写进根目录下的 `/html` 文件中。
@@ -1966,6 +1962,95 @@ html
 |───...
 ```
 
+
+
+## **上传静态资源到 S3**
+
+完成页面渲染后，最后一步将静态资源上传到 S3。
+
+根据 S3 标志，将打包的静态资源上传到对应的 S3 Bucket。
+
+> * S3 是什么？
+>
+> Amazon S3（Simple Storage Service）是亚马逊Web Services（AWS）提供的一项云存储服务。它是一个高度可扩展的对象存储服务，用于在互联网上存储和检索任意数量的数据。
+>
+> Amazon S3的主要用途和解决的问题包括：
+>
+> 1. **数据存储和备份**：S3为各种应用程序提供了一种可靠、安全和可扩展的数据存储解决方案。无论是用于存档、备份还是主存储，S3都能满足需求。
+> 2. **内容分发**：S3与Amazon CloudFront集成，可以提供快速、高效的内容分发，适用于网站、移动应用程序和其他数字内容分发场景。
+> 3. **数据共享和协作**：通过S3的访问控制和预签名URL功能，可以轻松地在团队或组织之间共享数据，同时保持对数据的精细控制。
+> 4. **数据保护和恢复**：S3提供了数据冗余、加密、版本控制等功能，以确保数据的安全性和可恢复性。
+>
+> 在此处主要使用 S3 的内容分发 CDN 服务。
+>
+> * 内容分发网络（CDN）是一种网络架构，用于将网站的内容（如HTML页面、图片、JavaScript文件、CSS文件等）分发到全球各地的服务器上。当用户访问网站时，他们会从离自己最近的服务器上获取内容，从而加快网站的加载速度，提高用户体验。
+
+
+
+上传到 S3 的脚本位于 `./static-cli/s3/cli-s3.js` 目录下，该文件对外暴露 `uploadToS3` 方法，调用该方法将指定目录静态资源上传到 S3：
+
+```js
+const s3 = require('s3')
+const path = require('path')
+const consola = require('consola')
+const ora = require('ora')
+
+// https://www.npmjs.com/package/s3
+const client = s3.createClient({
+  maxAsyncS3: 20, // this is the default
+  s3RetryCount: 3, // this is the default
+  s3RetryDelay: 1000, // this is the default
+  s3Options: {
+    accessKeyId: 'accessKeyId',
+    secretAccessKey: 'secretAccessKey',
+    region: 'region'
+  }
+})
+
+function uploadToS3Handle({ lang = 'my-en', s3 = 'test' }) {
+  return new Promise((resolve, reject) => {
+    const params = {
+      deleteRemoved: false, // default false, whether to remove s3 objects that have no corresponding local file.
+      localDir: path.resolve(__dirname, `../../dist-static/${lang}/`), // 本地资源路径
+      s3Params: { 
+        Bucket: s3 === 'test' ? 'test-cdn-car-static' : 'cdn-car-static',  // S3 文件目录
+        Prefix: `${lang}/`, // 文件前缀
+        ACL: 'public-read'
+      }
+    }
+
+    const uploader = client.uploadDir(params)
+    uploader.on('error', function (err) {
+      return reject(err)
+    })
+
+    uploader.on('end', function () {
+      return resolve(true)
+    })
+  })
+}
+
+module.exports = {
+  async uploadToS3({ lang = 'my-en', s3 = 'test' }) {
+    const spinnerBuild = ora('>>>> S3 uploading...\n').start()
+    try {
+      await uploadToS3Handle({ lang, s3 })
+      spinnerBuild.stop()
+      consola.success('>>>> 静态资源上传到 s3 完成!')
+      return Promise.resolve(true)
+    } catch (error) {
+      spinnerBuild.stop()
+      return Promise.reject(error)
+    } finally {
+      spinnerBuild.stop()
+    }
+  }
+}
+
+```
+
+
+
 ## **TypeScript 支持**
 
 * 项目支持 typescript，基于[vue-property-decorator](https://github.com/kaorun343/vue-property-decorator#readme)。
@@ -1974,12 +2059,12 @@ html
 
 ### **本地开发**
 
-本地服务器访问链接携带 *?ampRouteName=*** 参数，#development=1 忽略以下 AMP 报错：
+本地服务器访问链接携带 `?ampRouteName=***`参数，`#development=1` 忽略以下 AMP 报错：
 
-- *CSS syntax error in tag 'style amp-custom'*
-- *Custom JavaScript is not allowed.*
+- `CSS syntax error in tag 'style amp-custom'`
+- `Custom JavaScript is not allowed.`
 
-`在`*` /static-addition-config/routeHooks/routeName.js`* 中的*钩子 createHtml* 进行处理，将 HTML 数据转化为 AMP。
+在` /static-addition-config/routeHooks/routeName.js`*中的钩子 `createHtml`进行处理，将 HTML 数据转化为 AMP。
 
 ## **其他**
 
@@ -1988,22 +2073,11 @@ html
 
 ## **开发**
 
-### **命令**
-
-| 命令                  | 说明              | api                                                    | S3                                                     |
-| --------------------- | ----------------- | ------------------------------------------------------ | ------------------------------------------------------ |
-| npm run dev           | 开发              | 测服                                                   | 静态资源不上传 S3，放本地                              |
-| npm run start         | 预览打包后的文件  | 根据打包命令为区分(npm run build:test / npm run build) | 根据打包命令为区分(npm run build:test / npm run build) |
-| npm run build:test    | 打包生成 dist-ssr | 测服                                                   | 测服(test-cdn-car-static)                              |
-| npm run build         | 打包生成 dist-ssr | 正服                                                   | 正服(cdn-car-static)                                   |
-| npm run generate:test | 静态化生成 html   | 测服                                                   | 测服(test-cdn-car-static)，自动上传                    |
-| npm run generate      | 静态化生成 html   | 正服                                                   | 正服(cdn-car-static)，手动上传                         |
-
 ### **接口**
 
 - 跟登录态相关的接口请求，放 mounted 处理；
 
-- 在 src/api下新建文件，管理接口。
+- 在 `src/api` 下新建文件，管理接口。
 
 ### **多语言**
 
@@ -2026,7 +2100,7 @@ html
 
 ### **AMP**
 
-1. 在 `/static-addition-config/routeHooks/routeName.js`  中的钩子 createHtml 进行处理，调用 `/static-addition-config/common/convertHtmlToAMP.js` 将 HTML 数据转化为 AMP。该函数输入 `{ html: ... }` ，输出 html 数据。（文件名称对应 routes.js 中的 name）
+1. 在 `/static-addition-config/routeHooks/routeName.js`  中的钩子 `createHtml` 进行处理，调用 `/static-addition-config/common/convertHtmlToAMP.js` 将 HTML 数据转化为 AMP。该函数输入 `{ html: ... }` ，输出 html 数据。（文件名称对应 routes.js 中的 name）
 
 2. 本地服务器访问链接携带 `?ampRouteName=**` 参数，`#development=1` 忽略以下 AMP 报错：
 
@@ -2047,7 +2121,7 @@ routeName
 
 - 组件命名：大驼峰
 
-- 使用 typescript。如果是 vue 组件或者页面`<script lang="ts"></script>`，添加 lang="ts" 标签属性；
+- 使用 typescript。如果是 vue 组件或者页面`<script lang="ts"></script>`，添加` lang="ts" `标签属性；
 
 - 减少使用魔术数字，用常量或者枚举类型替代。
 
@@ -2104,7 +2178,10 @@ S3 正式服链接：`npm run generate:s3 -- --target=routeName --params=** --la
 
 * 项目思想参照 nuxt 思想和 ssr 项目思想
 
-### **附件** 
+### **参考资料** 
 
-* [nuxt源码](https://github.com/nuxt/nuxt.js/blob/dev/packages/generator/src/generator.js)
-* [ssr源码](https://github.com/vuejs/vue-hackernews-2.0)
+[Sewar-x/SSG-Demo: 《从零到一搭建移动端SSG项目实践》| Sewen 博客 示例项目，项目仅作学习使用 (github.com)](https://github.com/Sewar-x/SSG-Demo)
+
+[Nuxt源码](https://github.com/nuxt/nuxt.js/blob/dev/packages/generator/src/generator.js)
+
+[SSR 源码](https://github.com/vuejs/vue-hackernews-2.0)
