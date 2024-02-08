@@ -32,7 +32,7 @@
 
 通过以上脚本，解析 `vite` 命令时，会在不同平台下加载对应 Shell 脚本， shell 中使用 node 执行 vite 脚本，vite 脚本位于 `./node_modules/vite/bin/vite.js` 目录下：
 
-![image-20240207171907086](C:\Users\wen6.xu\AppData\Roaming\Typora\typora-user-images\image-20240207171907086.png)
+![image-20240207171907086](../images/image-20240207171907086.png)
 
 > vite 入口文件主要执行以下逻辑：
 >
