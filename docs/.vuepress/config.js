@@ -88,33 +88,34 @@ module.exports = config({
           { text: 'vite专题', link: '../vite/' },
           { text: 'npm', link: '../Front-end-Engineering/npm/' },
           { text: 'Git', link: '../git/' },
-          { text: '自动构建和部署', link: '../Front-end-Engineering/自动构建和部署/' },
+          { text: '自动构建和部署', link: '../projectDeploy/自动构建和部署/' },
         ]
       },
       {
         text: '项目实践',
         ariaLabel: '项目实践',
         items: [
+          { text: '前端部署', link: '../projectDeploy/' },
+          { text: '组件和组件封装实践', link: '../componentsEncapsulation/组件和组件封装实践/' },
+          { text: '登录与单点登录', link: '../projectsSummary/登录与单点登录/' },
+          { text: '权限管理方案实践', link: '../projectsSummary/权限管理方案实践/' },
+          { text: 'Echarts二次封装实践', link: '../projectsSummary/Echarts二次封装实践/' },
+          { text: '文档在线预览和编辑方案', link: '../projectsSummary/文档在线预览和编辑方案/' },
+          { text: '移动端开发实践', link: '../projectsSummary/移动端开发实践/' },
+        ]
+      },
+      {
+        text: '项目搭建',
+        ariaLabel: '项目搭建到原理分析',
+        items: [
+      
           { text: '从零到一搭建Vue2工程化项目', link: '../projectsSummary/从零到一搭建Vue2工程化项目/' },
           { text: '从零到一搭建Vue3工程化项目', link: '../projectsSummary/从零到一搭建Vue3工程化项目/' },
           { text: '从零到一搭建SSR项目', link: '../projectsSummary/从零到一搭建SSR项目/' },
           { text: '从零到一搭建移动端SSG项目', link: '../projectsSummary/从零到一搭建移动端SSG项目/' },
           { text: '移动端SSG项目实践', link: '../projectsSummary/移动端SSG项目实践/' },
           { text: '搭建低代码平台', link: '../projectsSummary/搭建低代码平台/' },
-          { text: '组件和组件封装实践', link: '../componentsEncapsulation/组件和组件封装实践/' },
-          { text: '登录与单点登录', link: '../projectsSummary/登录与单点登录/' },
-          { text: '权限管理方案实践', link: '../projectsSummary/权限管理方案实践/' },
-          { text: 'Echarts二次封装实践', link: '../projectsSummary/Echarts二次封装实践/' },
-          { text: '移动端开发实践', link: '../projectsSummary/移动端开发实践/' },
-          { text: '文档在线预览和编辑方案', link: '../projectsSummary/文档在线预览和编辑方案/' },
           { text: '混合桌面应用开发实践', link: '../projectsSummary/混合桌面应用开发实践/' },
-        ]
-      },
-      {
-        text: '常见问题汇总',
-        ariaLabel: '常见问题汇总',
-        items: [
-          { text: '前端发版静态资源404问题', link: '../workNote/前端发版静态资源404问题/' },
         ]
       },
     ],
@@ -181,9 +182,15 @@ module.exports = config({
         'webpack项目实践',
         'Vue2.5项目webpack分析'
       ],
-      'vite': [
+      '/vite/': [
         '',
         'Vite原理解析'
+      ],
+      '/projectDeploy/':[
+        '',
+        '前端部署原理',
+        '自动构建和部署',
+        '前端发版静态资源404问题'
       ]
     },
 
