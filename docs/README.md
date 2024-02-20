@@ -108,7 +108,7 @@ footer:  MIT Licensed | Copyright © 2023-present
 |                    | [Echarts二次封装实践](https://sewar-x.github.io/projectsSummary/Echarts%E4%BA%8C%E6%AC%A1%E5%B0%81%E8%A3%85%E5%AE%9E%E8%B7%B5/) |                                                              | 💯    |
 |                    | **前端部署**                                                 |                                                              |      |
 |                    |                                                              | [前端自动部署](https://sewar-x.github.io/projectDeploy/自动构建和部署/) | 💯    |
-|                    |                                                              | [前端部署原理](https://sewar-x.github.io/projectDeploy/前端部署原理/) | ❌    |
+|                    |                                                              | [前端部署原理](https://sewar-x.github.io/projectDeploy/前端部署原理/) | 💯    |
 |                    |                                                              | [前端发版静态资源404问题](https://sewar-x.github.io/projectDeploy/%E5%89%8D%E7%AB%AF%E5%8F%91%E7%89%88%E9%9D%99%E6%80%81%E8%B5%84%E6%BA%90404%E9%97%AE%E9%A2%98/) | 💯    |
 |                    | 文档在线预览和编辑方案                                       |                                                              | ❌    |
 |                    | 移动端开发实践                                               |                                                              | ❌    |
