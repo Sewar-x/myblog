@@ -173,7 +173,6 @@ module.exports = config({
       ],
       '/webpack/': [
         '',
-        'webpack专题大纲',
         'webpack构建原理',
         'Loader和Plugin原理',
         'DevServer原理',
