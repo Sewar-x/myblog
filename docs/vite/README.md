@@ -4,13 +4,15 @@
 
 ![Vite](../images/Vite.png)
 
+## **原理**
+
 官方文档 [为什么选 Vite | Vite 官方中文文档 (vitejs.dev)](https://cn.vitejs.dev/guide/why.html) 章节中，详细讲述了 Vite 产生的背景和 Vite 原理。
 
 ## **功能**
 
 ![image-20240221170745135](../images/vite功能.png)
 
- Vite 的主要功能：
+ **Vite 的主要功能：**
 
 |            功能             |                             描述                             |
 | :-------------------------: | :----------------------------------------------------------: |
@@ -89,6 +91,366 @@
 
 
 
-## **Vite 优化**
+## **Vite 构建优化**
 
-### **构建优化**
+|                           优化措施                           |                             描述                             |                             说明                             |
+| :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
+|                        **快速冷启动**                        |   利用原生 ESM 进行快速启动，避免不必要的打包转换和捆绑。    | 当开发者启动 Vite 开发服务器时，由于直接利用原生 ESM，无需进行额外的模块转换或打包，从而实现了快速的启动速度。 |
+|                    **模块热替换（HMR）**                     | 提供高效的 HMR API，实现即时模块更新，无需重新加载页面或清除状态。 | 当开发者在开发过程中修改了某个组件的代码并保存后，Vite 会利用 HMR 功能，仅更新修改的部分，而无需重新加载整个页面，从而提高了开发效率。 |
+| [**预构建依赖**](https://cn.vitejs.dev/guide/dep-pre-bundling.html#dependency-pre-bundling) |    预构建裸模块导入，转换为 ESM 格式，优化页面加载速度。     | 当开发者在项目中导入一个第三方库时，Vite 会在构建过程中预构建这个库的 ESM 版本，并在浏览器中按需加载，从而提高了页面加载速度。 |
+|                       **依赖构建缓存**                       | 1. 使用文件系统缓存V：ite 将预构建的依赖项缓存到 `node_modules/.vite` 中；<br />2.浏览器缓存：已预构建的依赖请求使用 HTTP 头 `max-age=31536000, immutable` 进行强缓存，以提高开发期间页面重新加载的性能。一旦被缓存，这些请求将永远不会再次访问开发服务器。如果安装了不同版本的依赖项（这反映在包管理器的 lockfile 中），则会通过附加版本查询自动失效。 |                                                              |
+|                    **代码拆分和动态导入**                    |    将应用程序拆分为多个小块，按需加载，减少初始加载时间。    | 1. 在一个大型应用中，开发者可以使用动态导入（`import()` 语法）将某些非核心功能拆分为单独的模块，并在需要时异步加载，从而减少初始加载时间。<br />2.CSS 代码分割：Vite 会自动地将一个异步 chunk 模块中使用到的 CSS 代码抽取出来并为其生成一个单独的文件。 |
+|          **Tree Shaking 和 Dead Code Elimination**           | 利用 ES 模块静态结构，移除未使用的代码和依赖，减小打包体积。 | 这个 CSS 文件将在该异步 chunk 加载完成时自动通过一个 `<link>` 标签载入，该异步 chunk 会保证只在 CSS 加载完毕后再执行，避免发生 [FOUC](https://en.wikipedia.org/wiki/Flash_of_unstyled_content#:~:text=A flash of unstyled content,before all information is retrieved.) 。当开发者构建生产版本的应用时，Vite 会利用 Tree Shaking 功能，移除那些未被导入或使用的代码和依赖，从而减小打包后的文件体积。 |
+|                        **压缩和优化**                        |    使用现代压缩算法和优化技术，对生成代码进行压缩和优化。    | Vite 在构建过程中会使用如 Terser 等压缩工具，对生成的代码进行压缩和优化，以减小文件大小并提高加载速度。 |
+|                         **缓存策略**                         | 利用浏览器缓存策略，通过内容哈希确保文件唯一性，避免重复请求。 | 当开发者构建应用并部署到生产环境时，Vite 会为每个文件生成一个唯一的哈希值，并将其作为文件名的一部分。这样，只要文件内容没有变化，浏览器就会从缓存中加载文件，而不是重新请求服务器。 |
+|                         **插件系统**                         | 提供灵活的插件系统，允许开发者扩展功能，如添加新的加载器、优化器或自定义构建逻辑。 | 开发者可以使用 Vite 的插件系统来扩展其功能，例如添加对特定框架或库的支持，或自定义构建逻辑以满足特定需求。 |
+|                      **预加载指令生成**                      | Vite 会为入口 chunk 和它们在打包出的 HTML 中的直接引入自动生成 `<link rel="modulepreload">` 指令。 |                                                              |
+|                   **异步 Chunk 加载优化**                    | Vite 将使用一个预加载步骤自动重写代码，来分割动态导入调用，以实现当 某个模块被请求时，该模块依赖模块也将 **同时** 被请求 |                                                              |
+
+### **异步 Chunk 加载优化**
+
+在实际项目中，Rollup 通常会生成 “共用” chunk —— 被两个或以上的其他 chunk 共享的 chunk。
+
+与动态导入相结合，会很容易出现下面这种场景：
+
+![image-20240221190258118](../images/vite异步Chunk加载优化.png)
+
+在无优化的情境下，当异步 chunk `A` 被导入时，浏览器将必须请求和解析 `A`，然后它才能弄清楚它也需要共用 chunk `C`。这会导致额外的网络往返：
+
+```js
+Entry ---> A ---> C
+```
+
+Vite 将使用一个预加载步骤自动重写代码，来分割动态导入调用，以实现当 `A` 被请求时，`C` 也将 **同时** 被请求：
+
+```js
+Entry ---> (A + C)
+```
+
+`C` 也可能有更深的导入，在未优化的场景中，这会导致更多的网络往返。Vite 的优化会跟踪所有的直接导入，无论导入的深度如何，都能够完全消除不必要的往返。
+
+
+
+## **插件 **
+
+>  [Vite 基于 rollup 的插件系统](https://cn.vitejs.dev/guide/api-plugin.html)
+>
+> 插件使用流程参考：[使用插件 | Vite 官方中文文档 (vitejs.dev)](https://cn.vitejs.dev/guide/using-plugins)
+>
+> 详细插件API 参考： [插件 API | Vite 官方中文文档 (vitejs.dev)](https://cn.vitejs.dev/guide/api-plugin.html)
+
+### [强制插件排序](https://cn.vitejs.dev/guide/using-plugins#enforcing-plugin-ordering)
+
+**Vite 中修改插件排序**
+
+> 为了与某些 Rollup 插件兼容，可能需要强制修改插件的执行顺序，或者只在构建时使用。这应该是 Vite 插件的实现细节。可以使用 `enforce` 修饰符来强制插件的位置:
+>
+> - `pre`：在 Vite 核心插件之前调用该插件
+> - 默认：在 Vite 核心插件之后调用该插件
+> - `post`：在 Vite 构建插件之后调用该插件
+>
+> ```js
+> 解释// vite.config.js
+> import image from '@rollup/plugin-image'
+> import { defineConfig } from 'vite'
+> 
+> export default defineConfig({
+>   plugins: [
+>     {
+>       ...image(),
+>       enforce: 'pre',
+>     },
+>   ],
+> })
+> ```
+>
+> 查看 [Plugins API Guide](https://cn.vitejs.dev/guide/api-plugin.html#plugin-ordering) 获取细节信息，并在 [Vite Rollup 插件](https://vite-rollup-plugins.patak.dev/) 兼容性列表中注意 `enforce` 标签和流行插件的使用说明。
+>
+>  解析后的插件将按照以下顺序排列：`enforce``enforce``pre``post`
+>
+> 1. Alias
+> 2. 带有 的用户插件`enforce: 'pre'`
+> 3. Vite 核心插件
+> 4. 没有 enforce 值的用户插件
+> 5. Vite 构建用的插件
+> 6. 带有 的用户插件`enforce: 'post'`
+> 7. Vite 后置构建插件（最小化，manifest，报告）
+
+
+
+**Rollup 修改插件排序**
+
+> 变钩子的执行：
+>
+> - `order: "pre" | "post" | null`
+>   如果有多个插件实现此钩子，则可以先运行此插件（`"pre"`），最后运行此插件（`"post"`），或在用户指定的位置运行（没有值或 `null`）。
+>
+>   ```js
+>   export default function resolveFirst() {
+>   	return {
+>   		name: 'resolve-first',
+>   		resolveId: {
+>   			order: 'pre',
+>   			handler(source) {
+>   				if (source === 'external') {
+>   					return { id: source, external: true };
+>   				}
+>   				return null; 	
+>   			}
+>   		}
+>   	};
+>   }
+>   ```
+>
+>   如果有多个插件使用 `"pre"` 或 `"post"`，Rollup 将按用户指定的顺序运行它们。此选项可用于所有插件钩子。对于并行钩子，它会更改同步部分运行的顺序。
+
+### [按需应用插件](https://cn.vitejs.dev/guide/using-plugins#conditional-application)
+
+> 默认情况下插件在开发 (serve) 和生产 (build) 模式中都会调用。如果插件在服务或构建期间按需使用，请使用 `apply` 属性指明它们仅在 `'build'` 或 `'serve'` 模式时调用：
+>
+> ```js
+> // vite.config.js
+> import typescript2 from 'rollup-plugin-typescript2'
+> import { defineConfig } from 'vite'
+> 
+> export default defineConfig({
+>   plugins: [
+>     {
+>       ...typescript2(),
+>       apply: 'build',
+>     },
+>   ],
+> })
+> ```
+
+### 插件开发
+
+> Vite 插件扩展了设计出色的 Rollup 接口，带有一些 Vite 独有的配置项。 因此，你只需要编写一个 Vite 插件，就可以同时为开发环境和生产环境工作。
+>
+> Vite 插件开发遵循 Rollup 插件开发，可以参考 [Rollup 插件文档](https://rollupjs.org/plugin-development/)
+
+#### **Rollup 插件**
+
+**是什么？**
+
+> Rollup 插件是一个对象，具有 [属性](https://cn.rollupjs.org/plugin-development/#properties)、[构建钩子](https://cn.rollupjs.org/plugin-development/#build-hooks) 和 [输出生成钩子](https://cn.rollupjs.org/plugin-development/#output-generation-hooks) 中的一个或多个，Rollup的 [约定](https://cn.rollupjs.org/plugin-development/#conventions)。
+>
+> 插件应作为一个导出一个函数的包进行发布，该函数可以使用插件特定的选项进行调用并返回此类对象。
+
+**作用**
+
+插件允许你通过例如在打包之前进行转译代码或在`node_modules`文件夹中查找第三方模块来自定义 Rollup 的行为。
+
+**示例**
+
+>  参见 [使用插件](https://cn.rollupjs.org/tutorial/#using-plugins)。插件列表可以在 [github.com/rollup/awesome](https://github.com/rollup/awesome) 上找到。
+
+以下插件将拦截任何不通过访问文件系统的 `virtual-module` 导入:
+
+创建 `rollup-plugin-my-example.js` 文件定义插件逻辑：
+
+```js
+//rollup-plugin-my-example.js
+export default function myExample () {
+  return {
+    name: 'my-example', // 此名称将出现在警告和错误中
+    resolveId ( source ) {
+      if (source === 'virtual-module') {
+        // 这表示 rollup 不应询问其他插件或
+        // 从文件系统检查以找到此 ID
+        return source;
+      }
+      return null; // 其他ID应按通常方式处理
+    },
+    load ( id ) {
+      if (id === 'virtual-module') {
+        // "virtual-module"的源代码
+        return 'export default "This is virtual!"';
+      }
+      return null; // 其他ID应按通常方式处理
+    }
+  };
+}
+
+```
+
+使用 `rollup-plugin-my-example.js` 插件：
+
+```js
+// rollup.config.js
+import myExample from './rollup-plugin-my-example.js';
+export default ({
+  input: 'virtual-module', // 由我们的插件解析
+  plugins: [myExample()],
+  output: [{
+    file: 'bundle.js',
+    format: 'es'
+  }]
+});
+```
+
+> [约定](https://cn.rollupjs.org/plugin-development/#conventions)：
+>
+> - 插件应该有一个明确的名称，并以`rollup-plugin-`作为前缀。
+> - 在`package.json`中包含`rollup-plugin`关键字。
+> - 插件应该被测试，我们推荐 [mocha](https://github.com/mochajs/mocha) 或 [ava](https://github.com/avajs/ava)，它们支持 Promise。
+> - 可能的话，使用异步方法，例如 `fs.readFile` 而不是 `fs.readFileSync`
+
+### **编写 Vite 插件**
+
+要创建一个 Vite 插件，你可以按照以下步骤进行：
+
+1. 创建一个新的 JavaScript 或 TypeScript 文件。
+2. 导出一个函数，该函数接收 `options` 参数并返回一个对象，该对象定义了 Vite 生命周期钩子的处理函数。
+3. 在每个钩子处理函数中，打印出钩子的名称。
+
+下面是一个简单的示例，展示了如何创建一个 Vite 插件，该插件在 Vite 的所有事件钩子和生命周期中打印输出钩子名称：
+
+```javascript
+// vite-plugin-print-hooks.js  
+  
+export default function vitePluginPrintHooks() {  
+  return {  
+    name: 'vite-plugin-print-hooks',  
+    configResolved(config) {  
+      console.log('configResolved hook called');  
+    },  
+    configureServer(server) {  
+      console.log('configureServer hook called');  
+    },  
+    transform(code, id) {  
+      console.log('transform hook called for', id);  
+      return code;  
+    },  
+    buildStart() {  
+      console.log('buildStart hook called');  
+    },  
+    buildEnd() {  
+      console.log('buildEnd hook called');  
+    },  
+    // ... 其他钩子可以在这里添加  
+  };  
+}
+```
+
+这个插件定义了几个常见的 Vite 钩子，如 `configResolved`、`configureServer`、`transform`、`buildStart` 和 `buildEnd`。当这些钩子被 Vite 调用时，它们会打印出相应的钩子名称。
+
+> Vite 专属的插件需要遵循以下规范：
+>
+> - Vite 插件应该有一个带 前缀、语义清晰的名称。`vite-plugin-`
+> - 在 package.json 中包含 关键字。`vite-plugin`
+> - 在插件文档增加一部分关于为什么本插件是一个 Vite 专属插件的详细说明（如，本插件使用了 Vite 特有的插件钩子）。
+
+要在 Vite 项目中使用这个插件，你需要在 `vite.config.js` 文件中引入并注册它：
+
+```javascript
+// vite.config.js  
+  
+import { defineConfig } from 'vite';  
+import vitePluginPrintHooks from './vite-plugin-print-hooks';  
+  
+export default defineConfig({  
+  plugins: [vitePluginPrintHooks()],  
+  // ... 其他配置  
+});
+```
+
+现在，当你运行 Vite 开发服务器或构建项目时，你应该能在控制台中看到各个钩子被调用的信息。
+
+### **Vite 插件通用钩子**
+
+Vite 开发服务器会创建一个插件容器来调用 [Rollup 构建钩子](https://rollupjs.org/plugin-development/#build-hooks)，与 Rollup 如出一辙。
+
+>  Rollup 钩子主要分为：构建钩子和输出生成钩子。
+>
+>  所有钩子详细文档：[插件开发 | Rollup 中文文档 (rollupjs.org)](https://cn.rollupjs.org/plugin-development/#build-hooks)
+
+#### **构建钩子**
+
+构建钩子在构建阶段运行，该阶段由 `rollup.rollup(inputOptions)` 触发。它们主要涉及在 Rollup 处理输入文件之前定位、提供和转换输入文件。
+
+构建阶段的第一个钩子是 [`options`](https://cn.rollupjs.org/plugin-development/#options)，最后一个钩子始终是 [`buildEnd`](https://cn.rollupjs.org/plugin-development/#buildend)。如果有构建错误，则在此之后将调用 [`closeBundle`](https://cn.rollupjs.org/plugin-development/#closebundle)。
+
+钩子钩子如下：
+
+| 钩子名称       | 作用                                                         |
+| -------------- | ------------------------------------------------------------ |
+| `options`      | 在构建阶段的第一个钩子，用于替换或操作传递给`rollup.rollup()`的选项对象。 |
+| `buildStart`   | 在构建阶段开始时调用的钩子，允许插件执行一些初始化操作。     |
+| `resolveId`    | 解析每个入口点的钩子，用于解析模块的ID。                     |
+| `load`         | 加载模块的钩子，用于加载模块的代码。                         |
+| `transform`    | 转换模块的钩子，用于对模块进行转换。                         |
+| `moduleParsed` | 每次Rollup完全解析一个模块时调用的钩子，用于获取有关模块的信息。 |
+| `onLog`        | 修改日志的钩子，允许插件修改日志级别或内容。                 |
+| `closeWatcher` | 关闭监视器的钩子，用于在构建结束时执行清理操作。             |
+| `buildEnd`     | 在构建结束时调用的钩子，允许插件执行一些清理操作。           |
+
+**构建钩子流程**
+
+![image-20240222151310730](../images/rollup插件钩子.png)
+
+
+
+#### **输出生成钩子**
+
+输出生成钩子可以提供有关生成的产物的信息并在构建完成后修改构建。
+
+它们的工作方式和类型与 [构建钩子](https://cn.rollupjs.org/plugin-development/#build-hooks) 相同，但是对于每个调用 `bundle.generate(outputOptions)` 或 `bundle.write(outputOptions)`，它们都会单独调用。仅使用输出生成钩子的插件也可以通过输出选项传递，并且因此仅针对某些输出运行。
+
+输出生成阶段的第一个钩子是 [`outputOptions`](https://cn.rollupjs.org/plugin-development/#outputoptions)，最后一个钩子是 [`generateBundle`](https://cn.rollupjs.org/plugin-development/#generatebundle)（如果通过 `bundle.generate(...)` 成功生成输出），[`writeBundle`](https://cn.rollupjs.org/plugin-development/#writebundle)（如果通过 `bundle.write(...)` 成功生成输出），或 [`renderError`](https://cn.rollupjs.org/plugin-development/#rendererror)（如果在输出生成期间的任何时候发生错误）。
+
+输出钩子：
+
+| 钩子名称              | 作用                                                     |
+| --------------------- | -------------------------------------------------------- |
+| `outputOptions`       | 输出生成阶段的第一个钩子，允许插件修改输出选项对象。     |
+| `renderChunk`         | 转换单个块的钩子，用于转换每个Rollup输出块的代码。       |
+| `renderDynamicImport` | 处理动态导入表达式的钩子，用于处理动态导入的情况。       |
+| `resolveFileUrl`      | 自定义文件URL解析的钩子，允许插件修改文件的URL解析方式。 |
+| `generateBundle`      | 生成产物的钩子，用于生成输出文件或资源。                 |
+| `writeBundle`         | 写入产物的钩子，用于将生成的文件或资源写入磁盘。         |
+| `renderStart`         | 渲染开始时调用的钩子，用于处理渲染开始时的逻辑。         |
+| `renderError`         | 渲染错误时调用的钩子，用于处理渲染过程中的错误情况。     |
+
+**输出钩子流程**：
+
+![image-20240222152021540](../images/rollup输出钩子流程.png)
+
+
+
+#### **开发服相关钩子**
+
+以下钩子在服务器启动时被调用：
+
+- [`options`](https://rollupjs.org/plugin-development/#options)
+- [`buildStart`](https://rollupjs.org/plugin-development/#buildstart)
+
+以下钩子会在每个传入模块请求时被调用：
+
+- [`resolveId`](https://rollupjs.org/plugin-development/#resolveid)
+- [`load`](https://rollupjs.org/plugin-development/#load)
+- [`transform`](https://rollupjs.org/plugin-development/#transform)
+
+以下钩子在服务器关闭时被调用：
+
+- [`buildEnd`](https://rollupjs.org/plugin-development/#buildend)
+- [`closeBundle`](https://rollupjs.org/plugin-development/#closebundle)
+
+请注意 [`moduleParsed`](https://rollupjs.org/plugin-development/#moduleparsed) 钩子在开发中是 **不会** 被调用的，因为 Vite 为了性能会避免完整的 AST 解析。
+
+
+
+#### **Vite 独有钩子**
+
+| 钩子名称                      | 作用                                                         |
+| ----------------------------- | ------------------------------------------------------------ |
+| `config`                      | 在解析Vite配置前调用，允许插件修改配置或返回部分配置对象。   |
+| `configResolved`              | 在解析Vite配置后调用，用于读取和存储最终解析的配置。         |
+| `configureServer`             | 用于配置开发服务器的钩子，常用于添加自定义中间件或存储服务器实例供其他钩子访问。 |
+| `configurePreviewServer`      | 用于配置预览服务器的钩子，与`configureServer`类似，但用于预览服务器。 |
+| `transformIndexHtml`          | 专用于转换index.html的钩子，允许插件修改HTML字符串或注入标签。 |
+| `handleHotUpdate`             | 执行自定义HMR更新处理的钩子，用于过滤和缩小受影响的模块列表或执行自定义HMR处理。 |
+| `client-server-communication` | 提供实用工具处理与客户端的通信，包括服务端到客户端和客户端到服务端的通信。 |
+| `CustomEventMap`              | 用于自定义事件的TypeScript类型定义指南，允许为自定义事件标注类型。 |
+
+> 详细钩子用法参考：[插件 API | Vite 官方中文文档 (vitejs.dev)](https://cn.vitejs.dev/guide/api-plugin.html#vite-specific-hooks)
