@@ -26,7 +26,7 @@ footer:  MIT Licensed | Copyright © 2023-present
 | ------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ | ---- |
 | **前端基础**       |                                                              |                                                              |      |
 |                    | HTML                                                         |                                                              | ❌    |
-|                    | CSS                                                          |                                                              | ❌    |
+|                    | [CSS](https://sewar-x.github.io/css/)                        |                                                              | 💯    |
 |                    | [JavaScript](https://sewar-x.github.io/javascript/)          |                                                              | 💯🔥   |
 |                    | TypeScript                                                   |                                                              | ❌    |
 |                    |                                                              |                                                              |      |
@@ -71,11 +71,11 @@ footer:  MIT Licensed | Copyright © 2023-present
 |                    |                                                              | Koa 源码分析                                                 | ❌    |
 | **性能优化**       |                                                              |                                                              |      |
 |                    | [性能优化指标和监控](https://sewar-x.github.io/performance/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E6%8C%87%E6%A0%87%E5%92%8C%E7%9B%91%E6%8E%A7/) |                                                              | 💯    |
-|                    | [前端性能优化方案](https://sewar-x.github.io/performance/%E5%89%8D%E7%AB%AF%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E6%96%B9%E6%A1%88/) |                                                              | 💯🔥   |
+|                    | [前端性能优化方案](https://sewar-x.github.io/performance/%E5%89%8D%E7%AB%AF%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E6%96%B9%E6%A1%88/) |                                                              | 💯    |
 |                    | [一次后台管理系统的性能优化](https://sewar-x.github.io/performance/%E4%B8%80%E6%AC%A1%E7%AE%A1%E7%90%86%E5%90%8E%E5%8F%B0%E7%9A%84%E6%B8%B2%E6%9F%93%E4%BC%98%E5%8C%96/) |                                                              | 💯    |
 |                    |                                                              |                                                              |      |
 | **前端工程化**     |                                                              |                                                              |      |
-|                    | [前端工程化](https://sewar-x.github.io/Front-end-Engineering/%E5%89%8D%E7%AB%AF%E5%B7%A5%E7%A8%8B%E5%8C%96/) |                                                              | 💯🔥   |
+|                    | [前端工程化](https://sewar-x.github.io/Front-end-Engineering/%E5%89%8D%E7%AB%AF%E5%B7%A5%E7%A8%8B%E5%8C%96/) |                                                              | 💯    |
 |                    | [前端渲染架构](https://sewar-x.github.io/Front-end-Engineering/%E5%89%8D%E7%AB%AF%E6%B8%B2%E6%9F%93%E6%9E%B6%E6%9E%84/) |                                                              | 💯    |
 |                    | [前端架构实践](https://sewar-x.github.io/Front-end-Engineering/%E5%89%8D%E7%AB%AF%E6%9E%B6%E6%9E%84%E5%AE%9E%E8%B7%B5/) |                                                              | ❌    |
 |                    | **NPM**                                                      |                                                              |      |
@@ -89,9 +89,9 @@ footer:  MIT Licensed | Copyright © 2023-present
 |                    |                                                              | [WebPackAPI 分析](https://sewar-x.github.io/webpack/webpackAPI%E5%88%86%E6%9E%90/) | 💯    |
 |                    |                                                              | [Vue2.5 项目 webpack 构建分析](https://sewar-x.github.io/webpack/Vue2.5%E9%A1%B9%E7%9B%AEwebpack%E5%88%86%E6%9E%90/) | 💯    |
 |                    |                                                              | WebPack 项目实践                                             | ❌    |
-|                    | **Vite**                                                     |                                                              | 💦    |
-|                    |                                                              | [Vite 基础](https://sewar-x.github.io/vite/)                 | 💦    |
-|                    |                                                              | Vite 原理及源码分析                                          | ❌    |
+|                    | **Vite**                                                     |                                                              |      |
+|                    |                                                              | [Vite 基础](https://sewar-x.github.io/vite/)                 | 💯    |
+|                    |                                                              | [Vite 源码分析](https://sewar-x.github.io/vite/Vite原理解析/) | 💯    |
 |                    |                                                              | Vite 项目实践                                                | ❌    |
 |                    | **Git**                                                      |                                                              |      |
 |                    |                                                              | [Git 基础](https://sewar-x.github.io/git/)                   | 💯    |

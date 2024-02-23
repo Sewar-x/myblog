@@ -108,12 +108,11 @@ module.exports = config({
         text: '项目搭建',
         ariaLabel: '项目搭建到原理分析',
         items: [
-      
-          { text: '从零到一搭建Vue2工程化项目', link: '../projectsSummary/从零到一搭建Vue2工程化项目/' },
-          { text: '从零到一搭建Vue3工程化项目', link: '../projectsSummary/从零到一搭建Vue3工程化项目/' },
           { text: '从零到一搭建SSR项目', link: '../projectsSummary/从零到一搭建SSR项目/' },
           { text: '从零到一搭建移动端SSG项目', link: '../projectsSummary/从零到一搭建移动端SSG项目/' },
           { text: '移动端SSG项目实践', link: '../projectsSummary/移动端SSG项目实践/' },
+          { text: '从零到一搭建Vue2工程化项目', link: '../projectsSummary/从零到一搭建Vue2工程化项目/' },
+          { text: '从零到一搭建Vue3工程化项目', link: '../projectsSummary/从零到一搭建Vue3工程化项目/' },
           { text: '搭建低代码平台', link: '../projectsSummary/搭建低代码平台/' },
           { text: '混合桌面应用开发实践', link: '../projectsSummary/混合桌面应用开发实践/' },
         ]
