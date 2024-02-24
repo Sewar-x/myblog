@@ -1,6 +1,6 @@
 # JavaScript 基础
 
-### ES6新特性
+## ES6新特性
 
 1. let const
 2. 字符串、数组、对象的方法扩展
@@ -12,7 +12,7 @@
 
 详情可参考：[ES6 入门教程 - 阮一峰](https://es6.ruanyifeng.com/)
 
-### 严格模式的限制
+## 严格模式的限制
 
 1. 变量必须声明后再使用
 2. 函数的参数不能有同名属性，否则报错
@@ -30,7 +30,7 @@
 14. 不能使用fn.caller和fn.arguments获取函数调用的堆栈
 15. 增加了保留字（比如protected、static和interface）
 
-### Script 标签加载脚本
+## Script 标签加载脚本
 
 ![](../images/script3.png)
 
@@ -38,7 +38,7 @@
 
 ![script1](../images/script1.png)
 
-### JS 延迟加载方式
+## JS 延迟加载方式
 
  js延迟加载，也就是等页面加载完成之后再加载JavaScript文件。js延迟加载有助于提高页面加载速度
 
@@ -52,11 +52,11 @@
 
 
 
-### 内存分类
+## 内存分类
 
 ![](../images/neicunfenlei.png)
 
-### 数据类型
+## 数据类型
 
 * 基本类型：Number、Boolean、String、null、undefined、symbol（ES6 新增的）， BigInt（ES2020） 
 * 引用类型：Object
@@ -125,7 +125,7 @@
 
 
 
-### 精度丢失
+## 精度丢失
 
 * 解释一：
 
@@ -145,7 +145,7 @@
 
   总结：**精度丢失可能出现在进制转换和对阶运算中**
 
-### 整数相关问题
+## 整数相关问题
 
 > **JS整数是怎么表示的？**
 
@@ -157,7 +157,7 @@
 
 
 
-### 显示转换&隐式转换
+## 显示转换&隐式转换
 
 **显示转换**
 
@@ -180,7 +180,7 @@
 
 
 
-### 运算符规则
+## 运算符规则
 
 **加号规则**
 
@@ -198,7 +198,7 @@
 
 ![](../images/booleancaozuo.png)
 
-### 位运算符
+## 位运算符
 
 * 位运算符工作于32位的数字上。任何数字操作都将转换为32位。结果会转换为 JavaScript 数字。
 
@@ -213,9 +213,9 @@
 
   (引用[菜鸟教程-JavaScript 位运算符](https://www.runoob.com/jsref/jsref-operators.html))
 
-#### 异或运算
+### 异或运算
 
-##### 运算规则
+#### 运算规则
 
 * 异或（eor）是一个数学运算符。它应用于逻辑运算。异或的数学符号为“⊕”，计算机符号为“eor”。其运算法则为：
   * **相同为0，不同为1**：
@@ -225,7 +225,7 @@
   * **满足交换律**： `a ^ b = b ^ a`；
   * **满足结合律**： `(a ^ b) ^ c = a ^ (b ^ c)`；
 
-##### 使用场景
+#### 使用场景
 
 * **异或运算交换两个数**：
 
@@ -258,7 +258,7 @@
     > * 加密：`const cipher = text ^ key`
     > * 解密：`const text = (text ^ key) ^ key`
 
-##### 算法题
+#### 算法题
 
 * 题目：
 
@@ -288,7 +288,7 @@
 
   
 
-### [尾后逗号](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Trailing_commas)
+## [尾后逗号](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Trailing_commas)
 
 **尾后逗号** （有时叫做“终止逗号”）在向 JavaScript 代码添加元素、参数、属性时十分有用。如果你想要添加新的属性，并且上一行已经使用了尾后逗号，你可以仅仅添加新的一行，而不需要修改上一行。这使得版本控制的代码比较（diff）更加清晰，代码编辑过程中遇到的麻烦更少。
 
@@ -307,7 +307,7 @@ a.length // 3
 
 
 
-### Symbol
+## Symbol
 
 **Symbol 是什么？**
 
@@ -338,7 +338,7 @@ a.length // 3
 
 
 
-### typeof 操作符
+## typeof 操作符
 
 ![](../images/typeof.png)
 
@@ -355,13 +355,13 @@ Object.prototype.toString.call(/regex-literal/i);  //"[objectRegExp]"
 
 
 
-### instanceof 操作符
+## instanceof 操作符
 
 ![](../images/instanceof-mind.png)
 
 
 
-### 数据类型判断方法
+## 数据类型判断方法
 
 * 判断数据类型方法
 
@@ -373,11 +373,11 @@ Object.prototype.toString.call(/regex-literal/i);  //"[objectRegExp]"
 
 
 
-### 数组创建和检测
+## 数组创建和检测
 
 ![](../images/array.png)
 
-### 数组方法
+## 数组方法
 
 ![](../images/array5.png)
 
@@ -387,7 +387,7 @@ Object.prototype.toString.call(/regex-literal/i);  //"[objectRegExp]"
 
 ![array1](../images/array1.png)
 
-### 数组迭代
+## 数组迭代
 
 ![](../images/array4.png)
 
@@ -420,7 +420,7 @@ Object.prototype.toString.call(/regex-literal/i);  //"[objectRegExp]"
 
 
 
-### 类数组
+## 类数组
 
 **类数组概念:**
 
@@ -442,9 +442,9 @@ Object.prototype.toString.call(/regex-literal/i);  //"[objectRegExp]"
 * Array.prototype.splice.call(arrayLike,0)
 * Array.prototype.concat.apply([],arrayLike)
 
-### 字符串
+## 字符串
 
-#### 字符串的不可变性
+### 字符串的不可变性
 
 * 在JavaScript中，字符串是不可变的（immutable），这意味着一旦**字符串被创建，就无法对其进行修改**。
 * 当你对字符串执行某些操作时，实际上是创建了一个新的字符串，而原始字符串保持不变。
@@ -464,6 +464,8 @@ Object.prototype.toString.call(/regex-literal/i);  //"[objectRegExp]"
 **参考资料：**
 
 [JavaScript深入之类数组对象与arguments](https://github.com/mqyqingfeng/Blog/issues/14)
+
+## **Object 对象**
 
 ### 对象访问
 
@@ -568,7 +570,7 @@ Object.prototype.toString.call(/regex-literal/i);  //"[objectRegExp]"
 
 
 
-### 深浅拷贝
+## 深浅拷贝
 
 ![](../images/copy.png)
 
@@ -611,6 +613,8 @@ Object.prototype.toString.call(/regex-literal/i);  //"[objectRegExp]"
 
 
 
+## **集合**
+
 ### Set 集合
 
 ![set](../images/set.png)
@@ -636,7 +640,7 @@ Object.prototype.toString.call(/regex-literal/i);  //"[objectRegExp]"
 * ES6 考虑到了这一点，推出了两种新的数据结构：[WeakSet](http://es6.ruanyifeng.com/#docs/set-map#WeakSet) 和 [WeakMap](http://es6.ruanyifeng.com/#docs/set-map#WeakMap)。它们对于值的引用都是不计入垃圾回收机制的，所以名字里面才会有一个"Weak"，表示这是弱引用。
 * 基本上，如果你要往对象上添加数据，又不想干扰垃圾回收机制，就可以使用 WeakMap。
 
-
+## **变量**
 
 ### 变量声明方式
 
@@ -784,14 +788,29 @@ for(var i=0; i<=5; i++) {
 
 
 
-### this 和 this 绑定
+## this 和 this 绑定
 
-* this 绑定主要有：
-  * 默认绑定
-  * 隐式绑定
-  * 显示绑定： call()、apply()、bind()
-  * new 绑定
-  * 函数绑定
+在 JavaScript 中，`this` 关键字是一个特殊的关键字，它在函数被调用时确定其值。`this` 的值是在函数执行时动态绑定的，而不是在函数定义时绑定的。
+
+注意：在严格模式（`'use strict'`）下，全局执行上下文中的 `this` 是 `undefined`，而不是全局对象。
+
+this 绑定主要有：
+* 默认绑定
+* 隐式绑定
+* 显示绑定： call()、apply()、bind()
+* new 绑定
+* 函数绑定
+
+
+
+|          绑定方式           |                             说明                             |                             特点                             |
+| :-------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
+|     **全局执行上下文**      | 在全局作用域中，`this` 指向全局对象（在浏览器中是 `window`）。 | 当你在全局作用域中调用一个函数，且该函数内部没有显式地设置 `this` 的值时，`this` 会指向全局对象。 |
+|        **函数调用**         |  当一个函数以函数调用的方式执行时，`this` 绑定到全局对象。   |          这就是在全局作用域中直接调用函数时的情况。          |
+|        **对象方法**         |   当一个函数作为对象的方法被调用时，`this` 绑定到该对象。    |    当你在一个对象上调用它的方法时，`this` 会指向该对象。     |
+|        **构造函数**         | 当一个函数以构造函数的方式调用时（使用 `new` 关键字），`this` 绑定到新创建的对象。 | 构造函数是一种特殊类型的函数，用于初始化一个新创建的对象。在构造函数内部，`this` 指向新创建的对象。 |
+| **`call`、`apply`、`bind`** | 你可以使用 `call`、`apply` 或 `bind` 方法来显式地设置 `this` 的值。 | 这些方法允许你控制函数执行时 `this` 的值。`call` 和 `apply` 会立即调用函数，而 `bind` 会返回一个新的函数，该函数在调用时具有指定的 `this` 值。 |
+|        **箭头函数**         | 箭头函数不绑定自己的 `this`，而是从包含它的函数或全局作用域中继承 `this`。 | 箭头函数提供了一种简洁的方式来定义函数，同时保持 `this` 的上下文不变。这对于在回调函数和其他情况下保持 `this` 的正确引用非常有用。 |
 
 ![](../images/this.png)
 
@@ -819,7 +838,7 @@ for(var i=0; i<=5; i++) {
 
 
 
-### 执行环境&环境栈
+## 执行环境&环境栈
 
 **执行环境**
 
@@ -829,7 +848,7 @@ for(var i=0; i<=5; i++) {
 
 ![](../images/huanjingzhan.png)
 
-### 作用域&作用域链
+## 作用域&作用域链
 
 ![](../images/zuoyonyu-zuoyongyulian.png)
 
@@ -853,7 +872,7 @@ for(var i=0; i<=5; i++) {
 
 
 
-### 闭包
+## 闭包
 
 ![](../images/bibao.png)
 
@@ -1069,7 +1088,7 @@ for(var i=0; i<=5; i++) {
 
 
 
-### Prototype 对象
+## Prototype 对象
 
 ![](../images/yuanxingduixiang.png)
 
@@ -1095,7 +1114,7 @@ for(var i=0; i<=5; i++) {
 
 
 
-### Prototype属性和proto 属性
+## Prototype属性和proto 属性
 
 ![](../images/prototype.png)
 
@@ -1113,7 +1132,7 @@ for(var i=0; i<=5; i++) {
 > * `B.prototype` 指向 B 的原型对象，B 的原型对象中包含 B 的构造函数 constructor 和属性；
 > * `B.prototype.__proto__` 指向 A 的原型对象，即为 B 原型对象中 [[Prototype]]  属性；
 
-### 获取原型方法
+## 获取原型方法
 
 * `p.__proto`__
 
@@ -1122,7 +1141,7 @@ for(var i=0; i<=5; i++) {
 
 
 
-### constructor 属性
+## constructor 属性
 
 ![](../images/construct.png)
 
@@ -1130,7 +1149,7 @@ for(var i=0; i<=5; i++) {
 
 
 
-### 原型&原型链
+## 原型&原型链
 
 ![](../images/yuanxing.png)
 
@@ -1145,6 +1164,8 @@ for(var i=0; i<=5; i++) {
     * ![image-20210713011124954](../images/原型链查找.png)
 
 
+
+## **函数**
 
 ### ES5 函数
 
@@ -1200,6 +1221,8 @@ for(var i=0; i<=5; i++) {
 
 ![](../images/hanshukelihua.png)
 
+## **对象**
+
 ### 创建对象方式有哪些
 
 ![](../images/createObject.png)
@@ -1246,6 +1269,8 @@ for(var i=0; i<=5; i++) {
 
 
 
+## **类**
+
 ### Class 类
 
 ![class](../images/class.png)
@@ -1264,15 +1289,15 @@ for(var i=0; i<=5; i++) {
 
 
 
-### Reflect 对象
+## Reflect 对象
 
 ![](../images/reflect.png)
 
-### [Object.defineProperty](https://devdoc.net/web/developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperties.html)
+## [Object.defineProperty](https://devdoc.net/web/developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperties.html)
 
 ![](../images/Object.defineProperty.png)
 
-### [Proxy 对象](https://es6.ruanyifeng.com/#docs/proxy) 
+## [Proxy 对象](https://es6.ruanyifeng.com/#docs/proxy) 
 
 ![](../images/proxy1.png)
 
@@ -1324,7 +1349,7 @@ for(var i=0; i<=5; i++) {
 
 * **更好的语法支持**：Proxy的语法更简洁直观，可以通过定义一个代理对象来统一拦截操作，而不需要分散处理每个属性。
 
-### 模块加载方案和区别
+## 模块加载方案
 
 ![](../images/module1.png)
 
@@ -1394,7 +1419,7 @@ commonjs 核心就是 require 语句
 
 
 
-### 定时器
+## 定时器
 
 ![](../images/dingshi1.png)
 
@@ -1463,7 +1488,7 @@ commonjs 核心就是 require 语句
 
 
 
-### 垃圾回收
+## 垃圾回收
 
 ![](../images/lajihuishou.png)**V8引擎的垃圾回收机制**
 
@@ -1585,7 +1610,7 @@ v8的垃圾回收机制基于分代回收机制，这个机制又基于世代假
 
 
 
-### AJax 是什么？
+## AJax 
 
 ![](../images/ajax1.png)
 
@@ -1599,7 +1624,7 @@ v8的垃圾回收机制基于分代回收机制，这个机制又基于世代假
 
 
 
-### 消息推送技术
+## 消息推送技术
 
 ![](../images/tuisongjishu.png)
 
@@ -1619,7 +1644,7 @@ v8的垃圾回收机制基于分代回收机制，这个机制又基于世代假
 
 
 
-### 跨页面通信方法
+## 跨页面通信方法
 
 在浏览器中，我们可以同时打开多个Tab页，每个Tab页可以粗略理解为一个“独立”的运行环境，即使是全局对象也不会在多个Tab间共享。然而有些时候，我们希望能在这些“独立”的Tab页面之间同步页面的数据、信息或状态，因此需要跨页面通信。
 
@@ -1777,7 +1802,7 @@ v8的垃圾回收机制基于分代回收机制，这个机制又基于世代假
 
 ***
 
-### Iframe框架
+## Iframe框架
 
 * 概念：
 
@@ -1825,11 +1850,11 @@ v8的垃圾回收机制基于分代回收机制，这个机制又基于世代假
 
 [`<iframe>` MDN](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/iframe)
 
-### BOM
+## BOM
 
 ![](../images/bom.png)
 
-### DOM
+## DOM
 
 ![](../images/dom.png)
 
@@ -1837,7 +1862,7 @@ v8的垃圾回收机制基于分代回收机制，这个机制又基于世代假
 
 ![](../images/event.png)
 
-### 事件流
+## 事件流
 
 事件流是网页元素接收事件的顺序，"DOM2级事件"规定的事件流包括三个阶段：
 

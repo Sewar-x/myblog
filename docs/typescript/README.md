@@ -717,3 +717,150 @@ console.log(area(rectangle)); // 输出矩形的面积
 > 在这个例子中，`Shape` 是一个可识别联合类型，因为它有一个 `kind` 属性，该属性在每个成员类型中都有不同的值（`"circle"` 或 `"rectangle"`）。这使得我们可以安全地根据 `kind` 的值来确定如何计算面积。
 
 通过使用可识别联合类型，我们可以编写更加类型安全的代码，因为 TypeScript 能够在编译时确定每个变量的具体类型。
+
+## **交叉类型**
+
+TypeScript的交叉类型（Intersection Types）是将多个类型合并为一个类型的方式。这意味着你可以将现有的多种类型叠加到一起，形成一个新的类型，这个新类型将包含所有原类型的特性。
+
+交叉类型是通过使用`&`运算符来定义的。
+
+例如，假设你有两个接口`IPerson`和`IWorker`，分别定义了人的基本信息和工作信息。你可以使用交叉类型来创建一个新的类型`IStaff`，这个类型将同时包含`IPerson`和`IWorker`的所有成员。
+
+```typescript
+interface IPerson {  
+  id: string;  
+  age: number;  
+}  
+  
+interface IWorker {  
+  companyId: string;  
+}  
+  
+type IStaff = IPerson & IWorker;  
+  
+const staff: IStaff = {  
+  id: 'E1006',  
+  age: 33,  
+  companyId: 'EXE'  
+};
+```
+
+> 在这个例子中，`IStaff`类型就是一个交叉类型，它包含了`IPerson`和`IWorker`的所有成员。因此，当你创建一个`IStaff`类型的变量时，你需要提供所有这些成员的值。
+
+交叉类型在TypeScript中非常有用，特别是在你需要组合多个类型的特性时。例如，在混入（Mixins）或其他不适合典型面向对象模型的地方，你经常会看到交叉类型的使用。
+
+## **函数**
+
+### **TypeScript 函数与 JavaScript 函数的区别**
+
+| TypeScript     | JavaScript         |
+| -------------- | ------------------ |
+| 含有类型       | 无类型             |
+| 箭头函数       | 箭头函数（ES2015） |
+| 函数类型       | 无函数类型         |
+| 必填和可选参数 | 所有参数都是可选的 |
+| 默认参数       | 默认参数           |
+| 剩余参数       | 剩余参数           |
+| 函数重载       | 无函数重载         |
+
+### **函数类型**
+
+以下是几种常见的函数分类以及它们的特点：
+
+|     分类     |                             特点                             |                             示例                             |
+| :----------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
+| **普通函数** |            最基本的函数形式，没有特殊修饰或特性。            | function greet(name: string): string {<br> return `Hello, ${name}!`;<br>} |
+| **箭头函数** | 使用 `=>` 语法定义，更简洁的语法，没有自己的 `this`、`arguments`、`super` 或 `new.target`。 | `const greet = (name: string): string => `Hello, ${name}!`;` |
+| **构造函数** |   使用 `new` 关键字调用的函数，通常用于创建和初始化对象。    | class Person {<br> constructor(public name: string) {}<br>}<br>const person = new Person("Alice"); |
+| **工厂函数** |         返回一个对象的函数，而不是直接创建一个对象。         | function createPerson(name: string): Person {<br> return new Person(name);<br>}<br>const person = createPerson("Alice"); |
+|   **方法**   |      定义在对象或类上的函数，通过对象或类的实例来调用。      | class Person {<br> greet(): string {<br> return `Hello, ${this.name}!`;<br> }<br>}<br>const person = new Person("Alice");<br>person.greet(); |
+|  **访问器**  |             允许你读取、设置或修改类的私有属性。             | class Person {<br> private _name: string;<br> get name(): string {<br> return this._name;<br> }<br> set name(value: string) {<br> this._name = value;<br> }<br>}<br>const person = new Person();<br>person.name = "Alice";<br>console.log(person.name); |
+| **重载函数** |         同一个函数名，但参数列表不同的多个函数定义。         | function greet(name: string): string;<br>function greet(age: number): string;<br>function greet(input: string) |
+| **抽象方法** |        在类中声明但没有实现的方法，必须在子类中实现。        | abstract class Animal {<br> abstract makeSound(): void;<br>}<br>class Dog extends Animal {<br> makeSound(): void {<br> console.log("Woof!");<br> }<br>} |
+
+### **函数参数**
+
+TypeScript 的函数参数具有以下特点：
+
+|     特点     |                             说明                             |                             示例                             |
+| :----------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
+| **类型注解** |   参数可以有明确的类型注解，这有助于增强代码的类型安全性。   | function greet(name: string): void {<br> console.log(`Hello, ${name}!`);<br>} |
+|  **默认值**  | 参数可以指定默认值，当调用函数时未提供该参数时，将使用默认值。 | function greet(name: string = "Anonymous"): void {<br> console.log(`Hello, ${name}!`);<br>} |
+| **可选参数** |  使用 `?` 标记的参数是可选的，调用函数时可以省略这些参数。   | function greet(name: string, greeting?: string): void {<br> const msg = greeting<br/>} |
+| **剩余参数** | 使用 `...` 标记的参数可以接收任意数量的参数，这些参数被收集到一个数组中。 | function sum(...numbers: number[]): number {<br> return numbers.reduce((a, b) => a + b, 0);<br>} |
+| **参数解构** |        可以使用解构赋值来直接提取对象或数组的参数值。        | function introduce({ name, age }: { name: string, age: number }): void {<br> console.log(`My name is ${name} and I'm ${age} years old.`);<br>} |
+| **参数验证** | TypeScript 会在编译时检查参数的类型和数量，确保调用者提供了正确类型和数量的参数。 |                              -                               |
+|   **重载**   | 函数可以有多个重载定义，允许**同一个函数名接受不同类型的参数**。 | function reverse(s: string): string;<br>function reverse(a: number[]): number[];<br>function reverse(input: any): any {<br> return Array.isArray(input) ? input.reverse() : input.split('').reverse().join('');<br>} |
+
+### **箭头函数**
+
+在 TypeScript 中，箭头函数 (`arrow function`) 提供了一种更简洁、更优雅的函数表达式语法。箭头函数使用 `=>` 符号来定义，并且它们有自己的特性，与常规函数（也被称为“函数声明”或“函数表达式”）有所不同。
+
+**特点**：
+
+1. **简洁的语法**：箭头函数语法更简洁，尤其是对于没有自己 `this`、`arguments`、`super` 或 `new.target` 的函数。
+2. **不绑定自己的 `this`**：箭头函数不会创建自己的 `this` 上下文，它们只是从包含它们的代码中继承 `this`。这使得它们非常适合于回调函数和作为对象的方法，因为它们不会意外地改变 `this` 的绑定。
+3. **不绑定 `arguments` 对象**：箭头函数也没有 `arguments` 对象。如果你需要在函数内部访问所有参数，可以使用剩余参数语法（`...args`）。
+4. **不能用作构造函数**：箭头函数不能用作构造函数，也就是说，它们不能配合 `new` 关键字使用来创建对象。
+5. **没有 `prototype` 属性**：箭头函数没有 `prototype` 属性，因此它们不能用作类构造函数。
+6. **更短的函数体**：如果函数体只有一个表达式，可以省略大括号，并且该表达式的结果将自动作为函数的返回值。
+
+**示例**：
+
+```typescript
+// 简单的箭头函数  
+const greet = (name: string) => `Hello, ${name}!`;  
+  
+// 作为回调函数使用  
+const numbers = [1, 2, 3, 4, 5];  
+const squares = numbers.map(x => x * x); // [1, 4, 9, 16, 25]  
+  
+// 在类中使用箭头函数作为方法  
+class MyClass {  
+  value: number;  
+  
+  constructor(value: number) {  
+    this.value = value;  
+  }  
+  
+  // 使用箭头函数来确保 `this` 指向 MyClass 实例  
+  increment = () => {  
+    this.value++;  
+  }  
+  
+  // 常规函数，`this` 绑定到调用上下文  
+  regularFunction() {  
+    this.value++;  
+  }  
+}  
+  
+const obj = new MyClass(5);  
+obj.increment(); // 使用箭头函数，`this` 指向 obj  
+obj.regularFunction(); // 调用错误，因为 `this` 可能是 undefined 或 null  
+  
+// 使用箭头函数作为对象字面量中的方法  
+const obj2 = {  
+  value: 10,  
+  increment: () => {  
+    this.value++; // 注意：这里的 `this` 不是 obj2，因为箭头函数不绑定自己的 `this`
+    console.log(this) // 执行时输出 windows 对象
+  }  
+};  
+  
+obj2.increment(); // `this` 在这里不会指向 obj2，所以不会报错，但也不会按预期工作，此时 this 指向 windows
+
+const obj3 = {  
+  value: 20,  
+  increment: function() {  
+    this.value++; // 注意：这里的 `this` 绑定当前对象
+    console.log(this) // 输出 obj3
+  }  
+};  
+  
+obj3.increment(); // 会按预期工作
+```
+
+> 在上面的示例中，可以看到箭头函数 `increment` 在 `MyClass` 类中被用来确保 `this` 指向的是类的实例。相比之下，`regularFunction` 方法在调用时可能会遇到 `this` 绑定错误的问题，因为常规函数有自己的 `this` 上下文。
+>
+> 在最后一个示例中，箭头函数 `increment` 作为对象 `obj2` 的方法被定义，但由于箭头函数不绑定自己的 `this`，所以 `this` 在函数内部不会指向 `obj2`。这展示了箭头函数在处理 `this` 时的特殊行为。
+
