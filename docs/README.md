@@ -27,8 +27,8 @@ footer:  MIT Licensed | Copyright © 2023-present
 | **前端基础**       |                                                              |                                                              |      |
 |                    | HTML                                                         |                                                              | ❌    |
 |                    | [CSS](https://sewar-x.github.io/css/)                        |                                                              | 💯    |
-|                    | [JavaScript](https://sewar-x.github.io/javascript/)          |                                                              | 💯🔥   |
-|                    | TypeScript                                                   |                                                              | ❌    |
+|                    | [JavaScript](https://sewar-x.github.io/javascript/)          |                                                              | 💯    |
+|                    | [TypeScript](https://sewar-x.github.io/typescript/)          |                                                              | ❌    |
 |                    |                                                              |                                                              |      |
 | **计算机基础**     |                                                              |                                                              |      |
 |                    | [数据结构和算法](https://sewar-x.github.io/algorithms/)      |                                                              |      |
