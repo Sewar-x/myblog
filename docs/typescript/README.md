@@ -54,7 +54,7 @@ $ tsc helloworld.ts
 
 > TypeScript Playground：https://www.typescriptlang.org/play/
 
-## **TypeScript 核心概念**
+## **核心概念**
 
 |        核心概念        |                           描述说明                           |
 | :--------------------: | :----------------------------------------------------------: |
@@ -80,7 +80,7 @@ $ tsc helloworld.ts
 |      **索引类型**      | 索引类型允许开发者通过字符串或数字索引来访问对象的属性。这有助于处理具有动态属性名的对象。 |
 |     **关键字类型**     | TypeScript提供了一些内置的关键字类型，如`any`、`void`、`null`、`undefined`等，用于处理特殊的类型情况。 |
 
-## TypeScript 基础类型
+## 基础类型
 
 ### Boolean 类型
 
@@ -414,7 +414,7 @@ type Foo = string | number | boolean;
 
 `controlFlowAnalysisWithNever` 方法总是穷尽了 Foo 的所有可能类型。 通过这个示例，我们可以得出一个结论：**使用 never 避免出现新增了联合类型没有对应的实现，目的就是写出类型绝对安全的代码。**
 
-## TypeScript 断言
+## 断言
 
 有时候你会遇到这样的情况，你会比 TypeScript 更了解某个值的详细信息。通常这会发生在你清楚地知道一个实体具有比它现有类型更确切的类型。
 
@@ -749,6 +749,267 @@ const staff: IStaff = {
 
 交叉类型在TypeScript中非常有用，特别是在你需要组合多个类型的特性时。例如，在混入（Mixins）或其他不适合典型面向对象模型的地方，你经常会看到交叉类型的使用。
 
+
+
+## **数组**
+
+### **数组解构**
+
+在 TypeScript 中，数组解构是一种方便的方式来提取数组中的元素，并将其赋值给变量。解构赋值使得代码更加简洁，可读性更强。
+
+下面是一些 TypeScript 数组解构的示例：
+
+#### **基本数组解构**
+
+```typescript
+const numbers = [1, 2, 3];  
+const [first, second, third] = numbers;  
+  
+console.log(first); // 输出 1  
+console.log(second); // 输出 2  
+console.log(third); // 输出 3
+```
+
+> 在这个例子中，我们创建了一个名为 `numbers` 的数组，然后使用解构赋值将数组的前三个元素分别赋值给 `first`、`second` 和 `third` 变量。
+
+#### 剩余元素解构
+
+如果数组有更多的元素，而你只需要提取部分元素，可以使用剩余语法（`...`）来捕获剩余的元素。
+
+```typescript
+const numbers = [1, 2, 3, 4, 5];  
+const [first, ...rest] = numbers;  
+  
+console.log(first); // 输出 1  
+console.log(rest);  // 输出 [2, 3, 4, 5]
+```
+
+> 在这个例子中，`first` 变量被赋值为数组的第一个元素，而 `rest` 变量则是一个包含剩余元素的新数组。
+
+#### 忽略某些元素
+
+如果你不想将某些元素赋值给变量，可以在解构中使用下划线（`_`）来忽略它们。
+
+```typescript
+const numbers = [1, 2, 3, 4, 5];  
+const [, second, , fourth] = numbers;  
+  
+console.log(second); // 输出 2  
+console.log(fourth); // 输出 4
+```
+
+> 在这个例子中，我们忽略了数组的第一个和第三个元素，只将第二个和第四个元素分别赋值给 `second` 和 `fourth` 变量。
+
+#### 解构赋值的类型推断
+
+TypeScript 会在解构赋值时进行类型推断，确保变量的类型与数组元素的类型一致。
+
+```typescript
+const numbers: number[] = [1, 2, 3];  
+const [a, b, c]: [number, number, number] = numbers;  
+  
+console.log(a); // 输出 1，类型为 number  
+console.log(b); // 输出 2，类型为 number  
+console.log(c); // 输出 3，类型为 number
+```
+
+> 在这个例子中，虽然我们没有显式地为 `a`、`b` 和 `c` 指定类型，但 TypeScript 会根据 `numbers` 数组的类型推断出它们的类型都是 `number`。
+
+
+
+### **数组展开运算符**
+
+在 TypeScript（以及 JavaScript）中，数组展开运算符（Spread Operator）用于将一个数组的元素展开到另一个数组或者一个函数调用中。这可以让我们在不复制整个数组的情况下，轻松地组合或克隆数组。展开运算符使用三个点（`...`）来表示。
+
+下面是几个 TypeScript 中数组展开运算符的用法示例：
+
+#### **数组克隆**
+
+使用展开运算符可以创建一个数组的浅拷贝。
+
+```typescript
+const originalArray = [1, 2, 3];  
+const clonedArray = [...originalArray];  
+  
+console.log(clonedArray); // 输出 [1, 2, 3]
+```
+
+#### **数组合并**
+
+可以将多个数组使用展开运算符合并成一个新数组。
+
+```typescript
+const array1 = [1, 2, 3];  
+const array2 = [4, 5, 6];  
+const combinedArray = [...array1, ...array2];  
+  
+console.log(combinedArray); // 输出 [1, 2, 3, 4, 5, 6]
+```
+
+#### **函数参数**
+
+在函数调用中，可以使用展开运算符将数组的元素作为单独的参数传递。
+
+```typescript
+function sum(a: number, b: number, c: number) {  
+  return a + b + c;  
+}  
+  
+const numbers = [1, 2, 3];  
+const result = sum(...numbers);  
+  
+console.log(result); // 输出 6
+```
+
+#### **与解构赋值结合使用**
+
+展开运算符还可以与解构赋值结合使用，用于复制数组并替换其中的某些元素。
+
+```typescript
+const originalArray = [1, 2, 3];  
+const [first, ...rest] = originalArray;  
+const newArray = [...rest, 4];  
+  
+console.log(newArray); // 输出 [2, 3, 4]
+```
+
+> 在这个例子中，我们创建了一个新的数组 `newArray`，它包含了 `originalArray` 中除了第一个元素之外的所有元素，并在末尾添加了一个新的元素 `4`。
+
+#### 注意事项
+
+- 展开运算符执行的是**浅拷贝**，所以如果数组中的元素是对象或其他数组，拷贝后的新数组中的这些元素将仍然引用原始对象或数组。
+- 展开运算符不会改变原始数组。
+
+这些用法使得数组展开运算符在 TypeScript 中成为了一种非常有用且灵活的工具，用于处理数组数据。
+
+### **数组遍历**
+
+在 TypeScript 中，你可以使用多种方法来遍历数组。以下是一些常见的遍历数组的方法：
+
+#### **for 循环**
+
+传统的 for 循环可以用来遍历数组。
+
+```typescript
+const numbers: number[] = [1, 2, 3, 4, 5];  
+for (let i = 0; i < numbers.length; i++) {  
+  console.log(numbers[i]);  
+}
+```
+
+
+
+#### **forEach 方法**
+
+`Array.prototype.forEach` 方法用于对数组的每个元素执行一次提供的函数。
+
+```typescript
+const numbers: number[] = [1, 2, 3, 4, 5];  
+numbers.forEach(number => {  
+  console.log(number);  
+});
+```
+
+> **特点：**
+>
+> 1. **遍历数组**：`forEach` 用于遍历数组的每个元素，并对每个元素执行一次提供的函数。
+> 2. **回调函数**：`forEach` 接受一个回调函数作为参数，这个回调函数会被数组的每个元素调用一次。回调函数可以接收三个参数：当前元素值、当前元素的索引和数组本身。
+> 3. **不改变原数组**：`forEach` 方法不会改变原数组的内容。它只是简单地遍历数组，并对每个元素执行回调函数。
+> 4. **无返回值**：`forEach` 方法本身没有返回值（返回 `undefined`）。它主要用于执行操作，而不是用于生成新数组或收集处理结果。
+> 5. **类型安全**：在 TypeScript 中，`forEach` 方法可以利用类型系统来提供类型安全。你可以为回调函数的参数指定类型，以确保类型匹配和代码健壮性。
+> 6. **易于使用**：`forEach` 方法的使用相对简单和直观，对于需要遍历数组并对每个元素执行某种操作的场景非常有用。
+> 7. **不支持提前退出**：与一些其他数组方法（如 `Array.prototype.some` 或 `Array.prototype.every`）不同，`forEach` 不支持提前退出循环。即使回调函数返回了某个值，`forEach` 也会继续遍历数组的剩余元素。
+> 8. **遍历顺序**：`forEach` 方法按照数组元素在数组中出现的顺序进行遍历，即按照索引从低到高的顺序
+
+#### **map 方法**
+
+`Array.prototype.map` 方法创建一个新数组，其结果是该数组中的每个元素都调用一个提供的函数后的返回值。
+
+```typescript
+const numbers: number[] = [1, 2, 3, 4, 5];  
+const squared = numbers.map(number => number * number);  
+console.log(squared); // 输出 [1, 4, 9, 16, 25]
+```
+
+> **特点：**
+>
+> 1. **生成新数组**：`map` 方法不会修改原始数组，而是返回一个新数组。这个新数组中的元素是原始数组元素经过回调函数处理后的结果。
+> 2. **回调函数**：`map` 方法接受一个回调函数作为参数，这个回调函数会被数组的每个元素调用一次。回调函数可以接收三个参数：当前元素值、当前元素的索引和数组本身。回调函数应返回一个新值，这个新值将被用来构建新数组。
+> 3. **链式调用**：由于 `map` 方法返回一个新数组，因此可以与其他数组方法结合使用，实现链式调用。
+> 4. **类型安全**：在 TypeScript 中，`map` 方法可以利用类型系统来提供类型安全。你可以为回调函数的参数和返回值指定类型，以确保类型匹配和代码健壮性。
+> 5. **遍历顺序**：`map` 方法按照数组元素在数组中出现的顺序进行遍历，即按照索引从低到高的顺序。
+
+**forEach 和 map 的类型参数**
+
+你可以为 `forEach` 和 `map` 提供类型参数，以确保类型安全。
+
+```typescript
+const numbers: number[] = [1, 2, 3, 4, 5];  
+numbers.forEach<number>((number) => {  
+  console.log(number);  
+});  
+ 
+const squared: number[] = numbers.map<number, number>(number => number * number);  
+console.log(squared); // 输出 [1, 4, 9, 16, 25]
+```
+
+
+
+#### **for...of 循环**
+
+TypeScript 提供了 `for...of` 循环，这是 ES6 引入的一种更简洁的遍历数组的方法。
+
+```typescript
+const numbers: number[] = [1, 2, 3, 4, 5];  
+for (const number of numbers) {  
+  console.log(number);  
+}
+```
+
+> **特点：**
+>
+> 1. **自动迭代**：`for...of` 循环会自动迭代可迭代对象的每个元素，而不需要手动更新索引或进行条件检查。
+> 2. **迭代值**：`for...of` 循环直接提供可迭代对象的当前元素值，而不需要通过索引来访问。
+> 3. **不支持普通对象**：`for...of` 循环不能直接用于遍历普通对象（即没有实现 `[Symbol.iterator]` 接口的对象），因为它要求遍历的对象必须是可迭代的。如果需要遍历对象的属性，可以使用 `for...in` 循环或 `Object.keys()` 方法。
+> 4. **可以与 `break`、`continue` 和 `return` 配合使用**：`for...of` 循环可以配合 `break` 语句来提前退出循环，`continue` 语句来跳过当前迭代进入下一次迭代，以及 `return` 语句来退出整个函数。
+
+**for...of 与解构赋值**
+
+你也可以在 `for...of` 循环中使用解构赋值。
+
+```typescript
+const numbers: [number, number, number, number, number] = [1, 2, 3, 4, 5];  
+for (const [index, value] of numbers.entries()) {  
+  console.log(`Index: ${index}, Value: ${value}`);  
+}
+```
+
+
+
+
+
+#### **for...in 循环**
+
+虽然 `for...in` 循环在 JavaScript 中**常用来遍历对象的属性**，但它也可以用来遍历数组索引。但需要注意的是，**`for...in` 循环不仅遍历数组元素，还会遍历可枚举的属性，包括原型链上的**。因此，通常不建议使用 `for...in` 来遍历数组。
+
+```typescript
+const numbers: number[] = [1, 2, 3, 4, 5];  
+for (let index in numbers) {  
+  console.log(numbers[index]);  
+}
+```
+
+> 特点：
+>
+> 1. **遍历对象属性**：`for...in` 循环主要用于遍历对象的属性，包括对象自身以及从其原型链上继承的属性。
+> 2. **枚举顺序**：`for...in` 循环遍历对象属性的顺序并不是按照属性在对象中定义的顺序，而是按照对象属性在内部存储中的顺序，这通常是根据属性被添加到对象中的时间顺序。在某些情况下，遍历顺序可能与预期不同。
+> 3. **包括原型链属性**：`for...in` 循环不仅遍历对象自身的属性，还会遍历对象原型链上的属性。这意味着它会包括从原型对象继承的属性。
+> 4. **返回属性名**：与 `for...of` 循环不同，`for...in` 循环返回的是对象的属性名（键名），而不是属性值。要获取属性值，需要使用对象本身和属性名来访问。
+> 5. **非严格模式下包括不可枚举属性**：在非严格模式下（`use strict` 未被声明），`for...in` 循环还会遍历对象的不可枚举属性。在严格模式下，它只遍历可枚举属性。
+> 6. **不适用于遍历数组**：虽然 `for...in` 循环可以用于遍历数组，但由于它会遍历数组的所有可枚举属性（包括原型链上的属性），并且不保证按照索引顺序遍历，因此通常不推荐使用它来遍历数组。对于数组，更推荐使用 `for...of` 循环或常规的 `for` 循环。
+
+
+
 ## **函数**
 
 ### **TypeScript 函数与 JavaScript 函数的区别**
@@ -782,15 +1043,15 @@ const staff: IStaff = {
 
 TypeScript 的函数参数具有以下特点：
 
-|     特点     |                             说明                             |                             示例                             |
-| :----------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
-| **类型注解** |   参数可以有明确的类型注解，这有助于增强代码的类型安全性。   | function greet(name: string): void {<br> console.log(`Hello, ${name}!`);<br>} |
-|  **默认值**  | 参数可以指定默认值，当调用函数时未提供该参数时，将使用默认值。 | function greet(name: string = "Anonymous"): void {<br> console.log(`Hello, ${name}!`);<br>} |
-| **可选参数** |  使用 `?` 标记的参数是可选的，调用函数时可以省略这些参数。   | function greet(name: string, greeting?: string): void {<br> const msg = greeting<br/>} |
-| **剩余参数** | 使用 `...` 标记的参数可以接收任意数量的参数，这些参数被收集到一个数组中。 | function sum(...numbers: number[]): number {<br> return numbers.reduce((a, b) => a + b, 0);<br>} |
-| **参数解构** |        可以使用解构赋值来直接提取对象或数组的参数值。        | function introduce({ name, age }: { name: string, age: number }): void {<br> console.log(`My name is ${name} and I'm ${age} years old.`);<br>} |
-| **参数验证** | TypeScript 会在编译时检查参数的类型和数量，确保调用者提供了正确类型和数量的参数。 |                              -                               |
-|   **重载**   | 函数可以有多个重载定义，允许**同一个函数名接受不同类型的参数**。 | function reverse(s: string): string;<br>function reverse(a: number[]): number[];<br>function reverse(input: any): any {<br> return Array.isArray(input) ? input.reverse() : input.split('').reverse().join('');<br>} |
+|      特点      |                             说明                             |                             示例                             |
+| :------------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
+|  **类型注解**  |   参数可以有明确的类型注解，这有助于增强代码的类型安全性。   | function greet(name: string): void {<br> console.log(`Hello, ${name}!`);<br>} |
+| **参数默认值** | 参数可以指定默认值，当调用函数时未提供该参数时，将使用默认值。 | function greet(name: string = "Anonymous"): void {<br> console.log(`Hello, ${name}!`);<br>} |
+|  **可选参数**  |  使用 `?` 标记的参数是可选的，调用函数时可以省略这些参数。   | function greet(name: string, greeting?: string): void {<br> const msg = greeting<br/>} |
+|  **剩余参数**  | 使用 `...` 标记的参数可以接收任意数量的参数，这些参数被收集到一个数组中。 | function sum(...numbers: number[]): number {<br> return numbers.reduce((a, b) => a + b, 0);<br>} |
+|  **参数解构**  |        可以使用解构赋值来直接提取对象或数组的参数值。        | function introduce({ name, age }: { name: string, age: number }): void {<br> console.log(`My name is ${name} and I'm ${age} years old.`);<br>} |
+|  **参数验证**  | TypeScript 会在编译时检查参数的类型和数量，确保调用者提供了正确类型和数量的参数。 |                              -                               |
+|  **函数重载**  | 函数可以有多个重载定义，允许**同一个函数名接受不同类型的参数**。 | function reverse(s: string): string;<br>function reverse(a: number[]): number[];<br>function reverse(input: any): any {<br> return Array.isArray(input) ? input.reverse() : input.split('').reverse().join('');<br>} |
 
 ### **箭头函数**
 
@@ -799,7 +1060,7 @@ TypeScript 的函数参数具有以下特点：
 **特点**：
 
 1. **简洁的语法**：箭头函数语法更简洁，尤其是对于没有自己 `this`、`arguments`、`super` 或 `new.target` 的函数。
-2. **不绑定自己的 `this`**：箭头函数不会创建自己的 `this` 上下文，它们只是从包含它们的代码中继承 `this`。这使得它们非常适合于回调函数和作为对象的方法，因为它们不会意外地改变 `this` 的绑定。
+2. **不绑定自己的 `this`**：箭头函数不会创建自己的 `this` 上下文，它们只是从包含它们的代码中继承 `this`。也就是在定义箭头函数时候绑定`this` 上下文。 这使得它们非常适合于回调函数和作为对象的方法，因为它们不会意外地改变 `this` 的绑定。
 3. **不绑定 `arguments` 对象**：箭头函数也没有 `arguments` 对象。如果你需要在函数内部访问所有参数，可以使用剩余参数语法（`...args`）。
 4. **不能用作构造函数**：箭头函数不能用作构造函数，也就是说，它们不能配合 `new` 关键字使用来创建对象。
 5. **没有 `prototype` 属性**：箭头函数没有 `prototype` 属性，因此它们不能用作类构造函数。
@@ -863,4 +1124,112 @@ obj3.increment(); // 会按预期工作
 > 在上面的示例中，可以看到箭头函数 `increment` 在 `MyClass` 类中被用来确保 `this` 指向的是类的实例。相比之下，`regularFunction` 方法在调用时可能会遇到 `this` 绑定错误的问题，因为常规函数有自己的 `this` 上下文。
 >
 > 在最后一个示例中，箭头函数 `increment` 作为对象 `obj2` 的方法被定义，但由于箭头函数不绑定自己的 `this`，所以 `this` 在函数内部不会指向 `obj2`。这展示了箭头函数在处理 `this` 时的特殊行为。
+
+
+
+### **函数重载**
+
+**TypeScript 函数重载（Function Overloading）**是指在同一个作用域内用同一个函数名声明多次，但每次声明的函数参数类型或数量不同，从而实现对同一函数名的多种实现方式。这种方式允许我们根据不同的参数类型或数量调用不同的函数实现。
+
+**特点**：
+
+1. **同一函数名**：使用相同的函数名声明多个函数。
+2. **不同参数**：每个重载版本的函数参数类型或数量必须不同。
+3. **返回类型可相同也可不同**：虽然参数类型不同，但返回类型可以相同也可以不同。
+4. **编译时检查**：TypeScript 的函数重载在编译时进行类型检查，确保调用时参数类型与某个重载版本匹配。
+
+**为什么要用函数重载**：
+
+1. **提高代码可读性**：通过为同一函数提供多种实现方式，可以使得代码更具可读性，因为每种实现方式可能对应一种特定的使用场景。
+2. **类型安全**：函数重载可以提供更好的类型安全性，因为它确保了在编译时就已经确定了函数的参数类型和数量。
+3. **灵活性**：允许开发者在不改变函数名的情况下，为函数提供多种不同的实现方式，这在实际开发中是非常有用的。
+
+**示例**：
+
+```typescript
+function combine(a: number, b: number): number;  
+function combine(a: string, b: string): string;  
+  
+function combine(a: any, b: any) {  
+    if (typeof a === "number" && typeof b === "number") {  
+        return a + b;  
+    }  
+    if (typeof a === "string" && typeof b === "string") {  
+        return a.concat(b);  
+    }  
+    throw new Error("Invalid arguments");  
+}  
+  
+let result1 = combine(1, 2); // 返回数字 3  
+let result2 = combine("hello", " world"); // 返回字符串 "hello world"
+```
+
+> 在上面的示例中，`combine` 函数被重载了两次，一次用于处理数字类型的参数，另一次用于处理字符串类型的参数。在函数体内部，我们通过检查参数的类型来确定应该执行哪种实现。
+
+
+
+## **对象**
+
+在 TypeScript 中，对象是一种复合数据类型，它允许您存储多个值作为一个单一的实体。这些值可以是不同的数据类型，并且可以通过键（通常是字符串）来访问。TypeScript 的对象类型是对 JavaScript 对象类型的超集，提供了更强的类型安全性。
+
+### **对象定义**
+
+在 TypeScript 中，对象的类型可以通过两种主要方式定义：
+
+1. **使用类型注解**：您可以为对象字面量或变量指定一个对象类型，该类型定义了对象可以具有的属性和方法。
+2. **使用接口**：接口允许您定义一个对象的结构，包括它可以有哪些属性和方法，以及这些属性和方法的类型。
+
+#### **使用类型注解定义对象**
+
+```typescript
+const person: { name: string; age: number } = {  
+  name: "Alice",  
+  age: 30  
+};  
+  
+// 访问对象的属性  
+console.log(person.name); // 输出 "Alice"  
+console.log(person.age);  // 输出 30  
+  
+// 尝试给对象添加一个不符合定义的属性会报错  
+// person.location = "New York"; // TypeScript 错误  
+  
+// 尝试修改属性的类型也会报错  
+// person.age = "thirty"; // TypeScript 错误
+```
+
+>  在这个例子中，我们定义了一个 `person` 对象，并使用了类型注解来指定它必须有一个 `name` 属性（类型为 `string`）和一个 `age` 属性（类型为 `number`）。
+
+#### **使用接口定义对象**
+
+```typescript
+interface Person {  
+  name: string;  
+  age: number;  
+  greet(): void;  
+}  
+  
+const alice: Person = {  
+  name: "Alice",  
+  age: 30,  
+  greet() {  
+    console.log(`Hello, my name is ${this.name}`);  
+  }  
+};  
+  
+alice.greet(); // 输出 "Hello, my name is Alice"  
+  
+// 尝试给对象添加一个不符合接口定义的属性会报错  
+// alice.location = "New York"; // TypeScript 错误  
+  
+// 尝试修改属性的类型也会报错  
+// alice.age = "thirty"; // TypeScript 错误  
+  
+// 尝试不实现接口中的方法也会报错  
+// const bob: Person = { name: "Bob", age: 25 }; // TypeScript 错误
+```
+
+>  在这个例子中，我们首先定义了一个 `Person` 接口，它指定了对象必须有的属性和方法。然后，我们创建了一个 `alice` 对象，它实现了 `Person` 接口，并提供了所有必要的属性和方法。
+
+使用接口定义对象的好处是，您可以在**多个地方重复使用相同的接口**，以确保所有实现该接口的对象都遵循相同的结构。此外，接口还可以定义可选属性、只读属性和索引签名等高级功能。
 
