@@ -1172,6 +1172,8 @@ let result2 = combine("hello", " world"); // 返回字符串 "hello world"
 
 在 TypeScript 中，对象是一种复合数据类型，它允许您存储多个值作为一个单一的实体。这些值可以是不同的数据类型，并且可以通过键（通常是字符串）来访问。TypeScript 的对象类型是对 JavaScript 对象类型的超集，提供了更强的类型安全性。
 
+
+
 ### **对象定义**
 
 在 TypeScript 中，对象的类型可以通过两种主要方式定义：
@@ -1233,3 +1235,455 @@ alice.greet(); // 输出 "Hello, my name is Alice"
 
 使用接口定义对象的好处是，您可以在**多个地方重复使用相同的接口**，以确保所有实现该接口的对象都遵循相同的结构。此外，接口还可以定义可选属性、只读属性和索引签名等高级功能。
 
+
+
+## **类**
+
+在 TypeScript 中，类（Class）是一种面向对象编程的构造，它提供了一种定义对象结构和行为的模板。
+
+**类定义了对象的属性（成员变量）和方法（成员函数），并且可以通过实例化来创建对象**。
+
+以下是一个简单的 TypeScript 类的例子：
+
+```typescript
+class Greeter {  
+  greeting: string;  
+  
+  constructor(message: string) {  
+    this.greeting = message;  
+  }  
+  
+  greet() {  
+    return "Hello, " + this.greeting;  
+  }  
+}  
+  
+// 创建 Greeter 类的实例  
+let greeter = new Greeter("world");  
+  
+// 调用实例的方法  
+console.log(greeter.greet());  // 输出 "Hello, world"
+```
+
+> 在这个例子中，`Greeter` 是一个类，它有一个名为 `greeting` 的属性，以及一个构造函数和一个 `greet` 方法。
+>
+> - `greeting` 属性存储了一个字符串，表示问候语。
+> - 构造函数 `constructor` 是一个特殊的方法，当创建类的新实例时会自动调用。在这个构造函数中，我们为 `greeting` 属性赋了一个值。
+> - `greet` 方法返回一个字符串，该字符串由 "Hello, " 和 `greeting` 属性的值组成。
+> - 要创建 `Greeter` 类的一个实例，我们使用 `new` 关键字，并传递一个字符串参数给构造函数。一旦实例被创建，我们就可以通过实例来调用其方法，例如 `greeter.greet()`。
+
+### **类的特性**
+
+以下是一些 TypeScript 类的特性：
+
+|      特性      |                             描述                             |
+| :------------: | :----------------------------------------------------------: |
+|   **类声明**   | 使用 `class` 关键字声明一个类。类可以包含属性、方法和构造函数。 |
+|    **属性**    | 类中的属性是类的成员变量，用于存储类的状态。属性可以是公有（public）、私有（private）或受保护的（protected）。 |
+|    **方法**    | 类中的方法是类的成员函数，用于执行特定的操作。方法可以是公有、私有或受保护的。 |
+|  **构造函数**  | 构造函数是一个特殊的方法，用于初始化类的新实例。构造函数在创建类的实例时自动调用。 |
+|  **静态成员**  | 类可以包含静态属性和静态方法。静态成员属于类本身，而不是类的实例。它们可以通过类名直接访问，而不需要创建类的实例。 |
+|    **继承**    | TypeScript 支持类的继承，允许一个类继承另一个类的属性和方法。通过继承，可以创建层次结构的类，实现代码的重用和扩展。 |
+| **访问修饰符** | TypeScript 类支持三种访问修饰符：`public`、`private` 和 `protected`。这些修饰符控制类的成员（属性和方法）的可见性和可访问性。 |
+|   **抽象类**   | 抽象类是一种不能被实例化的类，它包含抽象方法（没有实现的方法）。抽象类通常用作其他类的基类，以确保子类实现特定的方法。 |
+|    **接口**    | 接口定义了一个类的形状，它指定了一个类应该具有哪些属性和方法。类可以实现一个或多个接口，以确保它们符合特定的契约。 |
+|    **泛型**    | TypeScript 支持泛型类，即类可以具有类型参数。这使得类可以更加灵活和可重用，因为可以将其与不同的数据类型一起使用。 |
+|   **访问器**   | 访问器（getter 和 setter）允许您控制对类属性的访问和修改。getter 是一种特殊的方法，用于读取属性的值，而 setter 是一种特殊的方法，用于设置属性的值。 |
+
+
+
+### **类构造函数**
+
+在 TypeScript 中，构造函数是一种特殊的方法，用于初始化新创建的对象实例。构造函数**在创建类的实例时自动调用**，并且它的名称与类的名称相同。
+
+构造函数可以接收参数，并且可以使用这些参数来初始化类的属性或执行其他设置任务。它也可以调用父类的构造函数，以实现继承时的初始化。
+
+下面是一个简单的 TypeScript 类的构造函数示例：
+
+```typescript
+class Person {  
+  // 构造函数  
+  constructor(public firstName: string, public lastName: string) {  
+    // 在这里可以执行一些初始化操作  
+    console.log(`Person created with first name ${this.firstName} and last name ${this.lastName}`);  
+  }  
+  
+  // 其他方法  
+  greet() {  
+    console.log(`Hello, my name is ${this.firstName} ${this.lastName}`);  
+  }  
+}  
+  
+// 创建 Person 类的实例  
+const john = new Person("John", "Doe");  
+john.greet(); // 输出 "Hello, my name is John Doe"
+```
+
+> 在这个例子中，`Person` 类有一个构造函数，它接收两个参数：`firstName` 和 `lastName`。这些参数被标记为 `public`，这意味着它们不仅是构造函数的参数，还是类的公有属性，可以在类的其他方法和实例中直接访问。
+
+构造函数内部可以执行任何必要的初始化代码，例如打印日志、设置默认值、进行验证等。
+
+####  **`super()` 父类构造函数**
+
+如果类是从另一个类继承的，构造函数还可以调用 `super()` 来访问父类的构造函数。这在需要初始化从父类继承的属性或执行父类构造函数中的逻辑时非常有用。
+
+```typescript
+class Animal {  
+  name: string;  
+  
+  constructor(name: string) {  
+    this.name = name;  
+    console.log(`Animal created with name ${this.name}`);  
+  }  
+}  
+  
+class Dog extends Animal {  
+  breed: string;  
+  
+  constructor(name: string, breed: string) {  
+    super(name); // 调用父类 Animal 的构造函数  
+    this.breed = breed;  
+    console.log(`Dog created with breed ${this.breed}`);  
+  }  
+  
+  bark() {  
+    console.log("Woof!");  
+  }  
+}  
+  
+const myDog = new Dog("Buddy", "Labrador");  
+myDog.bark(); // 输出 "Woof!"
+```
+
+> 在这个例子中，`Dog` 类继承自 `Animal` 类，并在其构造函数中通过 `super(name)` 调用了父类的构造函数。这确保了 `Dog` 实例也正确初始化了从 `Animal` 类继承的 `name` 属性。
+
+
+
+### **类访问修饰符**
+
+在 TypeScript 中，类成员（包括属性、方法和访问器）可以通过访问修饰符来指定其可见性。
+
+访问修饰符有三种：`public`、`private` 和 `protected`。这些修饰符决定了成员在类内部、子类以及类实例上的可见性和可访问性。
+
+| 访问修饰符  |                             特点                             |
+| :---------: | :----------------------------------------------------------: |
+|  `public`   | 成员是公开的，可以在任何地方被访问。如果**不明确指定访问修饰符，则成员默认是 `public` 的**。 |
+|  `private`  | 成员是私有的，**只能在声明它的类的内部访问。在类的外部，包括子类，都不能直接访问私有成员**。 |
+| `protected` | 成员是受保护的，可以在**声明它的类以及任何子类中访问**。在类的外部，包括其他非子类类型，都不能直接访问受保护的成员。 |
+
+#### `public`
+
+`public` 修饰符表示成员是公开的，可以在任何地方被访问。如果不明确指定访问修饰符，则成员默认是 `public` 的。
+
+```typescript
+class MyClass {  
+  public myPublicProperty: string;  
+  
+  public myPublicMethod(): void {  
+    // ...  
+  }  
+}
+```
+
+#### `private`
+
+`private` 修饰符表示成员是私有的，只能在声明它的类的内部访问。
+
+```typescript
+class MyClass {  
+  private myPrivateProperty: string;  
+  
+  private myPrivateMethod(): void {  
+    // ...  
+  }  
+}  
+  
+const instance = new MyClass();  
+// instance.myPrivateProperty // 错误：'myPrivateProperty' 是私有的。  
+// instance.myPrivateMethod()  // 错误：'myPrivateMethod' 是私有的。
+```
+
+
+
+##### ECMAScript 私有字段
+
+ECMAScript 私有字段（Private Fields）是 ECMAScript 2020（也称为 ES11）中引入的一个新特性，允许在类中定义私有字段。
+
+**语法：**
+
+**ECMAScript 私有字段 使用 `#` 前缀来标记私有字段**。
+
+```js
+class Person {
+  #name: string;
+
+  constructor(name: string) {
+    this.#name = name;
+  }
+
+  greet() {
+    console.log(`Hello, my name is ${this.#name}!`);
+  }
+}
+
+let semlinker = new Person("Semlinker");
+
+semlinker.#name;
+// Property '#name' is not accessible outside class 'Person'
+// because it has a private identifier.
+
+```
+
+与常规属性（甚至使用 `private` 修饰符声明的属性）不同，私有字段要牢记以下规则：
+
+- 私有字段以 `#` 字符开头，有时我们称之为私有名称；
+- 每个私有字段名称都唯一地限定于其包含的类；
+- 不能在私有字段上使用 TypeScript 可访问性修饰符（如 public 或 private）；
+- 私有字段不能在包含的类之外访问，甚至不能被检测到。
+
+##### **ECMAScript 私有字段和 TypeScript 的 `private` 修饰符区别**
+
+|                |                ECMAScript私有字段                |             TypeScript的`private`修饰符              |
+| :------------: | :----------------------------------------------: | :--------------------------------------------------: |
+|  **定义方式**  |                   使用`#`前缀                    |                 使用`private`关键字                  |
+|  **语言标准**  |            ECMAScript 2020及更高版本             |                  TypeScript语言特性                  |
+|   **兼容性**   |    需要较新的ECMAScript环境，可能需要转译工具    | 适用于TypeScript环境，可以通过转译支持旧版ECMAScript |
+|   **封装性**   | 提供了严格的封装，只能通过特定的语法在类内部访问 |            提供了封装性，只能在类内部访问            |
+|    **继承**    |          子类无法直接访问父类的私有字段          |            子类无法直接访问父类的私有成员            |
+|  **访问控制**  |           只能通过类内部的特定语法访问           |           只能通过类内部的`this`关键字访问           |
+|  **类型安全**  |  提供了封装性，但类型检查可能不如TypeScript严格  |       提供了类型安全，可以在编译时进行类型检查       |
+|   **可读性**   |         使用`#`前缀使私有字段更易于识别          |       使用`private`关键字使私有成员更易于识别        |
+| **语法简洁性** |                  简洁的`#`前缀                   |              需要额外的`private`关键字               |
+
+
+
+#### `protected`
+
+`protected` 修饰符表示成员是受保护的，可以在声明它的类以及任何子类中访问，但不能在类的实例上直接访问。
+
+```typescript
+class MyClass {  
+  protected myProtectedProperty: string;  
+  
+  protected myProtectedMethod(): void {  
+    // ...  
+  }  
+}  
+  
+class MySubClass extends MyClass {  
+  accessProtected() {  
+    this.myProtectedProperty = "accessible";  
+    this.myProtectedMethod();  
+  }  
+}  
+  
+const instance = new MyClass();  
+// instance.myProtectedProperty // 错误：'myProtectedProperty' 是受保护的。  
+// instance.myProtectedMethod()  // 错误：'myProtectedMethod' 是受保护的。  
+  
+const subClassInstance = new MySubClasses();  
+subClassInstance.accessProtected(); // 正确，因为是在子类中访问受保护的成员
+```
+
+#### 访问修饰符的用途
+
+访问修饰符主要用于封装和隐藏类的实现细节，只允许通过特定的接口或方法进行访问。这有助于保持代码的整洁和可维护性，同时确保类的不变性（immutability）和安全性。
+
+使用 `private` 和 `protected` 修饰符还可以防止外部代码直接访问或修改类的内部状态，这对于实现封装和抽象是非常重要的。
+
+#### 访问修饰符和继承
+
+在继承中，**子类可以访问父类中所有标记为 `public` 和 `protected` 的成员**。但是，子类不能访问父类中标记为 `private` 的成员。这确保了父类的私有实现细节在子类中仍然是私有的。
+
+```typescript
+class Parent {  
+  private parentPrivate() { /* ... */ }  
+  protected parentProtected() { /* ... */ }  
+  public parentPublic() { /* ... */ }  
+}  
+  
+class Child extends Parent {  
+  // 可以访问 parentPublic()  
+  // 可以访问 parentProtected()  
+  // 不能访问 parentPrivate()  
+}
+```
+
+
+
+### **类继承**
+
+在 TypeScript 中，类的继承允许你创建一个新的类，该类继承自一个或多个已存在的类（父类或超类）。
+
+通过继承，**子类可以获取父类的所有公有和保护成员（属性和方法）**，**并且可以添加新的成员或重写父类的成员**。
+
+下面是一个简单的 TypeScript 类的继承示例：
+
+```typescript
+// 父类  
+class Animal {  
+  name: string;  
+  
+  constructor(name: string) {  
+    this.name = name;  
+  }  
+  
+  // 父类的方法  
+  move(): void {  
+    console.log(`${this.name} is moving.`);  
+  }  
+}  
+  
+// 子类  
+class Dog extends Animal {  
+  breed: string;  
+  
+  constructor(name: string, breed: string) {  
+    super(name); // 调用父类的构造函数  
+    this.breed = breed;  
+  }  
+  
+  // 重写父类的方法  
+  move(): void {  
+    console.log(`${this.name} of breed ${this.breed} is walking.`);  
+  }  
+  
+  // 子类特有的方法  
+  bark(): void {  
+    console.log(`${this.name} says, 'Woof!'`);  
+  }  
+}  
+  
+// 创建 Dog 类的实例  
+const myDog = new Dog("Buddy", "Labrador");  
+  
+// 调用继承自父类的方法  
+myDog.move(); // 输出 "Buddy of breed Labrador is walking."  
+  
+// 调用子类特有的方法  
+myDog.bark(); // 输出 "Buddy says, 'Woof!'"
+```
+
+> 在这个例子中，`Dog` 类继承自 `Animal` 类。`Dog` 类有一个新的属性 `breed`，并且它重写了 `move` 方法以提供特定的行为。同时，`Dog` 类还添加了一个新的方法 `bark`。
+>
+> 使用 `super` 关键字可以在子类的构造函数中调用父类的构造函数。这是必要的，除非父类的构造函数没有参数，因为子类需要正确地初始化从父类继承的属性。
+
+#### **特点**
+
+TypeScript 的继承特点主要体现在以下几个方面：
+
+1. **基于类的继承**：与 JavaScript 的基于原型的继承不同，TypeScript 支持基于类的继承，这是从 ES6 版本开始引入的。通过 **`extends` 关键字**，TypeScript 允许类继承自其他类。
+2. **属性和方法的继承**：子类可以继承父类的属性和方法。这意味着在子类中，你可以访问和使用从父类继承来的成员。
+3. **重写和修改**：子类不仅可以继承父类的属性和方法，还可以重写或修改它们。这允许子类根据需要定制或扩展父类的行为。
+4. **继承的层次结构**：TypeScript 支持多重继承，即**一个类可以继承自多个父类**。然而，需要注意的是，多重继承可能会导致一些复杂性和潜在的冲突，因此需要谨慎使用。
+5. **访问修饰符**：在 TypeScript 中，你可以使用 `public`、`private` 和 `protected` 访问修饰符来控制类成员的可见性。这有助于封装类的实现细节，确保只有适当的代码可以访问或修改这些成员。
+6. **构造函数的继承**：值得注意的是，**父类的构造函数不能被继承，只能被子类调用**。**如果子类中没有定义构造函数，那么会默认调用父类的构造函数。**
+
+#### **多重继承**
+
+TypeScript 支持多重继承，即一个类可以继承自多个父类。
+
+多重继承允许一个类从多个父类中获取属性和方法，从而实现代码的重用和组合。然而，多重继承也可能引入一些复杂性和潜在的冲突，因此需要谨慎使用。
+
+在 TypeScript 中实现多重继承的语法如下：
+
+```typescript
+class BaseClass1 {  
+  // 父类1的属性和方法  
+}  
+  
+class BaseClass2 {  
+  // 父类2的属性和方法  
+}  
+  
+class DerivedClass extends BaseClass1, BaseClass2 {  
+  // 子类可以访问父类1和父类2的属性和方法  
+}
+```
+
+>  在这个例子中，`DerivedClass` 继承自 `BaseClass1` 和 `BaseClass2`，因此它可以访问这两个父类的所有公共和保护成员。
+
+**多重继承问题**
+
+然而，需要注意的是，多重继承可能会引发一些问题，如钻石问题（Diamond Problem）。钻石问题发生在两个父类都继承自一个共同的基类，并且子类同时继承自这两个父类时。在这种情况下，子类可能会出现两个相同名称但实现不同的方法，这会导致歧义和冲突。
+
+为了解决这个问题，TypeScript 提供了一种称为“线性化”的机制，它会将多重继承转换为一个线性继承链。这个机制确保了子类只会继承每个方法的一个版本，并且这个版本的顺序是确定的。但是，在某些情况下，你可能需要手动解决潜在的冲突，例如通过重写冲突的方法或使用接口来定义共同的行为。
+
+此外，当使用多重继承时，你需要格外注意构造函数的调用。在子类的构造函数中，你需要显式地调用每个父类的构造函数，以确保它们被正确初始化。这可以通过使用 `super` 关键字来实现。
+
+
+
+### **类静态成员**
+
+在 TypeScript 中，**类的静态成员是属于类本身而不是类的实例的属性或方法**。静态成员可以在没有创建类的实例的情况下直接通过类来访问。
+
+静态成员包括静态属性（static properties）和静态方法（static methods）。
+
+#### **静态属性**
+
+静态属性使用 `static` 关键字进行定义，它们**只能被类本身访问，而不能被类的实例访问**。
+
+```typescript
+class MyClass {  
+  static myStaticProperty: string = "Hello, World!";  
+  
+  instanceProperty: string = "Hello from instance";  
+  
+  static getStaticProperty() {  
+    return MyClass.myStaticProperty;  
+  }  
+  
+  getInstanceProperty() {  
+    return this.instanceProperty;  
+  }  
+}  
+  
+// 访问静态属性  
+console.log(MyClass.myStaticProperty); // 输出: "Hello, World!"  
+  
+// 尝试通过实例访问静态属性（这是不允许的）  
+const instance = new MyClass();  
+console.log(instance.myStaticProperty); // 错误: 'myStaticProperty' 是静态的，不能通过实例访问  
+  
+// 调用静态方法  
+console.log(MyClass.getStaticProperty()); // 输出: "Hello, World!"
+```
+
+#### **静态方法**
+
+静态方法也是使用 `static` 关键字定义的，它们**只能被类本身调用，而不能被类的实例调用**。
+
+```typescript
+class MyClass {  
+  static myStaticMethod() {  
+    console.log("This is a static method.");  
+  }  
+  
+  instanceMethod() {  
+    console.log("This is an instance method.");  
+  }  
+}  
+  
+// 调用静态方法  
+MyClass.myStaticMethod(); // 输出: "This is a static method."  
+  
+// 尝试通过实例调用静态方法（这是不允许的）  
+const instance = new MyClass();  
+instance.myStaticMethod(); // 错误: 'myStaticMethod' 是静态的，不能通过实例调用  
+  
+// 调用实例方法  
+instance.instanceMethod(); // 输出: "This is an instance method."
+```
+
+#### **静态成员的应用场景**
+
+1. **工厂方法**：静态方法可以用作工厂函数来创建类的实例，比如常见的单例模式或工具类中的工厂方法。
+2. **工具类**：当类仅包含静态方法，且不需要创建实例时，通常将其用作工具类。例如，`Math` 类在 JavaScript 中就是一个工具类，它包含了许多静态方法（如 `Math.max()`, `Math.min()` 等）。
+3. **配置和常量**：静态属性常用于存储类的配置信息或常量值，这些值对所有的类实例都是相同的。
+
+#### **注意事项**
+
+- 静态成员**不能通过类的实例来访问**，它们只能通过类本身来访问。
+- 静态成员**不能访问类的实例成员**，因为静态成员与类的实例没有关联。
+- **静态成员之间可以相互访问**，包括静态属性和静态方法。
+- 静态成员**不能访问类的 `this` 关键字**，因为 `this` 关键字在静态上下文中没有定义。
