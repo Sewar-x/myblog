@@ -2,6 +2,8 @@
 
 ![TypeScript](../images/TypeScript.png)
 
+
+
 ## TypeScript 是什么
 
 TypeScript 是一种由微软开发的自由和开源的编程语言。它是 JavaScript 的一个超集，而且本质上向这个语言添加了可选的静态类型和基于类的[面向对象编程](https://so.csdn.net/so/search?q=面向对象编程&spm=1001.2101.3001.7020)。
@@ -115,7 +117,30 @@ let list: Array<number> = [1, 2, 3]; // Array<number>泛型语法
 
 ### Enum 类型
 
-使用枚举我们可以定义一些带名字的常量。 使用枚举可以清晰地表达意图或创建一组有区别的用例。 TypeScript 支持数字的和基于字符串的枚举。
+枚举是一个被命名的整型常数的集合，用于声明一组命名的常数,当一个变量有几种可能的取值时,可以将它定义为枚举类型
+
+通俗来说，枚举就是一个对象的所有可能取值的集合。
+
+枚举的使用是通过`enum`关键字进行定义，形式如下：
+
+```ts
+enum xxx { ... }
+```
+
+声明关键字为枚举类型的方式如下：
+
+```ts
+// 声明d为枚举类型Direction
+let d: Direction;
+```
+
+类型可以分成：
+
+- 数字枚举
+- 字符串枚举
+- 异构枚举
+
+### [#](https://vue3js.cn/interview/typescript/enum.html#数字枚举)数字枚举
 
 #### **1.数字枚举**
 
@@ -507,80 +532,7 @@ let strLength: number = (someValue as string).length;
 - 当变量可能是多种类型之一，但你确信在特定情况下它会是某个特定的类型。
 - 当从第三方库或 API 获取数据时，该库或 API 可能使用 `any` 类型，但你希望使用更具体的类型。
 
-## **类型别名**
 
-在 TypeScript 中，类型别名（Type Aliases）是一种为现有的类型定义一个新名称的方式。这有助于简化复杂的类型声明，提高代码的可读性和可维护性。
-
-类型别名可以使用 `type` 关键字来定义。
-
-下面是一些使用类型别名的例子：
-
-### 基本类型别名
-
-```typescript
-// 定义 string 类型别名为 Name
-type Name = string;  
-// 定义 number 类型别名为 Age
-type Age = number;  
-  
-const name: Name = "Alice";  
-const age: Age = 30;
-```
-
->  在这个例子中，我们为 `string` 和 `number` 类型分别定义了别名 `Name` 和 `Age`。
-
-### 联合类型别名
-
-```typescript
-// 定义联合类型的别名为 Shape
-type Shape =  
-  | { kind: "circle"; radius: number }  
-  | { kind: "rectangle"; width: number; height: number };  
-  
-const circle: Shape = { kind: "circle", radius: 10 };  
-const rectangle: Shape = { kind: "rectangle", width: 20, height: 10 };
-```
-
-
-
-### 交叉类型别名
-
-```typescript
-type Loggable = {  
-  log(): void;  
-}  
-  
-type Named = {  
-  name: string;  
-}  
-// 定义 Loggable & Named 交叉类型别名为 LoggableNamed
-type LoggableNamed = Loggable & Named;  
-  
-const obj: LoggableNamed = {  
-  name: "Alice",  
-  log() {  
-    console.log(this.name);  
-  }  
-};
-```
-
-> 在这个例子中，我们定义了 `Loggable` 和 `Named` 两个类型，并使用 `&` 符号创建了一个交叉类型别名 `LoggableNamed`，它结合了 `Loggable` 和 `Named` 的所有成员。
-
-### 泛型类型别名
-
-```typescript
-// 定义 泛型类型别名 `Id`
-type Id<T> = {  
-  id: T;  
-};  
-  
-const numberId: Id<number> = { id: 1 };  
-const stringId: Id<string> = { id: "hello" };
-```
-
->  在这个例子中，我们定义了一个泛型类型别名 `Id`，它接受一个类型参数 `T`，并创建了一个具有 `id` 属性的对象类型，该属性的类型是 `T`。
-
-类型别名有助于简化代码，特别是在处理复杂的类型时。它们不仅提高了代码的可读性，而且还允许我们更灵活地组织和复用类型定义。
 
 ## **类型守卫**
 
@@ -731,7 +683,195 @@ if (isNumber(value)) {
 
 
 
-## **联合类型**
+## **类型约束**
+
+在 TypeScript 中，类型约束（Type Constraints）通常指的是对泛型参数或类型变量的限制，以确保它们满足特定的条件或具有特定的属性。这有助于增强代码的类型安全性，并允许开发者在编译时捕获可能的错误。
+
+实现方式
+
+类型约束可以通过以下几种方式实现：
+
+### **接口约束**
+
+你可以使用接口来定义泛型参数必须满足的形状。
+
+```typescript
+interface Lengthwise {  
+  length: number;  
+}  
+  
+function loggingIdentity<T extends Lengthwise>(arg: T): T {  
+  console.log(arg.length); // 这里我们知道 arg.length 总是存在的  
+  return arg;  
+}
+```
+
+在这个例子中，泛型 `T` 被约束为必须实现 `Lengthwise` 接口，这意味着任何传递给 `loggingIdentity` 的类型都必须有一个 `length` 属性。
+
+### **类型参数约束**
+
+在定义泛型函数或类时，你可以直接在类型参数后面加上 `extends` 关键字和约束类型。
+
+```typescript
+function createArray<T extends number | string>(length: number, value: T): Array<T> {  
+  return new Array(length).fill(value);  
+}  
+  
+const numberArray = createArray<number>(5, 0); // [0, 0, 0, 0, 0]  
+const stringArray = createArray<string>(3, "hello"); // ["hello", "hello", "hello"]
+```
+
+在这个例子中，泛型 `T` 被约束为必须是 `number` 或 `string` 类型。
+
+### **类类型约束**
+
+你也可以约束泛型参数必须是某个类的实例。
+
+```typescript
+class Animal {  
+  name: string;  
+}  
+  
+class Dog extends Animal {  
+  breed: string;  
+}  
+  
+function greetAnimal<T extends Animal>(animal: T): void {  
+  console.log(`Hello, ${animal.name}`);  
+}  
+  
+const myDog = new Dog();  
+myDog.name = "Buddy";  
+myDog.breed = "Labrador";  
+  
+greetAnimal(myDog); // 输出 "Hello, Buddy"
+```
+
+在这个例子中，泛型 `T` 被约束为必须是 `Animal` 类或其子类的实例。
+
+### **联合类型约束**
+
+你可以使用联合类型来定义泛型参数可以是多种类型中的一种。
+
+```typescript
+function padLeft<T extends string | number>(value: T, padding: string | number): T {  
+  if (typeof value === "string") {  
+    return (value + padding.toString()).padStart(value.length + padding.toString().length, padding.toString());  
+  } else {  
+    return value + padding;  
+  }  
+}  
+  
+const paddedString = padLeft("42", 5); // "4242424242"  
+const paddedNumber = padLeft(42, 3); // 45
+```
+
+在这个例子中，泛型 `T` 可以是 `string` 或 `number` 类型，函数根据 `T` 的实际类型执行不同的逻辑。
+
+类型约束增强了 TypeScript 的类型系统，允许开发者编写更加健壮和可维护的代码。通过限制泛型参数的可能类型，你可以减少运行时错误，并更好地利用 TypeScript 的类型推断和自动补全功能。
+
+
+
+## **高级类型**
+
+高级类型，是`typescript`为了保证语言的灵活性，所使用的一些语言特性。这些特性有助于我们应对复杂多变的开发场景
+
+TypeScript 的高级类型提供了一种灵活且强大的方式来描述数据的形状和约束。以下是 TypeScript 的一些高级类型，以及它们的简要描述和特点：
+
+|                   类型名称                   |          特点          |                             描述                             |
+| :------------------------------------------: | :--------------------: | :----------------------------------------------------------: |
+|      **交叉类型（Intersection Types）**      |      组合多个类型      |     允许你将多个类型合并成一个类型，满足所有类型的成员。     |
+|         **联合类型（Union Types）**          |    选择多个类型之一    |          表示一个值可以是几种类型之一。使用竖线表示          |
+|             **泛型（Generics）**             |       类型参数化       |  允许你定义灵活且可重用的组件，这些组件可以支持不同的类型。  |
+|         **映射类型（Mapped Types）**         | 基于现有类型创建新类型 | 映射类型允许你从一个已有的类型创建一个新的类型，并添加或修改属性的类型。 |
+|      **条件类型（Conditional Types）**       |    基于条件选择类型    |  允许你根据条件选择两个类型中的一个。这通常与泛型一起使用。  |
+|         **索引类型（Index Types）**          |   描述对象属性的类型   |           索引类型允许你查询或设置对象的属性类型。           |
+|        **只读类型（Readonly Types）**        |        属性只读        | 通过在属性名前添加 `readonly` 关键字，你可以将对象的属性设置为只读，确保它们不会被修改。 |
+|        **排除类型（Exclude Types）**         |      排除特定类型      |               从一个类型集合中排除指定的类型。               |
+|        **提取类型（Extract Types）**         |      提取特定类型      |               从一个类型集合中提取指定的类型。               |
+| **非空断言类型（Non-null Assertion Types）** |      断言值不为空      | 使用 `!` 后缀来告诉 TypeScript 编译器该值是非空的，即使它可能是 `null` 或 `undefined`。 |
+|         **类型别名（Type Aliases）**         |   为复杂类型创建别名   |      允许你为复杂的类型表达式创建易于理解和使用的别名。      |
+
+
+
+### **类型别名**
+
+在 TypeScript 中，类型别名（Type Aliases）是一种为现有的类型定义一个新名称的方式。这有助于简化复杂的类型声明，提高代码的可读性和可维护性。
+
+类型别名可以使用 `type` 关键字来定义。
+
+下面是一些使用类型别名的例子：
+
+#### 基本类型别名
+
+```typescript
+// 定义 string 类型别名为 Name
+type Name = string;  
+// 定义 number 类型别名为 Age
+type Age = number;  
+  
+const name: Name = "Alice";  
+const age: Age = 30;
+```
+
+>  在这个例子中，我们为 `string` 和 `number` 类型分别定义了别名 `Name` 和 `Age`。
+
+#### 联合类型别名
+
+```typescript
+// 定义联合类型的别名为 Shape
+type Shape =  
+  | { kind: "circle"; radius: number }  
+  | { kind: "rectangle"; width: number; height: number };  
+  
+const circle: Shape = { kind: "circle", radius: 10 };  
+const rectangle: Shape = { kind: "rectangle", width: 20, height: 10 };
+```
+
+
+
+#### 交叉类型别名
+
+```typescript
+type Loggable = {  
+  log(): void;  
+}  
+  
+type Named = {  
+  name: string;  
+}  
+// 定义 Loggable & Named 交叉类型别名为 LoggableNamed
+type LoggableNamed = Loggable & Named;  
+  
+const obj: LoggableNamed = {  
+  name: "Alice",  
+  log() {  
+    console.log(this.name);  
+  }  
+};
+```
+
+> 在这个例子中，我们定义了 `Loggable` 和 `Named` 两个类型，并使用 `&` 符号创建了一个交叉类型别名 `LoggableNamed`，它结合了 `Loggable` 和 `Named` 的所有成员。
+
+#### 泛型类型别名
+
+```typescript
+// 定义 泛型类型别名 `Id`
+type Id<T> = {  
+  id: T;  
+};  
+  
+const numberId: Id<number> = { id: 1 };  
+const stringId: Id<string> = { id: "hello" };
+```
+
+>  在这个例子中，我们定义了一个泛型类型别名 `Id`，它接受一个类型参数 `T`，并创建了一个具有 `id` 属性的对象类型，该属性的类型是 `T`。
+
+类型别名有助于简化代码，特别是在处理复杂的类型时。它们不仅提高了代码的可读性，而且还允许我们更灵活地组织和复用类型定义。
+
+
+
+### **联合类型**
 
 在 TypeScript 中，联合类型（Union Types）允许一个变量在编译时可以是几种类型之一。
 
@@ -750,7 +890,22 @@ myVar = 42;     // number 类型，也可以赋值
 
 >  在这个例子中，`myVar` 可以是 `string` 类型或 `number` 类型。
 
-### **可识别联合类型**
+#### **判断联合类型**
+
+`keyof` 类似于 `Object.keys` ，用于获取一个接口中 Key 的联合类型。
+
+```ts
+解释interface Button {
+    type: string
+    text: string
+}
+
+type ButtonKeys = keyof Button
+// 等效于
+type ButtonKeys = "type" | "text"
+```
+
+#### **可识别联合类型**
 
 然而，当你试图访问一个联合类型对象的属性或方法时，TypeScript 不一定知道你要使用的是哪个类型，因此可能不会提供类型安全。为了解决这个问题，TypeScript 提供了可识别联合类型（Discriminated Unions）的概念。
 
@@ -781,7 +936,7 @@ console.log(area(rectangle)); // 输出矩形的面积
 
 通过使用可识别联合类型，我们可以编写更加类型安全的代码，因为 TypeScript 能够在编译时确定每个变量的具体类型。
 
-## **交叉类型**
+### **交叉类型**
 
 TypeScript的交叉类型（Intersection Types）是将多个类型合并为一个类型的方式。这意味着你可以将现有的多种类型叠加到一起，形成一个新的类型，这个新类型将包含所有原类型的特性。
 
@@ -811,6 +966,216 @@ const staff: IStaff = {
 > 在这个例子中，`IStaff`类型就是一个交叉类型，它包含了`IPerson`和`IWorker`的所有成员。因此，当你创建一个`IStaff`类型的变量时，你需要提供所有这些成员的值。
 
 交叉类型在TypeScript中非常有用，特别是在你需要组合多个类型的特性时。例如，在混入（Mixins）或其他不适合典型面向对象模型的地方，你经常会看到交叉类型的使用。
+
+### **映射类型**
+
+在 TypeScript 中，映射类型（Mapped Types）是一种高级类型，它允许你基于已有的类型创建新的类型，通过遍历原始类型的所有属性并应用一些转换规则来生成新的属性。映射类型使用了一种特殊的语法，即在类型名后面加上尖括号 `<>`，并在其中定义转换规则。
+
+映射类型最常见的应用场景是当你想要基于一个对象的形状创建一个新的对象，但需要对原始对象的每个属性应用一些转换逻辑时。例如，你可以将对象的所有属性都变为只读，或者将属性的类型从一种类型转换为另一种类型。
+
+下面是一些映射类型的例子：
+
+#### 只读映射类型
+
+```typescript
+type Readonly<T> = {  
+  readonly [P in keyof T]: T[P];  
+};  
+  
+interface Todo {  
+  title: string;  
+  description: string;  
+}  
+  
+const todo: Readonly<Todo> = {  
+  title: "Learn TypeScript",  
+  description: "Read the official documentation",  
+};  
+  
+// 下面的代码将会报错，因为 todo 的属性是只读的  
+// todo.title = "Update TypeScript knowledge";
+```
+
+在这个例子中，`Readonly` 映射类型将对象 `T` 的所有属性都标记为只读。
+
+#### 写入映射类型
+
+```typescript
+type Writable<T> = {  
+  -readonly [P in keyof T]: T[P];  
+};  
+  
+const readonlyTodo: Readonly<Todo> = {  
+  title: "Learn TypeScript",  
+  description: "Read the official documentation",  
+};  
+  
+const writableTodo: Writable<Readonly<Todo>> = readonlyTodo;  
+  
+// 现在 writableTodo 的属性是可以写入的  
+writableTodo.title = "Update TypeScript knowledge";
+```
+
+`Writable` 映射类型将对象 `T` 的所有只读属性移除只读修饰符，使其变为可写。
+
+#### 转换属性类型的映射类型
+
+```typescript
+type Partial<T> = {  
+  [P in keyof T]?: T[P];  
+};  
+  
+interface Todo {  
+  title: string;  
+  description: string;  
+}  
+  
+const todo: Partial<Todo> = {  
+  title: "Learn TypeScript"  
+  // description 属性是可选的  
+};
+```
+
+在这个例子中，`Partial` 映射类型将对象 `T` 的所有属性都变为可选的。
+
+#### 自定义映射类型
+
+你也可以创建自定义的映射类型，根据需要对属性进行更复杂的转换。
+
+```typescript
+type Capitalize<T> = {  
+  [P in keyof T]: T[P] extends string ? CapitalizeString<T[P]> : T[P];  
+};  
+  
+type CapitalizeString<S extends string> = S extends `${infer First}${infer Rest}`  
+  ? `${Uppercase<First>}${Rest}`  
+  : S;  
+  
+type Greeting = Capitalize<{ hello: string; world: string }>;  
+  
+// 结果类型是 { hello: "Hello"; world: "World"; }  
+const greeting: Greeting = {  
+  hello: "Hello",  
+  world: "World"  
+};
+```
+
+在这个例子中，`Capitalize` 映射类型将对象 `T` 的所有字符串属性都转换为首字母大写。
+
+映射类型是 TypeScript 中非常强大的工具，它们允许你以声明式的方式创建新类型，而无需显式地定义每个属性的类型。通过使用映射类型，你可以更加灵活地操作类型，并编写更加通用和可重用的代码。
+
+
+
+### **条件类型**
+
+TypeScript 中的条件类型（Conditional Types）是一种高级类型，它允许你根据一个条件表达式来选择两个类型中的一个。条件类型使用了一个特殊的语法，它类似于 JavaScript 中的三元条件运算符（ternary operator），但应用于类型系统。
+
+条件类型的基本语法如下：
+
+```typescript
+typescript复制代码
+
+T extends U ? X : Y
+```
+
+这里，`T` 和 `U` 是两个类型变量，`X` 和 `Y` 是两个类型。如果 `T` 可以赋值给 `U`（即 `T` 是 `U` 的子类型或相同类型），则条件类型的结果是 `X`；否则，结果是 `Y`。
+
+条件类型在类型操作和高级类型创建中非常有用，例如，你可以使用条件类型来创建联合类型、交叉类型、映射类型等。
+
+下面是一些条件类型的例子：
+
+**示例 1：提取字符串中的字符长度**
+
+```typescript
+type StringLength<T extends string> = T['length'];  
+  
+const str: StringLength<'hello'> = 5; // 类型是 5
+```
+
+**示例 2：根据条件返回不同的类型**
+
+```typescript
+type TypeOf<T> = T extends string | number ? T : never;  
+  
+const isStringOrNumber = <T>(value: T): TypeOf<T> => {  
+  if (typeof value === 'string' || typeof value === 'number') {  
+    return value;  
+  }  
+  throw new Error('Invalid type');  
+};  
+  
+const num = isStringOrNumber(123); // 类型是 number  
+const str = isStringOrNumber('hello'); // 类型是 string
+```
+
+**示例 3：使用条件类型实现 `Exclude`**
+
+`Exclude` 是一个内置的条件类型，它可以从一个类型中排除掉另一个类型的所有属性。
+
+```typescript
+type Exclude<T, U> = T extends U ? never : T;  
+  
+type Animals = 'Dog' | 'Cat' | 'Bird';  
+type Mammals = 'Dog' | 'Cat';  
+  
+type OtherAnimals = Exclude<Animals, Mammals>;  
+// 类型 OtherAnimals 等于 'Bird'，因为 'Dog' 和 'Cat' 被排除了
+```
+
+**示例 4：使用条件类型实现 `Extract`**
+
+`Extract` 是另一个内置的条件类型，它从一个类型中提取出另一个类型的所有属性。
+
+```typescript
+type Extract<T, U> = T extends U ? T : never;  
+  
+type Animals = 'Dog' | 'Cat' | 'Bird';  
+type Mammals = 'Dog' | 'Cat';  
+  
+type JustMammals = Extract<Animals, Mammals>;  
+// 类型 JustMammals 等于 'Dog' | 'Cat'，因为它只提取了 'Animals' 中也是 'Mammals' 的类型
+```
+
+**示例 5：条件类型与映射类型结合使用**
+
+```typescript
+type ReadOnly<T> = {  
+  readonly [P in keyof T]: T[P];  
+};  
+  
+type Writable<T> = {  
+  -readonly [P in keyof T]: T[P];  
+};  
+  
+type ReadWrite<T, ReadOnly extends boolean> = ReadOnly extends true  
+  ? ReadOnly<T>  
+  : Writable<T>;  
+  
+type Todo = {  
+  title: string;  
+  description: string;  
+};  
+  
+const todo1: ReadWrite<Todo, true> = {  
+  title: "Learn TypeScript",  
+  description: "Read the official documentation"  
+};  
+  
+// todo1 的属性是只读的  
+// todo1.title = "Update TypeScript knowledge"; // 错误  
+  
+const todo2: ReadWrite<Todo, false> = {  
+  title: "Learn TypeScript",  
+  description: "Read the official documentation"  
+};  
+  
+// todo2 的属性是可写的  
+todo2.title = "Update TypeScript knowledge"; // 正确
+```
+
+在这个例子中，`ReadWrite` 类型是一个条件类型，它根据 `ReadOnly` 参数的值来选择是返回只读类型还是可写类型。
+
+条件类型是 TypeScript 类型系统中非常强大的工具，它们允许你根据编译时的条件来创建灵活的、可定制的类型。通过结合使用条件类型和其他高级类型，你可以创建出非常复杂和有用的类型定义。
 
 
 
@@ -1799,15 +2164,66 @@ console.log(person.name); // 输出: 之前的值，因为设置无效
 
 需要注意的是，访问器并不总是必需的。在 TypeScript 中，你也可以直接使用公共或私有属性，而不需要封装它们。然而，访问器提供了一种更加灵活和强大的机制，用于在属性值读取和设置时执行额外的逻辑。
 
+### **抽象类**
+
+在 TypeScript 中，抽象类（Abstract Class）是一种不能被实例化的类，它通常用作其他类的基类，并为这些类提供一个公共的接口。
+
+抽象类可以包含抽象方法（没有实现的方法）和非抽象方法（有具体实现的方法）。子类继承抽象类时，必须实现抽象类中的所有抽象方法。
+
+抽象类的主要用途是定义一个公共的接口，这个接口由所有子类共享。通过抽象类，你可以确保所有子类都遵循相同的结构，并且具有特定的行为。此外，抽象类还可以包含一些通用的非抽象方法，这些方法可以在所有子类中共享。
+
+下面是一个 TypeScript 抽象类的例子：
+
+```typescript
+// 定义一个抽象类  
+abstract class Animal {  
+  // 抽象方法，必须在子类中实现  
+  abstract makeSound(): void;  
+  
+  // 非抽象方法，可以直接在抽象类中定义  
+  move(): void {  
+    console.log("The animal moves.");  
+  }  
+}  
+  
+// 定义一个类，继承自 Animal 抽象类  
+class Dog extends Animal {  
+  // 实现 Animal 抽象类中的 makeSound 方法  
+  makeSound(): void {  
+    console.log("The dog barks.");  
+  }  
+}  
+  
+// 定义一个类，继承自 Animal 抽象类  
+class Cat extends Animal {  
+  // 实现 Animal 抽象类中的 makeSound 方法  
+  makeSound(): void {  
+    console.log("The cat meows.");  
+  }  
+}  
+  
+// 创建 Dog 类的实例  
+const dog = new Dog();  
+dog.makeSound(); // 输出: The dog barks.  
+dog.move(); // 输出: The animal moves.  
+  
+// 创建 Cat 类的实例  
+const cat = new Cat();  
+cat.makeSound(); // 输出: The cat meows.  
+cat.move(); // 输出: The animal moves.
+```
+
+>  在这个例子中，`Animal` 是一个抽象类，它有一个抽象方法 `makeSound` 和一个非抽象方法 `move`。`Dog` 和 `Cat` 类都继承自 `Animal` 抽象类，并且实现了 `makeSound` 方法。因此，它们可以被实例化，并且可以调用 `makeSound` 和 `move` 方法。
 
 
-### **接口**
+
+## **接口**
 
 在 TypeScript 中，接口（Interfaces）是一种定义对象结构的方式，它允许你为对象定义一组必须遵循的属性（properties）和方法（methods）。**接口可以用来描述对象应有的形状（shape），而不关注具体的实现**。这使得代码更加模块化，同时也提供了类型安全的保证。
 
 接口在 TypeScript 中是非常灵活的，可以用来描述对象、函数和类的结构。
 
-
+### **分类**
 
 #### **对象类型接口**
 
@@ -2031,59 +2447,6 @@ console.log(strings.y); // 输出: world
 
 
 
-### **抽象类**
-
-在 TypeScript 中，抽象类（Abstract Class）是一种不能被实例化的类，它通常用作其他类的基类，并为这些类提供一个公共的接口。
-
-抽象类可以包含抽象方法（没有实现的方法）和非抽象方法（有具体实现的方法）。子类继承抽象类时，必须实现抽象类中的所有抽象方法。
-
-抽象类的主要用途是定义一个公共的接口，这个接口由所有子类共享。通过抽象类，你可以确保所有子类都遵循相同的结构，并且具有特定的行为。此外，抽象类还可以包含一些通用的非抽象方法，这些方法可以在所有子类中共享。
-
-下面是一个 TypeScript 抽象类的例子：
-
-```typescript
-// 定义一个抽象类  
-abstract class Animal {  
-  // 抽象方法，必须在子类中实现  
-  abstract makeSound(): void;  
-  
-  // 非抽象方法，可以直接在抽象类中定义  
-  move(): void {  
-    console.log("The animal moves.");  
-  }  
-}  
-  
-// 定义一个类，继承自 Animal 抽象类  
-class Dog extends Animal {  
-  // 实现 Animal 抽象类中的 makeSound 方法  
-  makeSound(): void {  
-    console.log("The dog barks.");  
-  }  
-}  
-  
-// 定义一个类，继承自 Animal 抽象类  
-class Cat extends Animal {  
-  // 实现 Animal 抽象类中的 makeSound 方法  
-  makeSound(): void {  
-    console.log("The cat meows.");  
-  }  
-}  
-  
-// 创建 Dog 类的实例  
-const dog = new Dog();  
-dog.makeSound(); // 输出: The dog barks.  
-dog.move(); // 输出: The animal moves.  
-  
-// 创建 Cat 类的实例  
-const cat = new Cat();  
-cat.makeSound(); // 输出: The cat meows.  
-cat.move(); // 输出: The animal moves.
-```
-
->  在这个例子中，`Animal` 是一个抽象类，它有一个抽象方法 `makeSound` 和一个非抽象方法 `move`。`Dog` 和 `Cat` 类都继承自 `Animal` 抽象类，并且实现了 `makeSound` 方法。因此，它们可以被实例化，并且可以调用 `makeSound` 和 `move` 方法。
-
-
-
 
 
 ## **泛型**
@@ -2098,6 +2461,8 @@ TypeScript 中的泛型（Generics）是一种编写灵活、可重用组件的�
 - K（Key）：表示对象中的键类型
 - V（Value）：表示对象中的值类型
 - E（Element）：表示元素类型
+
+### **分类**
 
 下面是一些使用 TypeScript 泛型的例子：
 
@@ -2156,7 +2521,7 @@ function loggingIdentity<T extends Lengthwise>(arg: T): T {
 }
 ```
 
-#### **泛型工具类型**
+### **泛型工具类型**
 
 在 TypeScript 中，泛型工具类型（Utility Types）是一种内置的类型工具，它们用于在泛型编程中执行常见的类型操作，如提取类型、映射类型、条件类型等。这些工具类型在编写泛型函数、接口和类时非常有用，可以帮助你创建更加灵活和可重用的代码。
 
@@ -2594,3 +2959,16 @@ TypeScript 支持多种模块类型，包括：
 ### 模块和命名空间
 
 在 TypeScript 中，模块和命名空间是两个不同的概念。模块是一种代码组织和封装的机制，而命名空间则是一种避免命名冲突的方式。不过，你可以在一个模块中定义一个命名空间，这样可以在模块内部使用命名空间来组织代码，同时保持模块外部的清晰接口。
+
+|    对比项    |                       TypeScript 模块                        |                     TypeScript 命名空间                      |
+| :----------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
+|   **定义**   | 模块是 TypeScript 中的一个代码单元，可以包含类、接口、函数等。 |  命名空间是一种将相关的代码组织在一起的方式，避免命名冲突。  |
+|   **语法**   |  使用 `import` 和 `export` 关键字来导入和导出模块中的成员。  |           使用 `namespace` 关键字来定义命名空间。            |
+|   **范围**   |        模块的范围是全局的，可以在任何地方导入和使用。        |        命名空间的作用范围限定在其定义的文件或项目中。        |
+|  **作用域**  |     模块成员在导入时具有局部作用域，不会污染全局作用域。     | 命名空间中的成员具有全局作用域，但可以通过命名空间名称来访问。 |
+| **代码重用** | 模块可以轻松地重用和共享代码，特别适合大型项目中的代码拆分和组织。 | 命名空间适合在单个文件或项目中组织相关的代码，但不适合跨文件或项目共享。 |
+| **类型冲突** |         模块可以导出类型，并通过导入来避免类型冲突。         | 命名空间可以避免命名冲突，但类型冲突仍然可能发生，尤其是在跨文件或项目使用时。 |
+|  **兼容性**  | 模块与 ECMAScript 模块规范兼容，可以与其他 JavaScript 或 TypeScript 项目无缝集成。 | 命名空间是 TypeScript 特有的功能，可能与其他 JavaScript 项目不完全兼容。 |
+| **推荐用法** |   对于大型项目或需要跨文件或项目共享的代码，推荐使用模块。   |    对于单个文件或项目中的相关代码组织，推荐使用命名空间。    |
+
+总结：TypeScript 模块和命名空间各有其优缺点，选择使用哪种方式取决于具体的需求和场景。在大型项目中，**模块通常更适合用于代码拆分和组织，而命名空间则更适合在单个文件或项目中组织相关的代码**。
