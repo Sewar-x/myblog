@@ -43,6 +43,7 @@ module.exports = config({
         ariaLabel: '框架和源码分析',
         items: [
           { text: 'Vue2.x源码分析专题', link: '../vue2/' },
+          { text: 'Vue3.x源码分析专题', link: '../vue3/' },
           { text: 'Axios源码分析专题', link: '../axios/' },
           { text: 'React', link: '../React/' }
         ]
@@ -154,7 +155,10 @@ module.exports = config({
         'VueCli源码分析',
         '前端框架选型'
       ],
-
+      '/vue3/': [
+        '',
+        'Vue3源码分析'
+      ],
       '/node/': [
         '',
         '使用docker服务node部署',
@@ -167,8 +171,9 @@ module.exports = config({
       ],
       '/componentsEncapsulation/': [
         '',
+        '从零到一搭建公共组件库',
         'Element二次封装',
-        'JSON组件'
+        'JSON组件',
       ],
       '/webpack/': [
         '',

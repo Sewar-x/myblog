@@ -48,12 +48,15 @@ footer:  MIT Licensed | Copyright © 2023-present
 |                    |                                                              | [Vue-Router 原理分析](https://sewar-x.github.io/vue2/VueRouter%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90/) | 💯    |
 |                    |                                                              | [Vue-SSR 原理分析](https://sewar-x.github.io/vue2/VueSSR%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90/) | 💯    |
 |                    |                                                              | [Vue-Cli 分析](https://sewar-x.github.io/vue2/VueCli%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/) | 💯    |
-|                    |                                                              | [Vue Vs React](https://sewar-x.github.io/vue2/%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6%E9%80%89%E5%9E%8B/) | ❌    |
 |                    | **Vue3.x**                                                   |                                                              | ❌    |
 |                    |                                                              | Vue3 基础                                                    | ❌    |
 |                    |                                                              | Vue3 原理及源码解析                                          | ❌    |
 |                    | **React**                                                    |                                                              |      |
-|                    |                                                              | React 基础                                                   |      |
+|                    |                                                              | React 基础                                                   | ❌    |
+|                    |                                                              | React 原理和源码分析                                         | ❌    |
+|                    | 框架对比                                                     |                                                              |      |
+|                    |                                                              | [Vue Vs React 全面对比](https://sewar-x.github.io/vue2/%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6%E9%80%89%E5%9E%8B/) | ❌    |
+|                    |                                                              | Vue2 Vs Vue3 全面对比                                        | ❌    |
 |                    | [Axios 源码分析](https://sewar-x.github.io/axios/)           |                                                              | 💯    |
 |                    |                                                              |                                                              |      |
 | **浏览器**         |                                                              |                                                              |      |
@@ -101,6 +104,7 @@ footer:  MIT Licensed | Copyright © 2023-present
 |                    |                                                              |                                                              |      |
 | **项目实践**       |                                                              |                                                              |      |
 |                    | **组件和组件封装实践**                                       |                                                              |      |
+|                    |                                                              | 从零到一搭建组件库                                           | ❌    |
 |                    |                                                              | [Element ui 与 Element-plus ui 二次封装实践](https://sewar-x.github.io/componentsEncapsulation/Element%E4%BA%8C%E6%AC%A1%E5%B0%81%E8%A3%85/) | 💯    |
 |                    |                                                              | [JSON配置化组件二次封装](https://sewar-x.github.io/componentsEncapsulation/JSON%E7%BB%84%E4%BB%B6/) | 💯    |
 |                    | [登录与单点登录](https://sewar-x.github.io/projectsSummary/%E7%99%BB%E5%BD%95%E4%B8%8E%E5%8D%95%E7%82%B9%E7%99%BB%E5%BD%95/) |                                                              | 💯    |
