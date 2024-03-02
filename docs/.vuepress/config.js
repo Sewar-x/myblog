@@ -42,12 +42,12 @@ module.exports = config({
         text: '框架和源码分析',
         ariaLabel: '框架和源码分析',
         items: [
-          { text: 'Vue2.x源码分析专题', link: '../vue2/' },
-          { text: 'Vue3.x源码分析专题', link: '../vue3/' },
+          { text: 'Vue2.x 分析专题', link: '../vue2/' },
+          { text: 'Vue3.x 分析专题', link: '../vue3/' },
+          { text: 'React  分析专题', link: '../React/' },
           { text: 'Vue2 与 Vue3 对比分析', link: '../FrameworkPK/Vue2VsVue3' },
           { text: 'Vue 与 React 对比分析', link: '../FrameworkPK/VueVsReact' },
           { text: 'Axios源码分析专题', link: '../axios/' },
-          { text: 'React', link: '../React/' }
         ]
       },
       {
