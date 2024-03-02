@@ -213,39 +213,44 @@
 
 ![vue生命周期](../flow-graph/响应式原理流程图.jpeg)
 
-* 总体流程：初始化 ->挂载组件 -> 模板编译 ->  依赖收集 -> 数据更新 -> 实例销毁
-  * 初始化：
-    * 在 new Vue() 之后, 调用 _init 函数进行初始化: 生命周期、事件、初始化渲染、调用 beforeCreated 钩子；
-    * 初始化状态 initState： props、methods、data、computed 与 watch;
-    * 初始化 data、computed 和 watch 时，调用 `defineReactive` 定义响应式数据，使用 Object.defineProperty 设置  getter 函数，初始化「 响应式」数据。
-    * 调用 created 钩子。
-  * 挂载组件：
-    * 调用 `$mount` 挂载组件，如果是运行时编译，即不存在  render function  但是存在 template  的情况，需要进行「 编译」步骤。
-  * 模板编译: 
-    * 将模板编译生成 渲染函数。
-    * `parse`:  用正则等方式解析  template  模板中的指令、class、style 等数据，形成 AST。
-    * `optimize`: 标记  static  静态节点。当 update更新界面时，会有一个 patch 的过程，diff  算法会直接跳过静态节点，从而减少了比较的过程，优化了 patch 的性能。
-    * `generate`:将  AST  转化成  render function  字符串的过程,得到 render 的字符串以及 staticRenderFns  字符串。
-  * 依赖收集
-    * 当  render function  被渲染的时候，因为会读取所需对象的值，所以会触发数据的 getter 函数进行「 依赖收集」；
-    * 「 依赖收集」的目的是将观察者  Watcher  对象存放到当前闭包中的订阅者  Dep  的  subs  中。
-    * 调用 beforeMount 钩子。
-    * 通过 _render() 生成 VNode，通过 _update() 将 VNode 渲染成真实 DOM。
-    * createElm() 先通过 VNode 创建真实 DOM 插入到父节点，直到递归完成完整 DOM  插入到 body，**完成初次渲染**。
-    * 调用 mounted 钩子。
-  * 数据更新
-    * 在修改对象的值的时候，会触发对应的 setter， setter 通知之前「 依赖收集」得到的  Dep  中的每一个 Watcher，告诉它们自己的值改变了，需要重新渲染视图。
-    * Watcher  就会开始调用 update 来更新视图。
-  * update时, 通过 patch (打补丁) 的过程以及使用队列来异步更新的策略更新视图。
-    * patch 时，通过 patchVnode() 比较 新旧 VNode, 并 updateChild() 进行更新视图。
-  * 实例销毁： 
-    * 离开页面时，触发 beforeDestroy 钩子
-  
-  
-  
+> 总体流程：初始化 ->挂载组件 -> 模板编译 ->  依赖收集 -> 数据更新 -> 实例销毁
+
+* 初始化：
+  * 在 new Vue() 之后, 调用 _init 函数进行初始化: 生命周期、事件、初始化渲染、调用 beforeCreated 钩子；
+  * 初始化状态 initState： props、methods、data、computed 与 watch;
+  * 初始化 data、computed 和 watch 时，调用 `defineReactive` 定义响应式数据，使用 Object.defineProperty 设置  getter 函数，初始化「 响应式」数据。
+  * 调用 created 钩子。
+* 挂载组件：
+  * 调用 `$mount` 挂载组件，如果是运行时编译，即不存在  render function  但是存在 template  的情况，需要进行「 编译」步骤。
+* 模板编译: 
+  * 将模板编译生成 渲染函数。
+  * `parse`:  用正则等方式解析  template  模板中的指令、class、style 等数据，形成 AST。
+  * `optimize`: 标记  static  静态节点。当 update更新界面时，会有一个 patch 的过程，diff  算法会直接跳过静态节点，从而减少了比较的过程，优化了 patch 的性能。
+  * `generate`:将  AST  转化成  render function  字符串的过程,得到 render 的字符串以及 staticRenderFns  字符串。
+* 依赖收集
+  * 当  render function  被渲染的时候，因为会读取所需对象的值，所以会触发数据的 getter 函数进行「 依赖收集」；
+  * 「 依赖收集」的目的是将观察者  Watcher  对象存放到当前闭包中的订阅者  Dep  的  subs  中。
+  * 调用 beforeMount 钩子。
+  * 通过 _render() 生成 VNode，通过 _update() 将 VNode 渲染成真实 DOM。
+  * createElm() 先通过 VNode 创建真实 DOM 插入到父节点，直到递归完成完整 DOM  插入到 body，**完成初次渲染**。
+  * 调用 mounted 钩子。
+* 数据更新
+  * 在修改对象的值的时候，会触发对应的 setter， setter 通知之前「 依赖收集」得到的  Dep  中的每一个 Watcher，告诉它们自己的值改变了，需要重新渲染视图。
+  * Watcher  就会开始调用 update 来更新视图。
+* update时, 通过 patch (打补丁) 的过程以及使用队列来异步更新的策略更新视图。
+  * patch 时，通过 patchVnode() 比较 新旧 VNode, 并 updateChild() 进行更新视图。
+* 实例销毁： 
+  * 离开页面时，触发 beforeDestroy 钩子
+
+
+
 * 总体流程图：
 
   ![](../flow-graph/vue创建流程.png)
+
+  简化流程：
+
+  ![image-20240228154538651](../images/vue渲染流程.png)
 
 
 
@@ -7483,44 +7488,57 @@ this.$delete(this.obj, 'propertyToRemove');
 
 使用 `Proxy` API 替换 `Object.defineProperty() ` 方法对 `data` 对象定义响应式，`Proxy` 接口底层支持检测代理对象属性的新增和删除检测。
 
-## Vue2.x数组变更方法实现
+## Vue2.x数组变更方法
 
-* Vue 也是不能检测到以下变动的数组：
-  * 当你利用索引直接设置一个项时，例如：`vm.items[indexOfItem] = newValue`；使用：`Vue.set(example1.items, indexOfItem, newValue)`；
-  * 当你修改数组的长度时，例如：`vm.items.length = newLength`；使用 `vm.items.splice(newLength)`。
+### **Vue 不能检测到数组的变动**
 
-* [变更方法](https://cn.vuejs.org/v2/guide/list.html#变更方法)：Vue 将被侦听的数组的变更方法进行了包裹，所以它们也将会触发视图更新。
+* Vue 不能检测到利用索引直接设置一个项
 
-  * 这些被包裹过的方法包括：
-    * `push()`
-    * `pop()`
-    * `shift()`
-    * `unshift()`
-    * `splice()`
-    * `sort()`
-    * `reverse()`
+  例如：`vm.items[indexOfItem] = newValue`；使用：`Vue.set(example1.items, indexOfItem, newValue)`；
 
-* 方法包裹实现思路：
+* Vue 不能检测到数组的长度的修改
+  例如：`vm.items.length = newLength`；使用 `vm.items.splice(newLength)`。
 
-  * 首先，进行代理原型：
+### **数组变更方法实现**
 
-    * 原数组对象原型关系： `ArrayInstance.__proto__` =  `Array.prototype`;
+[变更方法](https://cn.vuejs.org/v2/guide/list.html#变更方法)：Vue 将被侦听的数组的变更方法进行了包裹，所以它们也将会触发视图更新。
 
-      ![](../images/vue-proto.png)
+这些被包裹过的方法包括：
+* `push()`
+* `pop()`
+* `shift()`
+* `unshift()`
+* `splice()`
+* `sort()`
+* `reverse()`
 
-    * 以数组对象的原型 `Array.prototype` 创建新的对象 `arrayMethods` 作为代理原型 ；
+### **数组方法包裹实现原理**
 
-    * 创建新数组对象 `methodsToPatch`，将新数组对象的 `methodsToPatch.__proto__` 属性指向了  `arrayMethods`；
+> 1. 首先，进行**代理原型**；
+>
+> 2. 然后，通过**重写数组变更方法，调用缓存的数组变更方法**；
+>
+> 3. 最后**对新插入数据进行数据观测和通知视图变更**；
 
-    * 将  `arrayMethods__proto__` 属性指向 `Array.prototype`;
+* 首先，进行代理原型：
 
-    * 因此经过代理原型后，原型关系为：`ArrayInstance.__proto__` =  `methodsToPatch` , `methodsToPatch.__proto__`  =  `Array.prototype`;
+  * 原数组对象原型关系： `ArrayInstance.__proto__` =  `Array.prototype`;
 
-      ![](../images/proto2.png)
+    ![](../images/vue-proto.png)
 
-  * 然后，通过重写数组变更方法，调用缓存的数组变更方法；
+  * 以数组对象的原型 `Array.prototype` 创建新的对象 `arrayMethods` 作为代理原型 ；
 
-  * 最后对新插入数据进行数据观测和通知视图变更。
+  * 创建新数组对象 `methodsToPatch`，将新数组对象的 `methodsToPatch.__proto__` 属性指向了  `arrayMethods`；
+
+  * 将  `arrayMethods__proto__` 属性指向 `Array.prototype`;
+
+  * 因此经过代理原型后，原型关系为：`ArrayInstance.__proto__` =  `methodsToPatch` , `methodsToPatch.__proto__`  =  `Array.prototype`;
+
+    ![](../images/proto2.png)
+
+* 然后，通过重写数组变更方法，调用缓存的数组变更方法；
+
+* 最后对新插入数据进行数据观测和通知视图变更。
 
 * 源码分析：
 
@@ -7577,7 +7595,7 @@ this.$delete(this.obj, 'propertyToRemove');
     对于大部分现代浏览器都会走到 `protoAugment`，那么它实际上就把 `value` 的原型指向了 `arrayMethods` 
 
   * `arrayMethods` 的定义在 `src/core/observer/array.js` 中：
-  
+
     ```js
     import { def } from '../util/index'
     
@@ -7624,7 +7642,7 @@ this.$delete(this.obj, 'propertyToRemove');
     })
     })
     ```
-  
+
     * 对原来数字方法进行重写，重写的方法会先执行它们本身原有的逻辑，并对能增加数组长度的 3 个方法 `push、unshift、splice` 方法做了判断，获取到插入的值，然后把新添加的值变成一个响应式对象
     * 再调用 `ob.dep.notify()` 手动触发依赖通知
 
@@ -7860,136 +7878,6 @@ Q：根据浏览器任务队列异步执行的效率来选择放入方法的优�
    - 提供了监视对DOM树所做更改的能力（HTML5 中的新特性）
 3. setImmediate(flushCallbacks)
 4. setTimeout(flushCallbacks, 0)
-
-
-
-
-
-****
-
-
-
-## VUE 3.x
-
-### VUE2 与 VUE3 比较
-
-#### **语法差异**
-
-[vue3.x 文档-vue2迁移](https://vue3js.cn/docs/zh/guide/migration/introduction.html#%E4%BB%8B%E7%BB%8D)章节中介绍了 vue3.x 新增特性和 vue2 差异。
-
-**补充说明**
-
-Vue 3 中需要关注的一些新功能包括：
-
-- [组合式 API](https://vue3js.cn/docs/zh/guide/composition-api-introduction.html)：
-
-  - 提供 `setup` 组件选项：在**创建组件之前**执行，一旦 `props` 被解析，并充当合成 API 的入口点。
-  - `setup` 选项应该是一个接受 `props` 和 `context` 的函数。`setup` 返回的所有内容都将暴露给组件的其余部分 (计算属性、方法、生命周期钩子等等) 以及组件的模板。
-  - 作用：在多个组件中复用相同的代码逻辑。把组件逻辑模块化复用，增加代码可读性。
-    - vue2.x 中提供组件代码复用的 API：`mixin`、`slot`。
-
-- [Teleport](https://vue3js.cn/docs/zh/guide/teleport.html)： 
-
-  - 新的内置组件，将组件内的模板移动到 `to` 属性指定的 DOM 节点之下。
-  - 应用场景：用于类似 `modals`,`toast` 这类和 `Vue` 应用的 `DOM` 完全剥离的组件，这类组件如果嵌套在 `Vue` 的某个组件内部，那么处理嵌套组件的定位、`z-index` 和样式就会变得很困难，因此通过 `Teleport` 可以解决。
-
-- [片段](https://vue3js.cn/docs/zh/guide/migration/fragments.html)：支持多根节点组件，即片段。
-
-- [组件选项 emits](https://vue3js.cn/docs/zh/guide/component-custom-events.html)
-
-- [`createRenderer` API 来自 `@vue/runtime-core`](https://github.com/vuejs/vue-next/tree/master/packages/runtime-core) 创建自定义渲染器
-
-  
-
-#### **创建实例方式**
-
-* vue2: 使用 `new Vue()` 创建实例。
-
-  * 缺点：通过 `new Vue()` 创建的根 Vue 实例。从同一个 Vue 构造函数**创建的每个根实例共享相同的全局配置**，因此全局 API 影响所有 vue 实例。 
-
-  ```js
-  // 这会影响两个根实例
-  Vue.mixin({
-    /* ... */
-  })
-  
-  const app1 = new Vue({ el: '#app-1' })
-  const app2 = new Vue({ el: '#app-2' })
-  ```
-
-* vue3：使用 [`createApp()`](https://vue3js.cn/docs/zh/api/global-api.html#createapp) 创建实例。
-
-  * 解决 vue2 全局 api 缺点
-  
-  ```js
-  Vue.createApp({
-    data() {
-      return {
-        a: 1
-      }
-    },
-    created() {
-      // `this` 指向 vm 实例
-      console.log('a is: ' + this.a) // => "a is: 1"
-    }
-  })
-  //应用实例暴露的大多数方法都会返回该同一实例，允许链式：
-  Vue.createApp({})
-    .component('SearchInput', SearchInputComponent)
-    .directive('focus', FocusDirective)
-    .use(LocalePlugin)
-  ```
-
-#### **生命周期**
-
-* vue 3.x 生命周期：
-
-  ![](../flow-graph/vue3-lifecycle.png)
-
-![](../images/vue2-vue3-lifecycle.png)
-
-
-
-## Proxy 比 defineProperty好在哪里？
-
-* Vue 3.x 响应式系统使用  [ES6 Proxy](https://es6.ruanyifeng.com/#docs/proxy)，Vue2.x 使用 `Object.defineProperty()` 实现。
-
-Proxy和defineProperty都是JavaScript中用于处理对象属性的机制，但它们在功能和灵活性上存在一些差异。
-
-以下是一些Proxy比defineProperty更好的地方：
-
-1. **Proxy支持数组**：
-   * Proxy可以直接监听数组的变化; （Proxy 通过返回一个代理对象操作源对象），在使用Proxy时，你可以更容易地更新数组的索引或添加/删除数组元素。
-   * Object.defineProperty 需要深度遍历数组，对数组每个元素递归调用 Object.defineProperty 实现监听；因此原生API不能监听数组的变化；
-   * Proxy可以检测到数组基于下标的修改和长度修改，而Object.defineProperty无法做到。
-2. **Proxt 支持监听对象属性新增和删除**：
-   * Proxy 通过返回代理对象监听源对象，对整个对象操作进行拦截，因此在对象属性新增和删除时候能在代理对象中监听到；
-   * 使用 Object.defineProperty 对对象监听，需要对每一个对象属性进行遍历监听，因此在完成初始化属性遍历拦截后，再对对象属性进行新增和修改时就无法监听到变化； (Vue2.x 中使用Object.defineProperty 进行响应式初始化之后，不再进行响应式操作，因此无法监听对象属性新增和修改 )
-3. **Proxy 可以拦截更多的操作**：
-   * Proxy 可以拦截更多的操作，包括属性的读取、设置和删除等；
-     * Proxy 通过返回一个代理对象操作源对象，这意味着使用Proxy可以在不干扰现有代码逻辑的情况下修改对象的行为。
-   * Object.defineProperty 只能监视对象单个属性值的变化。
-4. **Proxy性能更好**：
-   * Proxy 通过返回一个代理对象操作源对象，Proxy可以在内存中只存储一份数据；Proxy可以在调用的时候递归，用到才代理，也不需要维护特别多的依赖关系，性能提升很大。
-   * Object.defineProperty 需要为每个对象每个属性都创建一个数据结构，导致内存占用较大；
-   * 由此在处理大量数据时，Object.defineProperty 内存占用较大；
-5. **Proxy提供了更丰富的特性**：
-   * Proxy提供了更丰富的特性，例如get/set属性、apply、construct、deleteProperty、getOwnPropertyDescriptor、getPrototypeOf、isExtensible、ownKeys、preventExtensions、setPrototype等。这些特性使得Proxy在处理对象属性时更加灵活和强大。
-6. **Proxy更简单的语法**：
-   * Proxy提供了一个相对简单的API，使得创建代理对象更加容易；
-   * Object.defineProperty的语法更加复杂和不易理解；
-
-
-
-
-
-## Vue VS React
-
-![Vue vs React](../images/VuevsReact.png)
-
-### 参考资料
-
-[超全的Vue3文档【Vue2迁移Vue3】](https://juejin.cn/post/6858558735695937544#heading-5)
 
 ****
 

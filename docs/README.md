@@ -57,6 +57,7 @@ footer:  MIT Licensed | Copyright © 2023-present
 |                    | 框架对比                                                     |                                                              |      |
 |                    |                                                              | [Vue Vs React 全面对比](https://sewar-x.github.io/vue2/%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6%E9%80%89%E5%9E%8B/) | ❌    |
 |                    |                                                              | Vue2 Vs Vue3 全面对比                                        | ❌    |
+|                    | Element-Plus 源码分析                                        |                                                              |      |
 |                    | [Axios 源码分析](https://sewar-x.github.io/axios/)           |                                                              | 💯    |
 |                    |                                                              |                                                              |      |
 | **浏览器**         |                                                              |                                                              |      |

@@ -44,6 +44,8 @@ module.exports = config({
         items: [
           { text: 'Vue2.x源码分析专题', link: '../vue2/' },
           { text: 'Vue3.x源码分析专题', link: '../vue3/' },
+          { text: 'Vue2 与 Vue3 对比分析', link: '../FrameworkPK/Vue2VsVue3' },
+          { text: 'Vue 与 React 对比分析', link: '../FrameworkPK/VueVsReact' },
           { text: 'Axios源码分析专题', link: '../axios/' },
           { text: 'React', link: '../React/' }
         ]
@@ -153,7 +155,6 @@ module.exports = config({
         'VueRouter原理分析',
         'VueSSR原理分析',
         'VueCli源码分析',
-        '前端框架选型'
       ],
       '/vue3/': [
         '',
