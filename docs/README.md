@@ -48,15 +48,15 @@ footer:  MIT Licensed | Copyright © 2023-present
 |                    |                                                              | [Vue-Router 原理分析](https://sewar-x.github.io/vue2/VueRouter%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90/) | 💯    |
 |                    |                                                              | [Vue-SSR 原理分析](https://sewar-x.github.io/vue2/VueSSR%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90/) | 💯    |
 |                    |                                                              | [Vue-Cli 分析](https://sewar-x.github.io/vue2/VueCli%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/) | 💯    |
-|                    | **Vue3.x**                                                   |                                                              | ❌    |
+|                    | **Vue3.x**                                                   |                                                              |      |
 |                    |                                                              | Vue3 基础                                                    | ❌    |
 |                    |                                                              | Vue3 原理及源码解析                                          | ❌    |
 |                    | **React**                                                    |                                                              |      |
 |                    |                                                              | React 基础                                                   | ❌    |
 |                    |                                                              | React 原理和源码分析                                         | ❌    |
-|                    | 框架对比                                                     |                                                              |      |
+|                    | **框架对比**                                                 |                                                              |      |
+|                    |                                                              | [Vue2 Vs Vue3 全面对比](https://sewar-x.github.io/FrameworkPK/Vue2VsVue3/) | 💯    |
 |                    |                                                              | [Vue Vs React 全面对比](https://sewar-x.github.io/vue2/%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6%E9%80%89%E5%9E%8B/) | ❌    |
-|                    |                                                              | Vue2 Vs Vue3 全面对比                                        | ❌    |
 |                    | Element-Plus 源码分析                                        |                                                              |      |
 |                    | [Axios 源码分析](https://sewar-x.github.io/axios/)           |                                                              | 💯    |
 |                    |                                                              |                                                              |      |
@@ -102,6 +102,10 @@ footer:  MIT Licensed | Copyright © 2023-present
 |                    |                                                              | [Git 流程规范实践](https://sewar-x.github.io/git/Git%E6%B5%81%E7%A8%8B%E8%A7%84%E8%8C%83/) | 💯    |
 |                    | **测试和自动化测试**                                         |                                                              | ❌    |
 |                    | **微前端**                                                   |                                                              |      |
+|                    |                                                              | 基础和原理                                                   | ❌    |
+|                    |                                                              | microapp                                                     | ❌    |
+|                    |                                                              | qiankun                                                      | ❌    |
+|                    |                                                              | 从零到一设计微前端框架                                       | ❌    |
 |                    |                                                              |                                                              |      |
 | **项目实践**       |                                                              |                                                              |      |
 |                    | **组件和组件封装实践**                                       |                                                              |      |
