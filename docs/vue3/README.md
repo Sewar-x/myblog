@@ -13,3 +13,7 @@ import { reactive } from 'vue'
 
 const state = reactive({ count: 0 })
 ```
+
+## **参考资料**
+
+[「Vue2+Vue3」 的 62 个知识点，看看你掌握了几个？](https://mp.weixin.qq.com/s/CAYPxaDrKChSgO1PMUGcAg)
