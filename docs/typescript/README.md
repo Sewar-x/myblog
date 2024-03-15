@@ -6,7 +6,11 @@
 
 ## TypeScript 是什么
 
-TypeScript 是一种由微软开发的自由和开源的编程语言。它是 JavaScript 的一个超集，而且本质上向这个语言添加了可选的静态类型和基于类的[面向对象编程](https://so.csdn.net/so/search?q=面向对象编程&spm=1001.2101.3001.7020)。
+`TypeScript` 是 `JavaScript` 的类型的超集，支持`ES6`语法，支持面向对象编程的概念，如类、接口、继承、泛型等；
+
+其是一种静态类型检查的语言，提供了类型注解，在代码编译阶段就可以检查出数据类型的错误；
+
+同时扩展了`JavaScript` 的语法，所以任何现有的`JavaScript` 程序可以不加改变的在 `TypeScript` 下工作；
 
 TypeScript 提供最新的和不断发展的 JavaScript 特性，包括那些来自 2015 年的 [ECMAScript](https://so.csdn.net/so/search?q=ECMAScript&spm=1001.2101.3001.7020) 和未来的提案中的特性，比如异步功能和 Decorators，以帮助建立健壮的组件。下图显示了 TypeScript 与 ES5、ES2015 和 ES2016 之间的关系：
 
@@ -56,6 +60,26 @@ $ tsc helloworld.ts
 
 > TypeScript Playground：https://www.typescriptlang.org/play/
 
+### **特性**
+
+**类型批注和编译时类型检查** ：在编译时批注变量类型
+
+**类型推断**：ts 中没有批注变量类型会自动推断变量的类型
+
+**类型擦除**：在编译过程中批注的内容和接口会在运行时利用工具擦除
+
+**接口**：ts 中用接口来定义对象类型
+
+**枚举**：用于取值被限定在一定范围内的场景
+
+**Mixin**：可以接受任意类型的值
+
+**泛型编程**：写代码时使用一些以后才指定的类型
+
+**名字空间**：名字只在该区域内有效，其他区域可重复使用该名字而不冲突
+
+**元组**：元组合并了不同类型的对象，相当于一个可以装不同类型数据的数组
+
 ## **核心概念**
 
 |        核心概念        |                           描述说明                           |
@@ -83,6 +107,36 @@ $ tsc helloworld.ts
 |     **关键字类型**     | TypeScript提供了一些内置的关键字类型，如`any`、`void`、`null`、`undefined`等，用于处理特殊的类型情况。 |
 
 ## 基础类型
+
+和`javascript`基本一致，也分成：
+
+- 基本类型
+- 引用类型
+
+在基础类型上，`typescript`增添了`void`、`any`、`emum`等原始类型
+
+`typescript` 的数据类型主要有如下：
+
+| 分类         |       类型        | 名称       |                             描述                             |
+| ------------ | :---------------: | ---------- | :----------------------------------------------------------: |
+| **基本类型** |                   |            |                                                              |
+|              |    **Number**     | 数字类型   |                  用于表示双精度64位浮点数。                  |
+|              |    **String**     | 字符串类型 |                    用于表示文本数据类型。                    |
+|              |    **Boolean**    | 布尔类型   |                  逻辑数据类型，表示真或假。                  |
+|              |    **Symbol**     |            |       表示唯一的、不可变的原始值，常用于对象的属性键。       |
+|              |     **Null**      |            |                  表示一个只有null值的类型。                  |
+|              |   **Undefined**   |            |               表示一个只有undefined值的类型。                |
+|              | **Literal Types** |            | 表示具体的值，如字符串字面量类型 `type EventNames = 'click'  |
+| **引用类型** |                   |            |                                                              |
+|              |     **Array**     | 数组类型   | 表示对象的集合，使用类型后面接方括号 `[]` 来定义数组。<br />例如：`let arr: number[] = [1, 2, 3];` |
+|              |     **Tuple**     | 元组类型   | 表示一个已知元素数量和类型的数组。<br />例如：`let x: [string, number] = ['hello', 10];` |
+|              |     **Enum**      | 枚举类型   | 枚举类型，用于定义数值集合。<br />例如：`enum Color {Red, Green, Blue}` |
+|              |     **Void**      |            |        表示没有任何类型。通常用于表示函数没有返回值。        |
+|              |     **Never**     |            | 表示的是那些永不存在的值的类型。<br />例如：函数总是抛出异常或根本不会有返回值。 |
+|              |    **Object**     |            |        用于非原始类型，比如数组、null以外的对象类型。        |
+|              |      **Any**      | 任意类型   |            表示任意类型，可以是任何JavaScript值。            |
+
+`Any` 类型在TypeScript中是一个特殊的类型，它可以被赋予任何值，因此它**不属于基本类型或引用类型的严格分类**。
 
 ### Boolean 类型
 
@@ -1671,6 +1725,16 @@ alice.greet(); // 输出 "Hello, my name is Alice"
 
 **类定义了对象的属性（成员变量）和方法（成员函数），并且可以通过实例化来创建对象**。
 
+
+
+### **使用**
+
+定义类的关键字为 `class`，后面紧跟类名，类可以包含以下几个模块（类的数据成员）：
+
+- **字段** ： 字段是类里面声明的变量。字段表示对象的有关数据。
+- **构造函数**： 类实例化时调用，可以为类的对象分配内存。
+- **方法**： 方法为对象要执行的操作。
+
 以下是一个简单的 TypeScript 类的例子：
 
 ```typescript
@@ -1942,6 +2006,8 @@ class Child extends Parent {
 在 TypeScript 中，类的继承允许你创建一个新的类，该类继承自一个或多个已存在的类（父类或超类）。
 
 通过继承，**子类可以获取父类的所有公有和保护成员（属性和方法）**，**并且可以添加新的成员或重写父类的成员**。
+
+类的继承使用 `extends` 的关键字实现。
 
 下面是一个简单的 TypeScript 类的继承示例：
 
@@ -2223,6 +2289,34 @@ cat.move(); // 输出: The animal moves.
 
 接口在 TypeScript 中是非常灵活的，可以用来描述对象、函数和类的结构。
 
+### **使用**
+
+接口定义如下：
+
+```ts
+interface interface_name {
+}
+```
+
+例如有一个函数，这个函数接受一个 `User` 对象，然后返回这个 `User` 对象的 `name` 属性:
+
+```ts
+const getUserName = (user) => user.name
+```
+
+可以看到，参数需要有一个`user`的`name`属性，可以通过接口描述`user`参数的结构
+
+```ts
+interface User {
+    name: string
+    age: number
+}
+
+const getUserName = (user: User) => user.name
+```
+
+这些属性并不一定全部实现，上述传入的对象必须拥有`name`和`age`属性，否则`typescript`在编译阶段会报错
+
 ### **分类**
 
 #### **对象类型接口**
@@ -2462,7 +2556,47 @@ TypeScript 中的泛型（Generics）是一种编写灵活、可重用组件的�
 - V（Value）：表示对象中的值类型
 - E（Element）：表示元素类型
 
+### **使用**
+
+假设我们用一个函数，它可接受一个 `number` 参数并返回一个`number` 参数，如下写法：
+
+```ts
+function returnItem (para: number): number {
+    return para
+}
+```
+
+如果我们打算接受一个 `string` 类型，然后再返回 `string`类型，则如下写法：
+
+```ts
+function returnItem (para: string): string {
+    return para
+}
+```
+
+上述两种编写方式，存在一个最明显的问题在于，代码重复度比较高
+
+虽然可以使用 `any`类型去替代，但这也并不是很好的方案，因为我们的目的是接收什么类型的参数返回什么类型的参数，即在运行时传入参数我们才能确定类型
+
+这种情况就可以使用泛型，如下所示：
+
+```ts
+function returnItem<T>(para: T): T {
+    return para
+}
+```
+
+可以看到，泛型给予开发者创造灵活、可重用代码的能力。
+
+在编写 `typescript` 的时候，定义函数，接口或者类的时候，**不预先定义好具体的类型，而在使用的时候在指定类型的一种特性的时候，这种情况下就可以使用泛型**。
+
 ### **分类**
+
+泛型通过`<>`的形式进行表述，可以声明：
+
+- 函数
+- 接口
+- 类
 
 下面是一些使用 TypeScript 泛型的例子：
 
@@ -2638,6 +2772,8 @@ function loggingIdentity<T extends Lengthwise>(arg: T): T {
 
 TypeScript 装饰器（Decorators）是一种特殊类型的声明，它可以被附加到类声明、方法、属性或参数上。
 
+是一种在不改变原类和使用继承的情况下，动态地扩展对象功能。
+
 装饰器使用 `@expression` 这样的形式，其中 **`expression` 必须计算为一个函数**，**该函数将在运行时被调用**。
 
 装饰器为我们在类的生命周期的各个阶段提供了钩子，允许我们在不修改类代码的情况下增强类的行为。
@@ -2699,6 +2835,12 @@ const greeter = new Greeter();
 
 请注意，虽然装饰器在 TypeScript 中得到了很好的支持，但它们并不是 TypeScript 核心语言的一部分，而是作为一个提案存在于 ECMAScript 标准中。在 TypeScript 中使用装饰器时，需要在 `tsconfig.json` 文件中设置 `"experimentalDecorators": true` 选项来启用装饰器支持。
 
+
+
+### **本质**
+
+TypeScript装饰器在本质上就是一个普通的函数，而`@expression`这种装饰器的语法只是提供了一种更简洁、更直观的方式来应用这些函数，类似于JavaScript中的`Object.defineProperty`方法，但实际上是TypeScript编译器在编译时将这些装饰器函数应用到目标对象上的一种机制。
+
 ### **作用**
 
 装饰器主要用途是在不修改原始函数或类的情况下，增加额外的功能或行为。这样做的好处有很多，以下是一些主要的原因：
@@ -2708,6 +2850,19 @@ const greeter = new Greeter();
 3. **动态性**：装饰器可以在运行时动态地改变函数或类的行为，这使得我们可以更加灵活地处理不同的场景和需求。
 4. **封装性**：装饰器提供了一种封装函数或类的方式，使得我们可以在不修改原始代码的情况下，对它们进行扩展或修改。
 5. **符合开闭原则**：在面向对象编程中，开闭原则是一种重要的设计原则，它要求软件实体（类、模块、函数等）应当是可扩展的，而不可修改的。装饰器正是符合这一原则的一种实现方式，它可以在不修改原始函数或类的情况下，通过添加新的装饰器来增加新的功能。
+
+### **配置**
+
+由于`typescript`是一个实验性特性，若要使用，需要在`tsconfig.json`文件启动，如下：
+
+```ts
+{
+    "compilerOptions": {
+        "target": "ES5",
+        "experimentalDecorators": true
+    }
+}
+```
 
 ### **分类**
 
@@ -2721,20 +2876,44 @@ const greeter = new Greeter();
 
 #### 类装饰器
 
-```typescript
-function logClassCreation(target: Function) {  
-  console.log(`${target.name} class was created.`);  
-}  
-  
-@logClassCreation  
-class MyClass {  
-  // ...  
-}  
-  
-// 输出: "MyClass class was created."
+例如声明一个函数 `addAge` 去给 Class 的属性 `age` 添加年龄.
+
+```ts
+function addAge(constructor: Function) {
+  constructor.prototype.age = 18;
+}
+
+@addAge
+class Person{
+  name: string;
+  age!: number;
+  constructor() {
+    this.name = 'huihui';
+  }
+}
+
+let person = new Person();
+
+console.log(person.age); // 18
 ```
 
+上述代码，实际等同于以下形式：
+
+```ts
+Person = addAge(function Person() { ... });
+```
+
+上述可以看到，当装饰器作为修饰类的时候，会把构造器传递进去。 `constructor.prototype.age` 就是在每一个实例化对象上面添加一个 `age` 属性。
+
 #### 方法装饰器
+
+装饰器可以用于修饰类的方法，这时候装饰器函数接收的参数变成了：
+
+- target：对象的原型
+- propertyKey：方法的名称
+- descriptor：方法的属性描述符
+
+这三个属性实际就是`Object.defineProperty`的三个参数，如果是类的属性，则没有传递第三个参数。
 
 ```typescript
 function logMethodCall(target: any, propertyName: string, descriptor: PropertyDescriptor) {  
@@ -2780,6 +2959,12 @@ instance.myProperty = "Attempt to modify"; // 不会成功，因为属性是只�
 
 #### 参数装饰器
 
+接收3个参数，分别是：
+
+- target ：当前对象的原型
+- propertyKey ：参数的名称
+- index：参数数组中的位置
+
 ```typescript
 function validateParam(target: any, propertyName: string, index: number) {  
   const params = Reflect.getMetadata('parameters', target, propertyName);  
@@ -2804,6 +2989,8 @@ instance.myMethod(123); // 抛出错误: "Expected a string"
 ```
 
 #### 访问器装饰器
+
+使用起来方式与方法装饰一致。
 
 ```typescript
 function logAccess(target: any, propertyName: string) {  
@@ -2830,6 +3017,66 @@ class MyClass {
 const instance = new MyClass();  
 console.log(instance.secretValue); // 输出: "Reading secretValue" 和实际的 secretValue 值
 ```
+
+#### **装饰器工厂**
+
+如果想要传递参数，使装饰器变成类似工厂函数，只需要在装饰器函数内部再函数一个函数即可，如下：
+
+```ts
+function addAge(age: number) {
+  // 装饰器函数内部返回一个函数
+  return function(constructor: Function) {
+    constructor.prototype.age = age
+  }
+}
+
+@addAge(10)
+class Person{
+  name: string;
+  age!: number;
+  constructor() {
+    this.name = 'huihui';
+  }
+}
+
+let person = new Person();
+```
+
+
+
+#### 执行顺序
+
+当多个装饰器应用于一个声明上，将由上至下依次对装饰器表达式求值，求值的结果会被当作函数，由下至上依次调用，例如如下：
+
+```ts
+function f() {
+    console.log("f(): evaluated");
+    return function (target, propertyKey: string, descriptor: PropertyDescriptor) {
+        console.log("f(): called");
+    }
+}
+
+function g() {
+    console.log("g(): evaluated");
+    return function (target, propertyKey: string, descriptor: PropertyDescriptor) {
+        console.log("g(): called");
+    }
+}
+
+class C {
+    @f()
+    @g()
+    method() {}
+}
+
+// 按照顺序从上到下调用装饰器，对装饰器表达式求值，然后结果被当作函数，由下至上依次调用
+// f(): evaluated 
+// g(): evaluated
+// g(): called
+// f(): called
+```
+
+
 
 
 
