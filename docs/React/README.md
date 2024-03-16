@@ -16,6 +16,10 @@
 | **企业级前端应用框架**                   | [**Umijs**](https://umijs.org/)                              | 采用约定式路由，并配备了一套完善的插件体系                   |
 |                                          | [Hooks-Admin](https://baimingxuan.github.io/react-router6-doc/start/overview) | 基于 React18、React-Router v6、React-Hooks、Redux && Redux-Toolkit、TypeScript、Vite2、Ant-Design 开源的一套后台管理框架 |
 
+---
+
+
+
 ## **基础概念**
 
 
@@ -34,6 +38,8 @@
 |      **虚拟DOM**      | React的一个核心概念，**React使用虚拟DOM来比较和更新实际的DOM**。这提高了性能，因为React只更新需要变化的部分。 |
 | **渲染（Rendering）** | React将组件转换为DOM标记的过程，这个过程包括创建虚拟DOM树并比较它与之前的版本，然后更新实际的DOM。 |
 |  **Reconciliation**   | React的“reconciliation”算法是React用于确定哪些组件需要更新，哪些可以保持不变的过程。这是React性能优化的关键部分。 |
+
+---
 
 
 
@@ -58,6 +64,8 @@
 > 当父组件的状态（state）发生变化时，它会将新的状态传递给子组件。
 >
 > 子组件接收到新的属性（props）后，会根据这些属性来渲染界面。在这个过程中，子组件不能直接修改父组件的状态，而是需要通过某种方式（如回调函数）通知父组件进行状态更新。
+
+---
 
 
 
@@ -181,9 +189,11 @@ React 组件为函数，每次渲染组件时，就是重新调用一次函数�
 
 > **列表渲染时为每个组件设置一个 `key` 值**：它使 React 能追踪这些组件，即便后者的位置或数据发生了变化
 
-## **JSX**
+---
 
-示例：
+
+
+## **JSX**
 
 ```react
 ReactDOM.render(
@@ -196,17 +206,15 @@ ReactDOM.render(
 );
 ```
 
-
-
 **JSX 规则：**
 
-* **只能返回一个根元素** 
+* 只能返回一个根元素 
 
-* **标签必须闭合**
+* 标签必须闭合
 
-* **驼峰式命名属性**
-* **组件的名称大写，以区分它们与普通的 HTML 标签**
-* **在 JSX 中，用单括号`{}` 解析表达式值，属性（attributes）使用双引号，而不是单引号**
+* 驼峰式命名属性
+* 组件的名称大写，以区分它们与普通的 HTML 标签
+* 在 JSX 中，用单括号`{}` 解析表达式值，属性（attributes）使用双引号，而不是单引号
 * 浏览器不能直接理解 JSX，需要使用 Babel 将 JSX 转换为纯 JavaScript。通过配置构建工具（如 Webpack）实现。
 
 详细解释参考文档：[使用 JSX 书写标签语言 – React 中文文档 (docschina.org)](https://react.docschina.org/learn/writing-markup-with-jsx)
@@ -240,15 +248,15 @@ function App() {
 }
 ```
 
-
-
-
-
 **参考资料**
 
 [React JSX_w3cschool](https://www.w3cschool.cn/react/react-jsx.html)
 
 [使用 JSX 书写标签语言 – React 中文文档 (docschina.org)](https://react.docschina.org/learn/writing-markup-with-jsx)
+
+---
+
+
 
 ## **Prop**
 
@@ -269,6 +277,10 @@ function App() {
 在React中，组件间的通信主要通过props和回调函数实现：父组件通过props将数据或函数传递给子组件，子组件则可以通过这些props来接收数据和触发回调函数，从而实现与父组件的通信。
 
 对于跨层级的组件通信，React提供了Context API。Context提供了一种在组件树中共享值的方式，无需显式地通过每一层组件传递props。
+
+---
+
+
 
 ## **state**
 
@@ -660,7 +672,7 @@ class ExampleComponent extends React.Component {
 
 为了解决这个问题，你可以使用**函数式的状态更新**，它允许你基于先前的状态来计算新的状态
 
-### 在下次渲染前多次更新同一个 state
+### **多次更新同一个 state**
 
 通过在设置状态时传递一个 更新器函数 使 react 在下次渲染前多次更新同一个 state
 
@@ -984,6 +996,8 @@ renderComponent();
 
 
 
+---
+
 
 
 ## **事件**
@@ -1086,9 +1100,11 @@ export default MyButton;
 
 
 
+---
+
+
+
 ## **Hooks**
-
-
 
 在 React 中，**以 `use` 开头的函数——只能在组件或[自定义 Hook](https://react.docschina.org/learn/reusing-logic-with-custom-hooks) 的最顶层调用**，`useState` 以及任何其他以“`use`”开头的函数都被称为 **Hook**。
 
@@ -1096,10 +1112,11 @@ export default MyButton;
 
 ### **特性**
 
-* Hook 是特殊的函数，只在 React [渲染](https://react.docschina.org/learn/render-and-commit#step-1-trigger-a-render)时有效。
+* 只能在组件的最顶层调用。
 
 * **Hook 内部使用了 state，Effect 以及其他的 React 特性**。
-* 自定义 Hook 共享的只是状态逻辑而不是状态本身。对 Hook 的每个调用完全独立于对同一个 Hook 的其他调用
+* Hook 是特殊的函数，只在 React [渲染](https://react.docschina.org/learn/render-and-commit#step-1-trigger-a-render)时有效。**每次组件重新渲染时，所有的 Hook 会重新运行**。
+* 自定义 Hook 共享的只是状态逻辑而不是状态本身。对 Hook 的每个调用完全独立于对同一个 Hook 的其他调用。
 
 ### **命名公约**
 
@@ -1107,8 +1124,6 @@ export default MyButton;
 2. **Hook 的名称必须以 `use` 开头，然后紧跟一个大写字母**，就像内置的 [`useState`](https://react.docschina.org/reference/react/useState) 或者本文早前的自定义 `useOnlineStatus` 一样。Hook 可以返回任意值。
 
 如果你在组件内部看见 `getColor()` 函数调用，就可以确定它里面不可能包含 React state，因为它的名称没有以 `use` 开头。但是像 `useOnlineStatus()` 这样的函数调用就很可能包含对内部其他 Hook 的调用！
-
-
 
 ### **Hook使用注意的问题和原因**
 
@@ -1147,6 +1162,8 @@ export default MyButton;
 
 正确使用Hook并遵循这些注意事项，可以帮助你编写更可靠、可预测和可维护的React组件。
 
+---
+
 
 
 ## **Reducer**
@@ -1164,6 +1181,68 @@ Reducer 接收一个旧的状态和一个动作对象，并返回一个新的状
 3. 使用 `useReducer` 替换 `useState`；
 
 > 如何转化详细内容参考官网：[迁移状态逻辑至 Reducer 中 – React 中文文档 (docschina.org)](https://react.docschina.org/learn/extracting-state-logic-into-a-reducer#)
+
+**特点：**
+
+1. 集中管理状态更新：reducer可以将组件的所有状态更新整合到一个外部函数中，使得状态管理更加集中和有序。
+2. 响应动作：reducer通过接收动作对象来指明“用户刚刚做了什么”，根据动作类型来更新状态，使得状态的变化与用户的操作紧密关联。
+3. 易于测试：reducer的逻辑相对独立，可以单独对它进行测试。可以针对特定的初始状态和动作，断言reducer返回的特定状态。
+
+在编写reducer时，你需要遵循一定的规则和结构。以下是一个简单的reducer编写示例：
+
+```javascript
+// 状态的初始值
+const initialState = {  
+  count: 0  
+};  
+// reducer 函数：封装 action, action 对状态进行操作
+function reducer(state = initialState, action) {  
+  switch (action.type) {  
+    case 'increment':  
+      return { count: state.count + 1 };  
+    case 'decrement':  
+      return { count: state.count - 1 };  
+    default:  
+      return state;  
+  }  
+}
+```
+
+> 在这个示例中，我们首先定义了一个初始状态`initialState`，它包含了一个`count`属性，初始值为0。
+>
+> 然后，我们定义了一个名为`reducer`的函数，它接收两个参数：`state`和`action`。`state`是当前的状态，`action`是一个包含`type`属性的对象，用于描述要执行的操作。
+>
+> 在`reducer`函数中，我们使用一个`switch`语句来根据`action.type`的值执行不同的操作。
+>
+> 在这个示例中，我们定义了两个操作类型：`increment`和`decrement`，分别用于增加和减少`count`的值。如果`action.type`的值不是这两个之一，我们就返回当前的状态，不做任何改变。
+
+
+
+最后，你可以在React组件中使用`useReducer`钩子来管理状态。例如：
+
+```javascript
+import React, { useReducer } from 'react';  
+  
+function Counter() {  
+  const [state, dispatch] = useReducer(reducer, initialState);  
+  
+  return (  
+    <div>  
+      <p>Count: {state.count}</p>  
+      <button onClick={() => dispatch({ type: 'increment' })}>Increment</button>  
+      <button onClick={() => dispatch({ type: 'decrement' })}>Decrement</button>  
+    </div>  
+  );  
+}
+```
+
+> 在这个组件中，我们使用`useReducer`钩子来创建一个状态和一个调度函数`dispatch`。
+>
+> 然后，我们在按钮的点击事件处理程序中调用`dispatch`函数，并传入一个包含`type`属性的对象来触发状态更新。这样，每当用户点击按钮时，就会通过reducer函数更新状态，并重新渲染组件。
+
+---
+
+
 
 ## **Context**
 
@@ -1188,17 +1267,295 @@ Reducer 接收一个旧的状态和一个动作对象，并返回一个新的状
 
 > 在 Vue 中使用 provide` 和 `inject 来解决 Prop 逐级透传问题：[依赖注入 | Vue.js (vuejs.org)](https://cn.vuejs.org/guide/components/provide-inject.html#prop-drilling)
 
-## **Refs**
+---
 
-## **VDOM**
+
+
+## **Ref**
+
+**摘要**
+
+- ref 是一种脱围机制，用于**保留不用于渲染的值**。 你不会经常需要它们。
+- ref 是一个普通的 JavaScript 对象，具有一个名为 `current` 的属性，你可以对其进行读取或设置。
+- 你可以通过调用 `useRef` Hook 来让 React 给你一个 ref。
+- 与 state 一样，**ref 允许你在组件的重新渲染之间保留信息**。
+- 与 state 不同，**设置 ref 的 `current` 值不会触发重新渲染**。
+- 不要在渲染过程中读取或写入 `ref.current`。这使你的组件难以预测。
+
+> ref详细解释参考官网：[使用 ref 引用值 – React 中文文档 (docschina.org)](https://react.docschina.org/learn/referencing-values-with-refs#)
+
+### **使用**
+
+通过从 React 导入 `useRef` Hook 来为你的组件添加一个 ref：
+
+```js
+import { useRef } from 'react';
+```
+
+在你的组件内，调用 `useRef` Hook 并传入你想要引用的初始值作为唯一参数。例如，这里的 ref 引用的值是“0”：
+
+```js
+const ref = useRef(0);
+```
+
+`useRef` 返回一个这样的对象:
+
+```js
+{ 
+  current: 0 // 你向 useRef 传入的值
+}
+```
+
+你可以用 `ref.current` 属性访问该 ref 的当前值。
+
+### **ref 和 state 的不同之处** 
+
+| ref                                                         | state                                                        |
+| ----------------------------------------------------------- | ------------------------------------------------------------ |
+| `useRef(initialValue)`返回 `{ current: initialValue }`      | `useState(initialValue)` 返回 state 变量的当前值和一个 state 设置函数 ( `[value, setValue]`) |
+| **更改时不会触发重新渲染**                                  | 更改时触发重新渲染。                                         |
+| **可变** —— 你可以在渲染过程之外修改和更新 `current` 的值。 | “不可变” —— 你必须使用 state 设置函数来修改 state 变量，从而排队重新渲染。 |
+| 你不应在渲染期间读取（或写入） `current` 值。               | 你可以随时读取 state。但是，每次渲染都有自己不变的 state [快照](https://react.docschina.org/learn/state-as-a-snapshot)。 |
+
+### **ref 和 DOM**
+
+
+
+你可以将 ref 指向任何值。但是，ref 最常见的用法是访问 DOM 元素。
+
+当你将 ref 传递给 JSX 中的 `ref` 属性时，比如 `<div ref={myRef}>`，React 会将相应的 DOM 元素放入 `myRef.current` 中。当元素从 DOM 中删除时，React 会将 `myRef.current` 更新为 `null`。
+
+要访问由 React 管理的 DOM 节点，首先，引入 `useRef` Hook：
+
+```jsx
+import { useRef } from 'react';
+```
+
+然后，在你的组件中使用它声明一个 ref：
+
+```jsx
+const myRef = useRef(null);
+```
+
+最后，将 ref 作为 `ref` 属性值传递给想要获取的 DOM 节点的 JSX 标签：
+
+```jsx
+<div ref={myRef}>
+```
+
+### **React 何时添加 refs** 
+
+在 React 中，每次更新都分为 [两个阶段](https://react.docschina.org/learn/render-and-commit#step-3-react-commits-changes-to-the-dom)：
+
+- 在 **渲染** 阶段， React 调用你的组件来确定屏幕上应该显示什么。
+- 在 **提交** 阶段， React 把变更应用于 DOM。
+
+在第一次渲染期间，DOM 节点尚未创建，因此 `ref.current` 将为 `null`。在渲染更新的过程中，DOM 节点还没有更新。所以读取它们还为时过早。
+
+React 在提交阶段设置 `ref.current`。在更新 DOM 之前，React 将受影响的 `ref.current` 值设置为 `null`。更新 DOM 后，React 立即将它们设置到相应的 DOM 节点。
+
+
+
+**摘要**
+
+- Refs 是一个通用概念，但大多数情况下你会使用它们来保存 DOM 元素。
+- 你通过传递 `<div ref={myRef}>` 指示 React 将 DOM 节点放入 `myRef.current`。
+- 通常，你会将 refs 用于非破坏性操作，例如聚焦、滚动或测量 DOM 元素。
+- 默认情况下，组件不暴露其 DOM 节点。 您可以通过使用 `forwardRef` 并将第二个 `ref` 参数传递给特定节点来暴露 DOM 节点。
+- 避免更改由 React 管理的 DOM 节点。
+
+----
+
+
+
+## **Effect**
+
+Effect是一种用于处理副作用操作的机制（副作用操作是指与组件渲染无关的任务，比如数据获取、订阅事件、手动修改DOM等）。
+
+**Effect能够在组件被挂载、更新或卸载时执行**。
+
+使用Effect的目的是为了将副作用操作与组件逻辑分离，并确保这些操作在正确的时间点被执行。这样可以避免产生bug、提高代码可读性和维护性。
+
+**摘要**
+
+- 与事件不同，Effect 是由渲染本身，而非特定交互引起的。
+- Effect 允许你将组件与某些外部系统（第三方 API、网络等）同步。
+- 默认情况下，Effect 在每次渲染（包括初始渲染）后运行。
+- 如果 React 的所有依赖项都与上次渲染时的值相同，则将跳过本次 Effect。
+- 不能随意选择依赖项，它们是由 Effect 内部的代码决定的。
+- 空的依赖数组（`[]`）对应于组件“挂载”，即添加到屏幕上。
+- 仅在严格模式下的开发环境中，React 会挂载两次组件，以对 Effect 进行压力测试。
+- 如果 Effect 因为重新挂载而中断，那么需要实现一个清理函数。
+- React 将在下次 Effect 运行之前以及卸载期间这两个时候调用清理函数。
+
+### 编写 Effect 
+
+> 官方文档详细解释了编写 Effect 流程：[使用 Effect 同步 – React 中文文档 (docschina.org)](https://react.docschina.org/learn/synchronizing-with-effects#)
+
+编写 Effect 需要遵循以下三个规则：
+
+1. **声明 Effect**:
+   * 默认情况下，**Effect 会在每次渲染后都会执行**。
+2. **指定 Effect 依赖**:
+   * 大多数 Effect 应该按需执行，而不是在每次渲染后都执行。
+   * 依赖状态变化时，执行Effect回调
+   * 空数组表示这个Effect只在组件挂载和卸载时执行。
+3. **添加清理（cleanup）函数**:
+   * 每次重新执行 Effect 之前，React 都会调用清理函数；组件被卸载时，也会调用清理函数
+
+```js
+useEffect(() => { // 第一个参数为回调函数，在DOM挂载和依赖状态变化时执行
+	return () => {} // 清理函数：每次重新执行 Effect 之前，React 都会调用清理函数；组件被卸载时，也会调用清理函数
+}, []); //依赖状态变化时，执行回调；空数组表示这个Effect只在组件挂载和卸载时执行
+```
+
+> `useEffect` ：
+>
+> 第一个参数：为回调函数，在每次渲染后都会执行：
+>
+> 第二个参数：为依赖状态
+>
+> * 依赖状态变化时，执行回调
+> * 空数组表示这个Effect只在组件挂载和卸载时执行回调
+
+
+
+```jsx
+import React, { useEffect } from 'react';
+function ExampleComponent() {  
+  useEffect(() => {  
+    // 这是一个Effect，它会在组件挂载后执行  
+    // 如果需要在组件卸载时执行清理操作，可以返回一个函数  
+    return () => {  
+      console.log('Component will unmount');  
+      // 清理操作，如取消订阅事件、清除计时器等  
+    };  
+  }, []); // 空数组表示这个Effect只在组件挂载和卸载时执行  
+  
+  return (  
+    <div>  
+      <p>测试</p>  
+    </div>  
+  );  
+}
+```
+
+
+
+下面是一个基本的`useEffect`的使用示例：
+
+```jsx
+import React, { useEffect, useState } from 'react';  
+  
+function ExampleComponent() {  
+  const [count, setCount] = useState(0);  
+  
+  useEffect(() => {  
+    // 这是一个Effect，它会在组件挂载后执行  
+    console.log('Component mounted');  
+  
+    // 模拟异步数据获取  
+    const fetchData = async () => {  
+      const response = await fetch('https://api.example.com/data');  
+      const data = await response.json();  
+      // 更新状态或执行其他操作  
+      setCount(data.count);  
+    };  
+  
+    fetchData();  
+  
+    // 如果需要在组件卸载时执行清理操作，可以返回一个函数  
+    return () => {  
+      console.log('Component will unmount');  
+      // 清理操作，如取消订阅事件、清除计时器等  
+    };  
+  }, []); // 空数组表示这个Effect只在组件挂载和卸载时执行  
+  
+  return (  
+    <div>  
+      <p>Count: {count}</p>  
+    </div>  
+  );  
+}
+```
+
+在这个例子中，`useEffect`的回调函数会在组件挂载后立即执行。它模拟了一个异步数据获取的操作，并在数据到达后更新了组件的状态。
+
+`useEffect`的第二个参数是一个依赖数组。在这个例子中，依赖数组是空的（`[]`），这意味着Effect只在组件首次渲染（挂载）和卸载时执行。如果依赖数组中包含某些值，那么当这些值发生变化时，Effect也会重新执行。
+
+例如，如果你想要Effect在`count`状态改变时重新执行，你可以这样写：
+
+```jsx
+useEffect(() => {  
+  console.log(`Count changed to ${count}`);  
+}, [count]); // 当count变化时，这个Effect会重新执行
+```
+
+在编写Effect时，要注意避免在Effect中直接修改状态或执行可能导致无限循环的操作，除非你有明确的逻辑来控制这些操作。同时，如果你订阅了外部数据源（如事件或定时器），记得在Effect的清理函数中取消订阅，以避免内存泄漏。
+
+### **响应式 Effect 的生命周期**
+
+> 详细示例解释：[响应式 Effect 的生命周期 – React 中文文档 (docschina.org)](https://react.docschina.org/learn/lifecycle-of-reactive-effects)
+
+每个 React 组件都经历相同的生命周期：
+
+- 当组件被添加到屏幕上时，它会进行组件的 **挂载**。
+- 当组件接收到新的 props 或 state 时，通常是作为对交互的响应，它会进行组件的 **更新**。
+- 当组件从屏幕上移除时，它会进行组件的 **卸载**。
+
+每个 Effect 与周围组件有着独立的生命周期，每个 Effect 描述了一个独立的同步过程，可以 **开始** 和 **停止**：
+
+1. **挂载阶段 (Mounting)：**
+   - **当组件首次渲染到 DOM 时，`useEffect` 中的回调函数会被执行**。这是 Effect 的“挂载”阶段。
+     - 如果 `useEffect` 的依赖数组为空（`[]`），则 Effect 只会在组件首次渲染时执行一次。
+     - 如果 `useEffect` 有依赖项，则当这些依赖项的值发生变化时，Effect 会重新执行。
+2. **更新阶段 (Updating):**
+   - **当组件的 props 或 state 发生变化导致组件重新渲染时，`useEffect` 会再次检查其依赖项**。
+     - 如果依赖项的值没有变化，则 Effect 不会重新执行。
+     - 如果依赖项的值发生了变化，则 Effect 会重新执行。
+   - 每一次**组件更新后，`useEffect` 中的回调函数都会被重新安排到微任务队列中**，等待当前同步代码执行完毕后执行。
+3. **卸载阶段 (Unmounting)**
+   - 当组件从 DOM 中卸载时（例如，由于父组件的条件渲染或路由切换），`useEffect` 中的回调函数会再次执行，但此时会带有一个清理函数（cleanup function）。
+   - 清理函数是 `useEffect` 回调函数中返回的那个函数，它会在组件卸载前执行，用于执行必要的清理操作，如取消事件监听、清除定时器或清除之前创建的资源等。
+
+
+
+----
+
+
 
 ## **生命周期**
 
-React的生命周期是指React组件从创建到销毁的整个过程，这个过程可以分为三个阶段：**挂载阶段（Mounting）、更新阶段（Updating）和卸载阶段（Unmounting）**。每个阶段都有其特定的方法和功能。
+React的生命周期是指React组件从创建到销毁的整个过程，这个过程可以分为三个阶段：
+
+- 挂载阶段（Mounting）
+  - `constructor`
+  - `static getDerivedStateFromProps`
+  - `render`
+  - `componentDidMount`
+- 更新阶段（Updating）
+  - `static getDerivedStateFromProps`
+  - `shouldComponentUpdate`
+  - `render`
+  - `getSnapshotBeforeUpdate`
+  - `componentDidUpdate`
+- 卸载阶段（Unmounting）
+  - `componentWillUnmount`
+
+从纵向划分，可以划分为 Render 阶段和 Commit 阶段。
+
+- Render 阶段：纯净且不包含副作用，可能会被 React 暂停、中止或重新启动
+- Commit 阶段：可以使用 DOM，运行副作用，安排更新
+
+更清晰了解生命周期的阶段图表 [React Lifecycle Methods Diagram](http://projects.wojtekmaj.pl/react-lifecycle-methods-diagram/)
+
+![React Lifecycle Methods Diagram](../images/react组件生命周期.png)
 
 ### **挂载阶段（Mounting）**
 
-在挂载阶段，React组件被创建并插入到DOM中。这个阶段包含以下几个方法：
+**在挂载阶段，React组件被创建并插入到DOM中**
+
+这个阶段包含以下几个方法：
 
 - **constructor(props)**：构造函数，用于**初始化组件的状态和绑定事件处理函数**。在这个阶段，你可以通过`this.state`来定义组件的初始状态。
 - **[static getDerivedStateFromProps(props, state)](https://react.docschina.org/reference/react/Component#static-getderivedstatefromprops)**：这是一个静态方法，用于**在组件实例化后和接收新的props之前，根据props来更新state**。注意，这个方法在React 16.3版本后引入，用于替代`componentWillReceiveProps`。
@@ -1206,6 +1563,16 @@ React的生命周期是指React组件从创建到销毁的整个过程，这个�
 - **componentDidMount()**：**在组件挂载后立即调用，此时组件已经被插入到DOM中**。你可以在这个方法中进行网络请求、订阅事件等初始化操作。
 
 #### constructor
+
+📜 **语法**：`constructor(props, context, updater)`
+
+- `props`：继承 React.Component 的属性方法，它是不可变的 read-only
+- `context`：全局上下文。
+- `updater`:包含一些更新方法的对象
+  - `this.setState` 最终调用的是 `this.updater.enqueueSetState`
+  - `this.forceUpdate` 最终调用的是 `this.updater.enqueueForceUpdate` 方法，所以这些 API 更多是 React 调用使用，暴露出来以备开发者不时之需。
+
+⏱ **触发时机**：在组件初始化的时候触发一次。
 
 实例过程中自动调用的方法，在方法内部通过`super`关键字获取来自父组件的`props`；
 
@@ -1239,6 +1606,14 @@ class MyComponent extends React.Component {
 3. **遵循React的生命周期**：React组件的生命周期是严格定义的，并且依赖于特定的方法和步骤来正确执行。调用`super(props)`是组件生命周期中的一个关键步骤，它确保了组件实例能够按照React的预期来工作。
 4. **状态初始化**：虽然`super(props)`主要用于确保`props`的可用性，但构造函数通常也用于初始化组件的状态。在调用`super(props)`之后，你可以安全地访问`this.props`，并且可以使用它来初始化状态（如果需要的话）。
 
+#### `static getDerivedStateFromProps(props, state)` 
+
+> 官方文档：[Component – React 中文文档 (docschina.org)](https://react.docschina.org/reference/react/Component#static-getderivedstatefromprops)
+
+如果你定义了 `static getDerivedStateFromProps`，React 会**在初始挂载和后续更新时调用 [`render`](https://react.docschina.org/reference/react/Component#render) 之前调用它**。它应该返回一个对象来更新 state，或者返回 `null` 就不更新任何内容。
+
+
+
 
 
 ### **更新阶段（Updating）**
@@ -1258,6 +1633,16 @@ class MyComponent extends React.Component {
 - **componentWillUnmount()**：在组件卸载及销毁之前直接调用。你可以在这个方法中进行清理操作，如取消网络请求、移除事件监听器等。
 
 需要注意的是，React 16.3版本之后，一些旧的生命周期方法（如`componentWillMount`、`componentWillReceiveProps`和`componentWillUpdate`）被认为是不安全的，并且可能在未来的版本中被移除。因此，建议开发者使用新的生命周期方法（如`getDerivedStateFromProps`和`getSnapshotBeforeUpdate`）来替代这些旧方法。同时，React团队还引入了Hooks API，使得组件逻辑可以更加独立和可重用，进一步简化了组件的生命周期管理。
+
+---
+
+## **VDOM**
+
+
+
+----
+
+
 
 
 
@@ -1290,15 +1675,125 @@ React的核心API主要包括用于创建组件、管理状态、处理生命周
 
 
 
+---
+
+
+
 ## **React VS Vue**
 
 |                                    |                             Vue                              |                            React                             |
 | :--------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
-|              **组件**              | 单文件组件：使用template、script和style来分别定义组件的结构、逻辑和样式。 |      在React中，组件可以通过函数式组件或类组件来定义。       |
-|              **思想**              |    数据的响应式：当数据发生变化时，Vue会自动更新相关的DOM    | 单向数据流，数据的不可变性，通过setState或useState等方法来触发组件的重新渲染 |
-|    **组件通信**（父子组件通信）    | 通过*props*和*emit*进行：父组件通过*props*向子组件传递数据或回调，子组件则通过emit触发事件来向父组件发送消息。 | 通过props和回调函数实现：父组件通过props将数据或函数传递给子组件，子组件则可以通过这些props来接收数据和触发回调函数 |
-| **Prop逐级透传问题**（跨组件通信） | Vue通过`provide`和`inject`机制解决Prop逐级透传问题。<br />父组件使用`provide`提供数据或方法，子组件通过`inject`接收。 | React没有内置的Prop逐级透传机制，通常通过高阶组件或Context API来实现。<br />高阶组件是一种函数，它接收一个组件并返回一个新组件，新组件可以访问传递的props。<br />Context API提供了一种在组件树中共享值的方式，无需显式地通过每一层组件。 |
-|      **状态或变量响应式渲染**      | Vue使用响应式系统来实现状态或变量的响应式渲染。<br />当数据发生变化时，Vue会自动更新DOM。<br />这是通过Vue的响应式原理实现的，即Vue在初始化时将数据转换为getter/setter形式的对象，当数据变化时，setter会触发组件的重新渲染。 | React通过setState方法来更新组件的状态，并触发组件的重新渲染。<br />React使用一种名为“调和”（Reconciliation）的过程来比较新旧虚拟DOM树，并计算出最小的DOM更新。<br />当组件的状态或属性发生变化时，React会重新渲染该组件及其子组件。 |
-|           **子组件渲染**           | **Vue插槽**是一种组件间内容分发机制，允许父组件将内容传递给子组件的指定位置。<br />通过`<slot>`标签定义插槽的位置，父组件使用`<template>`标签包裹内容，并通过具名插槽或作用域插槽将内容传递给子组件。 | React通过 JSX children 属性直接将组件标签内的内容作为prop传递给子组件。<br />组件标签内的内容会自动成为`children` prop，父组件可以将内容直接传递给子组件，并在子组件内部通过`props.children`或函数组件的props参数访问。 |
+|              **组件**              | **单文件组件**：使用template、script和style来分别定义组件的结构、逻辑和样式。 |    在React中，组件可以通过**函数式组件或类组件**来定义。     |
+|              **思想**              |  **数据的响应式**：当数据发生变化时，Vue会自动更新相关的DOM  | **单向数据流**，数据的不可变性，通过setState或useState等方法来触发组件的重新渲染 |
+|    **组件通信**（父子组件通信）    | **通过*props*和*emit*进行**：父组件通过*props*向子组件传递数据或回调，子组件则通过emit触发事件来向父组件发送消息。 | **通过props和回调函数实现**：父组件通过props将数据或函数传递给子组件，子组件则可以通过这些props来接收数据和触发回调函数 |
+| **Prop逐级透传问题**（跨组件通信） | Vue**通过`provide`和`inject`机制**解决Prop逐级透传问题。<br />父组件使用`provide`提供数据或方法，子组件通过`inject`接收。 | React没有内置的Prop逐级透传机制，通常通过高阶组件或**Context API来实现**。<br />高阶组件是一种函数，它接收一个组件并返回一个新组件，新组件可以访问传递的props。<br />Context API提供了一种在组件树中共享值的方式，无需显式地通过每一层组件。 |
+|      **状态或变量响应式渲染**      | Vue使用**响应式系统来实现状态或变量**的响应式渲染。<br />当数据发生变化时，Vue会自动更新DOM。<br />这是通过Vue的响应式原理实现的，即Vue在初始化时将数据转换为getter/setter形式的对象，当数据变化时，setter会触发组件的重新渲染。 | React通过**setState方法来更新组件的状态**，并触发组件的重新渲染。<br />React使用一种名为“调和”（Reconciliation）的过程来比较新旧虚拟DOM树，并计算出最小的DOM更新。<br />当组件的状态或属性发生变化时，React会重新渲染该组件及其子组件。 |
+|           **子组件渲染**           | **Vue插槽**是一种组件间内容分发机制，允许父组件将内容传递给子组件的指定位置。<br />通过`<slot>`标签定义插槽的位置，父组件使用`<template>`标签包裹内容，并通过具名插槽或作用域插槽将内容传递给子组件。 | **React通过 JSX children 属性**直接将组件标签内的内容作为prop传递给子组件。<br />组件标签内的内容会自动成为`children` prop，父组件可以将内容直接传递给子组件，并在子组件内部通过`props.children`或函数组件的props参数访问。 |
+|            **模板引用**            | Vue2中：模板中的元素或组件上使用`ref`属性，在Vue实例的方法或生命周期钩子中通过`this.$refs`来访问。<br />Vue3中：模板中使用`ref`函数来创建引用，在 `setup` 函数中通过 `import { ref } from 'vue'; ` 创建 ref 模板同名 ref 变量引用模板。 | `useRef`钩子来创建引用，通用 JSX 使用 `ref = ref变量名 ` 进行引用 |
 |            **生命周期**            | Vue 2.x有`beforeCreate`、`created`、`beforeMount`、`mounted`、`beforeUpdate`、`updated`、`beforeDestroy`和`destroyed`等生命周期钩子。<br />Vue 3.x引入了Composition API，提供了`onMounted`、`onUpdated`、`onUnmounted`等函数式API来替代部分生命周期钩子。 | React有`constructor`、`componentDidMount`、`componentDidUpdate`、`componentWillUnmount`等生命周期方法。<br />在React 16.8及以后的版本中，引入了Hooks API（如`useEffect`、`useState`等），使得在没有类的情况下使用状态以及其他React特性成为可能。 |
 
+### **模板引用**
+
+Vue 2、Vue 3和React在模板引用方面都有各自的特点和用法。下面我将对这三个框架的模板引用进行比较，并给出相应的例子。
+
+#### Vue 2的模板引用
+
+在Vue 2中，模板引用是通过在模板中的元素或组件上使用`ref`属性来实现的。然后，在Vue实例的方法或生命周期钩子中，你可以通过`this.$refs`来访问这些引用。
+
+**例子**：
+
+```vue
+<template>  
+  <div>  
+    <input ref="myInput" />  
+    <button @click="focusInput">Focus Input</button>  
+  </div>  
+</template>  
+  
+<script>  
+export default {  
+  methods: {  
+    focusInput() {  
+      this.$refs.myInput.focus();  
+    }  
+  }  
+}  
+</script>
+```
+
+在上面的例子中，我们给`<input>`元素添加了一个`ref="myInput"`。然后，在`focusInput`方法中，我们通过`this.$refs.myInput`访问到了这个元素，并调用了它的`focus`方法。
+
+#### Vue 3的模板引用
+
+Vue 3引入了Composition API，它提供了一种更灵活的方式来组织和管理组件的逻辑。在Vue 3中，你可以使用`ref`函数来创建引用，并通过`setup`函数返回它们。
+
+**例子**：
+
+```vue
+<template>  
+  <div>  
+    <input ref="myInput" />  
+    <button @click="focusInput">Focus Input</button>  
+  </div>  
+</template>  
+  
+<script>  
+import { ref } from 'vue';  
+  
+export default {  
+  setup() {  
+    const myInput = ref(null);  
+  
+    const focusInput = () => {  
+      myInput.value.focus();  
+    }  
+  
+    return {  
+      myInput,  
+      focusInput  
+    }  
+  }  
+}  
+</script>
+```
+
+在Vue 3中，我们使用`ref`函数创建了一个引用`myInput`，并在`setup`函数中返回了它。然后，在模板中，我们可以像Vue 2一样使用`ref="myInput"`来引用这个元素。在`focusInput`函数中，我们通过`myInput.value`访问到了这个元素。
+
+#### React的模板引用
+
+React使用JSX来编写模板，并且没有直接的“ref”属性来引用模板中的元素。相反，React提供了一个`useRef`钩子来创建引用。
+
+**例子**：
+
+```jsx
+import React, { useRef } from 'react';  
+  
+function MyComponent() {  
+  const myInput = useRef(null);  
+  
+  const focusInput = () => {  
+    myInput.current.focus();  
+  }  
+  
+  return (  
+    <div>  
+      <input ref={myInput} />  
+      <button onClick={focusInput}>Focus Input</button>  
+    </div>  
+  );  
+}
+```
+
+在React中，我们使用`useRef`钩子创建了一个引用`myInput`，并将其作为`ref`属性传递给`<input>`元素。然后，在`focusInput`函数中，我们通过`myInput.current`访问到了这个元素。
+
+**总结**
+
+Vue 2和Vue 3的模板引用都使用`ref`属性，但Vue 3通过Composition API提供了更灵活的方式来管理引用。而React则使用`useRef`钩子来创建和管理引用。这三个框架的模板引用方式都允许你访问和操作模板中的元素，但具体语法和用法有所不同。选择哪个框架取决于项目的需求、团队的偏好以及个人的经验。
+
+
+
+## **参考资料**
+
+[React Guidebook - 📚 React 知识图谱 关于概念、技巧、生态、前沿、源码核心 - React Guidebook (tsejx.github.io)](https://tsejx.github.io/react-guidebook/)
+
+[React 官方中文文档 (docschina.org)](https://react.docschina.org/)
