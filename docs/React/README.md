@@ -191,6 +191,99 @@ React 组件为函数，每次渲染组件时，就是重新调用一次函数�
 
 ---
 
+## **受控组件和非受控组件**
+
+在React中，表单元素的行为主要分为两种类型：受控组件（Controlled Components）和非受控组件（Uncontrolled Components）。
+
+### **受控组件**
+
+受控组件是指其值（如输入框的值）由React的状态（state）来控制并更新的组件：
+
+* 在受控组件中，组件的值与状态之间保持同步：当用户输入或选择某个值时，会触发相应的事件处理函数来更新组件的状态，从而重新渲染组件。
+* 受控组件必须提供一个事件处理函数来管理值的变化。
+* 受控组件的优点是可以精确控制表单元素的值和行为，并且能够对值进行验证和处理。
+
+**示例**
+
+在受控组件中，我们将使用React的state来管理表单元素的值。在函数组件中，我们可以使用React的`useState` Hook来创建和管理状态。
+
+```jsx
+import React, { useState } from 'react';  
+  
+function ControlledComponent() {  
+  const [inputValue, setInputValue] = useState('');  
+  
+  const handleChange = (event) => {  
+    setInputValue(event.target.value);  
+  };  
+  
+  return (  
+    <div>  
+      <input type="text" value={inputValue} onChange={handleChange} />  
+      <p>你输入的内容是: {inputValue}</p>  
+    </div>  
+  );  
+}  
+  
+export default ControlledComponent;
+```
+
+>  在这个例子中，`input`元素的值通过`useState` Hook创建的状态`inputValue`来控制。
+>
+> 当用户在输入框中输入文本时，`handleChange`函数会被调用，并通过`setInputValue`更新状态。这会导致组件重新渲染，输入框的值也会更新为新的状态值。
+
+### **非受控组件**
+
+非受控组件则是指其值不受React状态控制的组件：
+
+* 在非受控组件中，表单元素的值通常由DOM自身维护，并通过对DOM进行引用来获取表单元素的值。通常是通过ref属性获取DOM元素的引用。
+* 非受控组件的优点是简单易用，在处理简单的表单场景时可以减少代码量。它适用于一些简单的场景，不需要对表单数据进行额外处理的情况。
+
+**示例**
+
+非受控组件在函数组件中通常使用`useRef` Hook来获取对DOM元素的引用，而不是使用状态来管理值。
+
+```jsx
+import React, { useRef } from 'react';  
+  
+function UncontrolledComponent() {  
+  const inputRef = useRef(null);  
+  
+  const handleSubmit = (event) => {  
+    event.preventDefault();  
+    alert('你输入的内容是: ' + inputRef.current.value);  
+  };  
+  
+  return (  
+    <form onSubmit={handleSubmit}>  
+      <input type="text" ref={inputRef} />  
+      <button type="submit">提交</button>  
+    </form>  
+  );  
+}  
+  
+export default UncontrolledComponent;
+```
+
+> 在这个例子中，我们使用`useRef`创建了一个`ref`对象，并将其附加到`input`元素上。通过`inputRef.current`，我们可以访问到实际的DOM节点，并读取其值。当用户点击提交按钮时，我们直接通过`inputRef.current.value`获取输入框的值，而不需要通过状态来管理它。
+
+非受控组件在React函数组件中相对较少使用，因为它们的值不由React状态控制，这可能导致数据流不清晰。然而，在某些情况下，如与第三方库集成或需要直接操作DOM时，非受控组件可能是必要的。
+
+### **区别**
+
+受控组件和非受控组件的主要区别在于表单元素的值是由React状态控制还是由DOM自身维护。
+
+|     对比项     | 受控组件 (Controlled Components)                             | 非受控组件 (Uncontrolled Components)                  |
+| :------------: | :----------------------------------------------------------- | :---------------------------------------------------- |
+|   **值管理**   | 值由React状态控制                                            | 值由DOM自身维护                                       |
+|  **状态管理**  | 使用React状态（如`useState`）来管理值                        | 不使用React状态来管理值                               |
+|   **数据流**   | 清晰、明确的数据流                                           | 数据流可能不清晰，直接操作DOM                         |
+|  **事件处理**  | 需要编写事件处理函数来更新状态                               | 无需编写事件处理函数来更新状态                        |
+| **验证和处理** | 可以方便地对值进行验证和处理                                 | 值验证和处理可能较复杂，通常需要在表单提交时处理      |
+|    **性能**    | 可能需要更多的计算和渲染，因为每次值改变都会触发状态更新和组件重渲染 | 性能可能稍好，因为不涉及到React状态的更新和组件重渲染 |
+|  **适用场景**  | 复杂表单、需要验证和处理表单数据                             | 简单表单、无需额外处理表单数据、与第三方库集成        |
+|  **推荐程度**  | 推荐用于复杂表单和需要精确控制表单元素值的情况               | 在简单表单或特定场景下使用，通常不是首选              |
+
 
 
 ## **JSX**
