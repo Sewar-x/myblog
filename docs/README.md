@@ -1,9 +1,10 @@
 ---
 home: true
 heroFullScreen: true
-heroText: Sewen 前端博客
-heroImage: ./outline.png
-tagline: 专注于前端开发，分享基础知识总结、项目经验和项目总结.
+heroText: Sewen 博客
+tagline:  分享前端知识、项目经验和项目总结.
+actionText: 让我看看 →
+actionLink: /javascript/
 features:
 - title: ⚠️ 前端基础专题
   details: Html / Css / Javascript / ES6 / 异步编程 / 模块化

@@ -1,6 +1,6 @@
-# 构建 VitePress 站点并将其部署到 GitHub Pages 的示例工作流程
+# 构建 vuepress 站点并将其部署到 GitHub Pages 的示例工作流程
 #
-name: Deploy VitePress site to Pages
+name: Deploy vuepress site to Pages
 
 on:
   # 在针对 `master` 分支的推送上运行。如果你
@@ -49,7 +49,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: docs/.vitepress/dist
+          path: docs/.vuepress/dist
 
   # 部署工作
   deploy:

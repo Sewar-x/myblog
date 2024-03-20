@@ -43,12 +43,11 @@ module.exports = config({
         text: '框架和源码分析',
         ariaLabel: '框架和源码分析',
         items: [
-          { text: 'Vue2.x 分析专题', link: '../vue2/' },
-          { text: 'Vue3.x 分析专题', link: '../vue3/' },
-          { text: 'React  分析专题', link: '../React/' },
-          { text: 'Vue2 与 Vue3 对比分析', link: '../FrameworkPK/Vue2VsVue3/' },
-          { text: 'Vue 与 React 对比分析', link: '../FrameworkPK/VueVsReact/' },
-          { text: 'Axios源码分析专题', link: '../axios/' },
+          { text: 'Vue 专题', link: '../vue/Vue2原理和源码分析' },
+          { text: 'React 专题', link: '../React/' },
+          { text: 'webpack 专题', link: '../webpack/webpack构建原理' },
+          { text: 'vite 专题', link: '../vite/' },
+          { text: 'Axios 专题', link: '../axios/' },
         ]
       },
       {
@@ -88,8 +87,6 @@ module.exports = config({
           { text: '前端工程化', link: '../Front-end-Engineering/前端工程化/' },
           { text: '前端渲染架构', link: '../Front-end-Engineering/前端渲染架构/' },
           { text: '前端架构实践', link: '../Front-end-Engineering/前端架构实践/' },
-          { text: 'webpack专题', link: '../webpack/' },
-          { text: 'vite专题', link: '../vite/' },
           { text: 'npm', link: '../Front-end-Engineering/npm/' },
           { text: 'Git', link: '../git/' },
           { text: '自动构建和部署', link: '../projectDeploy/自动构建和部署/' },
@@ -100,7 +97,7 @@ module.exports = config({
         ariaLabel: '项目实践',
         items: [
           { text: '前端部署', link: '../projectDeploy/' },
-          { text: '组件和组件封装实践', link: '../componentsEncapsulation/组件和组件封装实践/' },
+          { text: '组件和组件封装实践', link: '../componentsEncapsulation/组件和组件封装实践' },
           { text: '登录与单点登录', link: '../projectsSummary/登录与单点登录/' },
           { text: '权限管理方案实践', link: '../projectsSummary/权限管理方案实践/' },
           { text: 'Echarts二次封装实践', link: '../projectsSummary/Echarts二次封装实践/' },
@@ -124,78 +121,196 @@ module.exports = config({
     ],
     sidebar: {
       '/javascript/': [
-        '',
-        '异步',
-        'Promise',
-        '原理实现',
-        '应用题'
+        {
+          title: 'JavaScript',
+          collapsable: false,
+          children: [
+            ''
+          ]
+        },
+        {
+          title: '专题',
+          collapsable: false,
+          children: [
+            '异步',
+            'Promise',
+            '原理实现'
+          ]
+        },
+        {
+          title: '应用',
+          collapsable: false,
+          children: [
+            '应用题'
+          ]
+        }
       ],
       '/algorithms/': [ //算法和数据结构
-        '',
-        '数组',
-        '栈和队列',
-        '链表',
-        '字符串',
-        '树',
-        '堆',
-        '图',
-        '哈希表',
-        '查找',
-        '排序',
-        '递归',
-        '分治',
-        '回溯',
-        '动态规划',
-        '贪心算法',
-        '数学运算'
+        {
+          title: '数据结构',
+          collapsable: true,
+          children: [
+            '',
+            '数组',
+            '栈和队列',
+            '链表',
+            '字符串',
+            '树',
+            '堆',
+            '图',
+            '哈希表',
+          ]
+        },
+        {
+          title: '算法',
+          collapsable: true,
+          children: [
+            '查找',
+            '排序',
+            '递归',
+            '分治',
+            '回溯',
+            '动态规划',
+            '贪心算法',
+            '数学运算'
+          ]
+        }
       ],
-      '/vue2/': [
-        '',
-        'Vue2原理和源码分析',
-        'Vuex原理分析',
-        'VueRouter原理分析',
-        'VueSSR原理分析',
-        'VueCli源码分析',
-      ],
-      '/vue3/': [
-        '',
-        'Vue3源码分析'
+      '/vue/': [
+        {
+          title: 'Vue2',
+          collapsable: false,
+          children: [
+            'Vue2原理和源码分析',
+            'Vuex原理分析',
+            'VueRouter原理分析',
+            'VueSSR原理分析',
+            'VueCli源码分析',
+          ]
+        },
+        {
+          title: 'Vue3',
+          collapsable: false,
+          children: [
+            'Vue3基础',
+            'Vue3源码分析'
+          ]
+        },
+        {
+          title: '框架对比',
+          collapsable: false,
+          children: [
+            'Vue2VsVue3',
+            'VueVsReact'
+          ]
+        }
       ],
       '/node/': [
-        '',
-        '使用docker服务node部署',
-        'Node性能',
-        '常见问题汇总'
+        {
+          title: '基础',
+          collapsable: false,
+          children: [
+            '',
+            'Node性能',
+          ]
+        },
+        {
+          title: '实践',
+          collapsable: false,
+          children: [
+            '使用docker服务node部署',
+            '常见问题汇总',
+          ]
+        },
       ],
       '/git/': [
-        '',
-        'Git流程规范'
+        {
+          title: 'Git',
+          collapsable: false,
+          children: [
+            '',
+            'Git流程规范'
+          ]
+        }
       ],
       '/componentsEncapsulation/': [
-        '',
-        '从零到一搭建公共组件库',
-        'Element二次封装',
-        'JSON组件',
+        {
+          title: '组件基础',
+          collapsable: false,
+          children: [
+            '组件和组件封装实践'
+          ]
+        },
+        {
+          title: '组件封装实践',
+          collapsable: false,
+          children: [
+            '从零到一搭建公共组件库',
+            'Element二次封装',
+            'JSON组件',
+          ]
+        }
       ],
       '/webpack/': [
-        '',
-        'webpack构建原理',
-        'Loader和Plugin原理',
-        'DevServer原理',
-        'webpack优化',
-        'webpackAPI分析',
-        'webpack项目实践',
-        'Vue2.5项目webpack分析'
+        {
+          title: '原理',
+          collapsable: false,
+          children: [
+            'webpack构建原理',
+            'Loader和Plugin原理',
+            'DevServer原理',
+            'webpack优化',
+            'webpackAPI分析',
+          ]
+        },
+        {
+          title: '实践',
+          collapsable: false,
+          children: [
+            'webpack项目实践',
+            'Vue2.5项目webpack分析'
+          ]
+        }
       ],
       '/vite/': [
-        '',
-        'Vite原理解析'
+        {
+          title: '基础',
+          collapsable: false,
+          children: [
+            '',
+          ]
+        },
+        {
+          title: '原理',
+          collapsable: false,
+          children: [
+            'Vite原理解析',
+          ]
+        }
       ],
       '/projectDeploy/': [
-        '',
-        '前端部署原理',
-        '自动构建和部署',
-        '前端发版静态资源404问题'
+        {
+          title: '基础',
+          collapsable: false,
+          children: [
+            '',
+          ]
+        },
+        {
+          title: '原理',
+          collapsable: false,
+          children: [
+            '前端部署原理',
+          ]
+        },
+        {
+          title: '实践',
+          collapsable: false,
+          children: [
+            '自动构建和部署',
+            '前端发版静态资源404问题'
+          ]
+        }
       ]
     },
 
@@ -206,7 +321,7 @@ module.exports = config({
       intro: "../outline.md",
       sidebarDisplay: "mobile",
       links: {
-        Github: "https://github.com/Sewar-x/Sewar-x.github.io",
+        Github: "https://github.com/Sewar-x/myblog",
         Wechat: "1567910907"
       },
     },
@@ -218,6 +333,14 @@ module.exports = config({
       'reading-time': true,
       word: true,
       visitor: true
+    },
+    serviceWorker: {
+      updatePopup: true, // Boolean | Object, 默认值是 undefined.
+      // 如果设置为 true, 默认的文本配置将是: 
+      updatePopup: {
+        message: "博客有新的内容喔~.",
+        buttonText: "刷新看看"
+      }
     }
   },
   markdown: {

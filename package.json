@@ -1,22 +1,22 @@
 {
   "name": "myblog",
   "version": "1.0.0",
-  "description": "my front end NoteBook",
+  "description": "Sewen Blog",
   "main": "index.js",
   "scripts": {
     "dev": "vuepress dev docs",
     "build": "vuepress build docs",
     "deploy": "sh deploy.sh",
-    "upload": "cd docs/.vuepress/dist && git push -f https://github.com/Sewar-x/Sewar-x.github.io.git master:gh-pages"
+    "upload": "cd docs/.vuepress/dist && git push -f https://github.com/Sewar-x/myblog.git master:gh-pages"
   },
   "repository": {
     "type": "git",
     "url": "https://gitee.com/jokerxw/myNotes.git"
   },
   "keywords": [
-    "myblog"
+    "SewenBlog"
   ],
-  "author": "Zoro",
+  "author": "Sewen",
   "license": "ISC",
   "devDependencies": {
     "vuepress": "^1.8.2"
