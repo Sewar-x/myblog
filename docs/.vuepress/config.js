@@ -1,6 +1,7 @@
 const { config } = require("vuepress-theme-hope");
 module.exports = config({
   title: 'Sewen 博客',
+  base: `/myblog/`,
   description: 'sewen 的前端学习笔记、博客、前端基础总结、技术深度剖析、面试题总结、算法总结、项目过程总结',
   head: [
     ['link', { rel: 'icon', href: './mylogo.png' }],
@@ -190,7 +191,7 @@ module.exports = config({
         '',
         'Vite原理解析'
       ],
-      '/projectDeploy/':[
+      '/projectDeploy/': [
         '',
         '前端部署原理',
         '自动构建和部署',

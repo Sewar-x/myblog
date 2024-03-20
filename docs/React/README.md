@@ -1731,11 +1731,24 @@ class MyComponent extends React.Component {
 
 ## **VDOM**
 
+虚拟 DOM 顾名思义不是真实的 DOM，它不需要浏览器的 DOM API 支持。
 
+虚拟 DOM 是在 DOM 的基础上建立一个抽象层，其实质是一个 JavaScript 对象，当数据和状态发生了变化，都会被自动高效的同步到虚拟 DOM 中，**最后再将仅变化的部分同步到真实 DOM 中**。
+
+将 DOM 抽象成一个 JavaScript 对象：
+
+```js
+const element = {
+  element: 'ul',
+  props: { id: 'ulist' },
+  children: [
+    { element: 'li', props: { id: 'first' }, children: ['这是第一个List元素'] },
+    { element: 'li', props: { id: 'second' }, children: ['这是第二个List元素'] },
+  ],
+};
+```
 
 ----
-
-
 
 
 
