@@ -1193,6 +1193,20 @@ export default MyButton;
 
 
 
+### **合成事件**
+
+**什么是合成事件？**
+
+* React的合成事件（SyntheticEvent）是React提供的一种统一的事件系统，它可以在不同浏览器中使用同一套API以及一致的行为。React根据W3C规范来定义合成事件，兼容所有浏览器，拥有与浏览器原生事件相同的接口。
+
+*  **React把所有事件都封装为合成事件，不是原生DOM事件**，但可以通过e.nativeEvent属性获取DOM事件。比如，**在React中，当我们在JSX中直接绑定事件时，我们实际上绑定的是合成事件**。这些合成事件是对原生事件的封装，React会根据原生事件类型来使用不同的合成事件对象。
+
+**为什么要用合成事件？**
+
+* React合成事件解决了浏览器兼容性问题，使得开发者可以更方便、更统一地处理各种事件。
+
+* 同时，由于React合成事件对原生事件的封装，开发者可以更容易地操作文本输入框以及其他使用文本输入的组件，如复制、剪切和粘贴等事件。
+
 ---
 
 
@@ -1901,5 +1915,7 @@ Vue 2和Vue 3的模板引用都使用`ref`属性，但Vue 3通过Composition API
 ## **参考资料**
 
 [React Guidebook - 📚 React 知识图谱 关于概念、技巧、生态、前沿、源码核心 - React Guidebook (tsejx.github.io)](https://tsejx.github.io/react-guidebook/)
+
+[React技术揭秘 (iamkasong.com)](https://react.iamkasong.com/#导学视频)
 
 [React 官方中文文档 (docschina.org)](https://react.docschina.org/)

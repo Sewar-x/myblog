@@ -1,6 +1,5 @@
 # 构建 vuepress 站点并将其部署到 GitHub Pages 的示例工作流程
-#
-name: Deploy vuepress site to Pages
+name: Deploy Sewen Blog site to Pages
 
 on:
   # 在针对 `master` 分支的推送上运行。如果你
@@ -13,53 +12,52 @@ on:
 
 # 设置 GITHUB_TOKEN 的权限，以允许部署到 GitHub Pages
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: read #允许读取仓库的内容
+  pages: write #允许写入GitHub Pages的设置和内容
+  id-token: write #允许写入安装令牌（通常用于身份验证）
 
-# 只允许同时进行一次部署，跳过正在运行和最新队列之间的运行队列
-# 但是，不要取消正在进行的运行，因为我们希望允许这些生产部署完成
-concurrency:
-  group: pages
-  cancel-in-progress: false
-
-jobs:
+# 只允许同时进行一次部署，跳过正在运行和最新队列之间的运行队列, 但是，不要取消正在进行的运行，因为我们希望允许这些生产部署完成
+concurrency: # 用于管理并发运行的工作流
+  group: pages # 将所有与“pages”相关的并发运行分组在一起
+  cancel-in-progress: false # 如果一个与“pages”相关的运行已经在进行中，并且触发了另一个新的运行，那么新的运行不会被取消。这确保了正在进行的部署能够完成。但是，新的运行会被排入队列，等待之前的运行完成。
+# 开始定义工作流中的任务（jobs）
+jobs: 
   # 构建工作
   build:
-    runs-on: ubuntu-latest
-    steps:
+    runs-on: ubuntu-latest # 指定这个任务将在GitHub提供的最新版本的Ubuntu系统上运行
+    steps: # 定义build任务中的步骤
       - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # 如果未启用 lastUpdated，则不需要
-      - uses: pnpm/action-setup@v2.1.0  
+        uses: actions/checkout@v4 # 使用GitHub提供的actions/checkout动作来检出（checkout）仓库的代码
+        with: # with部分用来配置动作
+          fetch-depth: 0 # 检出整个仓库的历史记录，而不是仅检出最近的提交。如果未使用lastUpdated特性（通常用于增量构建），则通常不需要这个设置
+      - uses: pnpm/action-setup@v2.1.0   # 使用pnpm/action-setup动作来设置pnpm环境
         with:  
-          version: 7.x # 你可以指定你需要的 pnpm 版本  
+          version: 7.x # 配置pnpm/action-setup动作，指定要安装的pnpm版本为7.x，即7系列的最新版本
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v4 # 使用GitHub提供的actions/setup-node动作来设置Node.js环境
         with:
-          node-version: 16
-          cache: pnpm # 或 pnpm / yarn
+          node-version: 16 # 配置actions/setup-node动作，指定Node.js的版本为16
+          cache: pnpm # 启用pnpm的缓存
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Install dependencies
-        run:  pnpm install # 或 pnpm install / yarn install / bun install
+        run:  pnpm install # 运行pnpm install命令来安装项目依赖 或 pnpm install / yarn install / bun install
       - name: Build with VuePress
         run:  pnpm run build # 或 pnpm docs:build / yarn docs:build / bun run docs:build
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v3 #使用actions/upload-pages-artifact动作来上传构建产物作为artifact
         with:
-          path: docs/.vuepress/dist
+          path: docs/.vuepress/dist #指定要上传的artifact路径为docs/.vuepress/dist
 
-  # 部署工作
-  deploy:
+  # 将之前构建好的VuePress站点部署到GitHub Pages
+  deploy: # 定义一个新的任务（job）名为deploy
     environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    needs: build
-    runs-on: ubuntu-latest
-    name: Deploy
+      name: github-pages # 指定了环境的名称为github-pages
+      url: ${{ steps.deployment.outputs.page_url }} # 动态获取部署后的URL，这个URL来自于deployment步骤的输出
+    needs: build # 指定了deploy任务依赖于build任务。只有当build任务成功完成后，deploy任务才会开始运行
+    runs-on: ubuntu-latest # 指定deploy任务将在最新的Ubuntu系统上运行
+    name: Deploy # 任务命名为Deploy，这个名称将显示在GitHub Actions的UI中
     steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Deploy to GitHub Pages # 定义了一个步骤，名称为Deploy to GitHub Pages，表示这个步骤将负责将站点部署到GitHub Pages。
+        id: deployment # 步骤ID
+        uses: actions/deploy-pages@v4 # 使用GitHub提供的actions/deploy-pages动作来部署站点到GitHub Pages
