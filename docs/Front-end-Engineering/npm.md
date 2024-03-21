@@ -1,8 +1,8 @@
 # NPM
 
-## npm script
+## **npm script**
 
-### 定义
+### **定义**
 
 npm 允许在`package.json`文件里面，使用`scripts`字段定义脚本命令。
 
