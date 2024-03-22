@@ -97,7 +97,6 @@ module.exports = config({
         ariaLabel: '项目实践',
         items: [
           { text: '前端部署', link: '../projectDeploy/' },
-          { text: '组件和组件封装实践', link: '../componentsEncapsulation/组件和组件封装实践' },
           { text: '登录与单点登录', link: '../projectsSummary/登录与单点登录/' },
           { text: '权限管理方案实践', link: '../projectsSummary/权限管理方案实践/' },
           { text: 'Echarts二次封装实践', link: '../projectsSummary/Echarts二次封装实践/' },
@@ -186,6 +185,18 @@ module.exports = config({
             'VueRouter原理分析',
             'VueSSR原理分析',
             'VueCli源码分析',
+
+          ]
+        },
+        {
+          title: 'Vue组件',
+          collapsable: false,
+          children: [
+            'Vue组件',
+            '组件和组件封装实践',
+            '从零到一搭建公共组件库',
+            'Element二次封装',
+            'JSON组件',
           ]
         },
         {
@@ -230,24 +241,6 @@ module.exports = config({
           children: [
             '',
             'Git流程规范'
-          ]
-        }
-      ],
-      '/componentsEncapsulation/': [
-        {
-          title: '组件基础',
-          collapsable: false,
-          children: [
-            '组件和组件封装实践'
-          ]
-        },
-        {
-          title: '组件封装实践',
-          collapsable: false,
-          children: [
-            '从零到一搭建公共组件库',
-            'Element二次封装',
-            'JSON组件',
           ]
         }
       ],
