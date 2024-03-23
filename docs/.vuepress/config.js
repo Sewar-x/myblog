@@ -189,11 +189,11 @@ module.exports = config({
           ]
         },
         {
-          title: 'Vue组件',
+          title: '组件化',
           collapsable: false,
           children: [
-            'Vue组件',
-            '组件和组件封装实践',
+            'Vue组件基础',
+            '组件设计',
             '从零到一搭建公共组件库',
             'Element二次封装',
             'JSON组件',
