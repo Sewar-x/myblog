@@ -41,7 +41,7 @@
 
 ---
 
-
+## 
 
 ## 特点
 
@@ -1374,6 +1374,27 @@ function Counter() {
 
 > 在 Vue 中使用 provide` 和 `inject 来解决 Prop 逐级透传问题：[依赖注入 | Vue.js (vuejs.org)](https://cn.vuejs.org/guide/components/provide-inject.html#prop-drilling)
 
+
+
+对于**全局、不常修改的数据共享**，就比较适合用 Context API 来实现。
+
+- 当前认证的用户
+- 主题方案
+- 首选语言
+
+除了业务场景外，很多 React 相关的功能库也是使用 Context API 实现：
+
+- [React Redux](https://github.com/reduxjs/react-redux)：`<Provider>` 组件，通过 Context 提供一个全局态的 `store`
+- [React Router](https://github.com/ReactTraining/react-router)：路由组件，通过 Context 管理路由状态
+
+**参考资料**
+
+[Context - React Guidebook (tsejx.github.io)](https://tsejx.github.io/react-guidebook/foundation/advanced-guides/context/)
+
+
+
+
+
 ---
 
 
@@ -1470,6 +1491,14 @@ React 在提交阶段设置 `ref.current`。在更新 DOM 之前，React 将受�
 - 通常，你会将 refs 用于非破坏性操作，例如聚焦、滚动或测量 DOM 元素。
 - 默认情况下，组件不暴露其 DOM 节点。 您可以通过使用 `forwardRef` 并将第二个 `ref` 参数传递给特定节点来暴露 DOM 节点。
 - 避免更改由 React 管理的 DOM 节点。
+
+
+
+**参考资料**
+
+[Refs - React Guidebook (tsejx.github.io)](https://tsejx.github.io/react-guidebook/foundation/advanced-guides/refs/)
+
+[使用 ref 引用值 – React 中文文档 (docschina.org)](https://react.docschina.org/learn/referencing-values-with-refs)
 
 ----
 
@@ -1629,6 +1658,70 @@ useEffect(() => {
 
 ----
 
+## **Portals**
+
+### createPortal
+
+> 详细用法参考文档：[createPortal – React 中文文档 (docschina.org)](https://react.docschina.org/reference/react-dom/createPortal)
+
+`createPortal` 允许你将 JSX 作为 children 渲染至 DOM 的不同部分。
+
+```jsx
+<div>
+  <SomeComponent />
+  {createPortal(children, domNode, key?)}
+</div>
+```
+
+`createPortal(children, domNode, key?)` 
+
+调用 `createPortal` 创建 portal，并传入 JSX 与实际渲染的目标 DOM 节点：
+
+```jsx
+import { createPortal } from 'react-dom';
+// ...
+<div>
+  <p>这个子节点被放置在父节点 div 中。</p>
+  {createPortal(
+    <p>这个子节点被放置在 document body 中。</p>,
+    document.body
+  )}
+</div>
+```
+
+**参考资料**
+
+[Portals - React Guidebook (tsejx.github.io)](https://tsejx.github.io/react-guidebook/foundation/advanced-guides/portals)
+
+---
+
+## **核心API**
+
+React的核心API主要包括用于创建组件、管理状态、处理生命周期以及处理用户输入等的函数和方法。
+
+以下是一些主要的React核心API，以及它们的作用和用法：
+
+|           API            |                             作用                             |                             用法                             |
+| :----------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
+| `React.createElement()`  |                 创建并返回一个新的React元素                  |     `React.createElement(type, [props], [...children])`      |
+|    `React.Component`     |               React组件的基类，用于创建类组件                |     `class MyComponent extends React.Component { ... }`      |
+|        `render()`        |        类组件中必须的方法，用于返回要渲染的React元素         |       `render() { return <div>Hello, World!</div>; }`        |
+|       `setState()`       |                    用于更新组件的局部状态                    |      `this.setState({ count: this.state.count + 1 });`       |
+|  `componentDidMount()`   |   组件被挂载后立即调用，常用于发起网络请求、添加事件监听等   |            `componentDidMount() { fetchData(); }`            |
+|  `componentDidUpdate()`  |         组件的props或state更新后调用，常用于DOM操作          |      `componentDidUpdate(prevProps, prevState) { ... }`      |
+| `componentWillUnmount()` | 组件卸载及销毁之前直接调用，常用于清理操作，如取消网络请求、移除事件监听等 |   `componentWillUnmount() { clearTimeout(this.timerID); }`   |
+|       `useState()`       |                 用于在函数组件中添加局部状态                 |           `const [count, setCount] = useState(0);`           |
+|      `useEffect()`       | 用于在函数组件中执行副作用操作，如数据获取、订阅、手动更改DOM等 | `useEffect(() => { document.title = `You clicked ${count} times`; });` |
+|      `useContext()`      | 接收一个context对象（由`React.createContext`返回）并返回该context的当前值 |          `const theme = useContext(ThemeContext);`           |
+|      `useReducer()`      |      用于在函数组件中使用Redux风格的“reducer”来管理状态      | `const [state, dispatch] = useReducer(reducer, initialCount);` |
+|     `useCallback()`      |                    返回一个记忆的回调函数                    | `const memoizedCallback = useCallback(() => { doSomething(a, b); }, [a, b]);` |
+|       `useMemo()`        |                       返回一个记忆的值                       | `const memoizedValue = useMemo(() => computeExpensiveValue(a, b), [a, b]);` |
+|        `useRef()`        | 返回一个可变的ref对象，其`.current`属性被初始化为传入的参数（`initialValue`） |               `const inputRef = useRef(null);`               |
+|   `useLayoutEffect()`    | 其API与`useEffect`相同，但它会在所有的DOM变更之后同步调用effect |              `useLayoutEffect(() => { ... });`               |
+|    `useDebugValue()`     |      用于在React Developer Tools中显示自定义hook的标签       |                   `useDebugValue(value);`                    |
+
+这些API提供了构建React应用所需的基本功能，从创建和渲染组件，到管理状态和处理副作用，再到处理用户输入和生命周期事件。你可以根据具体的应用需求选择使用哪些API。
+
 
 
 ## **生命周期**
@@ -1741,6 +1834,10 @@ class MyComponent extends React.Component {
 
 需要注意的是，React 16.3版本之后，一些旧的生命周期方法（如`componentWillMount`、`componentWillReceiveProps`和`componentWillUpdate`）被认为是不安全的，并且可能在未来的版本中被移除。因此，建议开发者使用新的生命周期方法（如`getDerivedStateFromProps`和`getSnapshotBeforeUpdate`）来替代这些旧方法。同时，React团队还引入了Hooks API，使得组件逻辑可以更加独立和可重用，进一步简化了组件的生命周期管理。
 
+**参考资料**
+
+[生命周期 - React Guidebook (tsejx.github.io)](https://tsejx.github.io/react-guidebook/foundation/main-concepts/lifecycle)
+
 ---
 
 ## **VDOM**
@@ -1766,32 +1863,33 @@ const element = {
 
 
 
-## **核心API**
+## **架构**
 
-React的核心API主要包括用于创建组件、管理状态、处理生命周期以及处理用户输入等的函数和方法。
+React的架构主要由三个关键部分组成：调度器（Scheduler）、协调器（Reconciler）和渲染器（Renderer）。
 
-以下是一些主要的React核心API，以及它们的作用和用法：
+- 调度器（Scheduler）：
+  - 这是React架构的新增部分，它在React 16版本中被引入。
+  - 主要作用是**管理任务的优先级和调度顺序**。
+  - 调度器允许高优先级的任务优先进入协调器进行处理，确保这些任务能够及时得到关注和执行。
+- 协调器（Reconciler）：它的主要作用是通过Diff算法找出哪些组件发生了变化。
+- 渲染器（Renderer）：
+  - 其主要职责是**负责将协调器找出的需要更新的组件渲染到视图中**。
+  - 在React中，渲染器会将协调器找出的需要更新的组件渲染到视图中。
+  - 不同的渲染器可以将组件渲染到不同的宿主环境的视图中，例如React DOM会将组件渲染成HTML，而React Native则会渲染App的原生组件。
 
-|           API            |                             作用                             |                             用法                             |
-| :----------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
-| `React.createElement()`  |                 创建并返回一个新的React元素                  |     `React.createElement(type, [props], [...children])`      |
-|    `React.Component`     |               React组件的基类，用于创建类组件                |     `class MyComponent extends React.Component { ... }`      |
-|        `render()`        |        类组件中必须的方法，用于返回要渲染的React元素         |       `render() { return <div>Hello, World!</div>; }`        |
-|       `setState()`       |                    用于更新组件的局部状态                    |      `this.setState({ count: this.state.count + 1 });`       |
-|  `componentDidMount()`   |   组件被挂载后立即调用，常用于发起网络请求、添加事件监听等   |            `componentDidMount() { fetchData(); }`            |
-|  `componentDidUpdate()`  |         组件的props或state更新后调用，常用于DOM操作          |      `componentDidUpdate(prevProps, prevState) { ... }`      |
-| `componentWillUnmount()` | 组件卸载及销毁之前直接调用，常用于清理操作，如取消网络请求、移除事件监听等 |   `componentWillUnmount() { clearTimeout(this.timerID); }`   |
-|       `useState()`       |                 用于在函数组件中添加局部状态                 |           `const [count, setCount] = useState(0);`           |
-|      `useEffect()`       | 用于在函数组件中执行副作用操作，如数据获取、订阅、手动更改DOM等 | `useEffect(() => { document.title = `You clicked ${count} times`; });` |
-|      `useContext()`      | 接收一个context对象（由`React.createContext`返回）并返回该context的当前值 |          `const theme = useContext(ThemeContext);`           |
-|      `useReducer()`      |      用于在函数组件中使用Redux风格的“reducer”来管理状态      | `const [state, dispatch] = useReducer(reducer, initialCount);` |
-|     `useCallback()`      |                    返回一个记忆的回调函数                    | `const memoizedCallback = useCallback(() => { doSomething(a, b); }, [a, b]);` |
-|       `useMemo()`        |                       返回一个记忆的值                       | `const memoizedValue = useMemo(() => computeExpensiveValue(a, b), [a, b]);` |
-|        `useRef()`        | 返回一个可变的ref对象，其`.current`属性被初始化为传入的参数（`initialValue`） |               `const inputRef = useRef(null);`               |
-|   `useLayoutEffect()`    | 其API与`useEffect`相同，但它会在所有的DOM变更之后同步调用effect |              `useLayoutEffect(() => { ... });`               |
-|    `useDebugValue()`     |      用于在React Developer Tools中显示自定义hook的标签       |                   `useDebugValue(value);`                    |
 
-这些API提供了构建React应用所需的基本功能，从创建和渲染组件，到管理状态和处理副作用，再到处理用户输入和生命周期事件。你可以根据具体的应用需求选择使用哪些API。
+
+## **工作流程**
+
+React的工作流程还包括计算阶段、渲染阶段和提交阶段。
+
+* 在计算阶段，React会根据组件的更新优先级和调度策略，将工作单元分成多个批次进行处理。
+* 在渲染阶段，React会根据工作单元的类型和优先级，执行相应的渲染操作。
+* 在提交阶段，React会将更新后的虚拟DOM节点映射到实际的DOM，更新用户界面。
+
+请注意，React的架构是一个复杂且不断发展的系统，随着React版本的更新，其架构也可能会有所变化。因此，对于React架构的深入理解需要持续学习和关注React的官方文档和社区动态。
+
+## **生态**
 
 
 
@@ -1804,12 +1902,14 @@ React的核心API主要包括用于创建组件、管理状态、处理生命周
 |                                    |                             Vue                              |                            React                             |
 | :--------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
 |              **组件**              | **单文件组件**：使用template、script和style来分别定义组件的结构、逻辑和样式。 |    在React中，组件可以通过**函数式组件或类组件**来定义。     |
-|              **思想**              |  **数据的响应式**：当数据发生变化时，Vue会自动更新相关的DOM  | **单向数据流**，数据的不可变性，通过setState或useState等方法来触发组件的重新渲染 |
+|              **思想**              |  **数据的响应式**：当数据发生变化时，Vue会自动更新相关的DOM  | React 的核心思想是每次对于变更 `props` 或 `state`，触发新旧 Virtual DOM 进行 diff（协调算法），对比出变化的地方，然后通过 `render` 重新渲染界面。 |
+|      **状态或变量响应式渲染**      | Vue使用**响应式系统来实现状态或变量**的响应式渲染。<br />当数据发生变化时，Vue会自动更新DOM。<br />这是通过Vue的响应式原理实现的，即Vue在初始化时将数据转换为getter/setter形式的对象，当数据变化时，setter会触发组件的重新渲染。 | React通过**setState方法来更新组件的状态**，并触发组件的重新渲染。<br />React使用一种名为“调和”（Reconciliation）的过程来比较新旧虚拟DOM树，并计算出最小的DOM更新。<br />当组件的状态或属性发生变化时，React会重新渲染该组件及其子组件。 |
+|             **数据流**             |                          单向数据流                          |                          单向数据流                          |
 |    **组件通信**（父子组件通信）    | **通过*props*和*emit*进行**：父组件通过*props*向子组件传递数据或回调，子组件则通过emit触发事件来向父组件发送消息。 | **通过props和回调函数实现**：父组件通过props将数据或函数传递给子组件，子组件则可以通过这些props来接收数据和触发回调函数 |
 | **Prop逐级透传问题**（跨组件通信） | Vue**通过`provide`和`inject`机制**解决Prop逐级透传问题。<br />父组件使用`provide`提供数据或方法，子组件通过`inject`接收。 | React没有内置的Prop逐级透传机制，通常通过高阶组件或**Context API来实现**。<br />高阶组件是一种函数，它接收一个组件并返回一个新组件，新组件可以访问传递的props。<br />Context API提供了一种在组件树中共享值的方式，无需显式地通过每一层组件。 |
-|      **状态或变量响应式渲染**      | Vue使用**响应式系统来实现状态或变量**的响应式渲染。<br />当数据发生变化时，Vue会自动更新DOM。<br />这是通过Vue的响应式原理实现的，即Vue在初始化时将数据转换为getter/setter形式的对象，当数据变化时，setter会触发组件的重新渲染。 | React通过**setState方法来更新组件的状态**，并触发组件的重新渲染。<br />React使用一种名为“调和”（Reconciliation）的过程来比较新旧虚拟DOM树，并计算出最小的DOM更新。<br />当组件的状态或属性发生变化时，React会重新渲染该组件及其子组件。 |
 |           **子组件渲染**           | **Vue插槽**是一种组件间内容分发机制，允许父组件将内容传递给子组件的指定位置。<br />通过`<slot>`标签定义插槽的位置，父组件使用`<template>`标签包裹内容，并通过具名插槽或作用域插槽将内容传递给子组件。 | **React通过 JSX children 属性**直接将组件标签内的内容作为prop传递给子组件。<br />组件标签内的内容会自动成为`children` prop，父组件可以将内容直接传递给子组件，并在子组件内部通过`props.children`或函数组件的props参数访问。 |
 |            **模板引用**            | Vue2中：模板中的元素或组件上使用`ref`属性，在Vue实例的方法或生命周期钩子中通过`this.$refs`来访问。<br />Vue3中：模板中使用`ref`函数来创建引用，在 `setup` 函数中通过 `import { ref } from 'vue'; ` 创建 ref 模板同名 ref 变量引用模板。 | `useRef`钩子来创建引用，通用 JSX 使用 `ref = ref变量名 ` 进行引用 |
+|             **传送门**             | [Teleport](https://cn.vuejs.org/guide/built-ins/teleport.html)：引入了 `<Teleport>` 组件，将子组件渲染到 DOM 树中不同于其父组件位置的能力 | [Portals](https://react.docschina.org/reference/react-dom/createPortal#createportal)：通过`createPortal` 允许你将 JSX 作为 children 渲染至 DOM 的不同部分 |
 |            **生命周期**            | Vue 2.x有`beforeCreate`、`created`、`beforeMount`、`mounted`、`beforeUpdate`、`updated`、`beforeDestroy`和`destroyed`等生命周期钩子。<br />Vue 3.x引入了Composition API，提供了`onMounted`、`onUpdated`、`onUnmounted`等函数式API来替代部分生命周期钩子。 | React有`constructor`、`componentDidMount`、`componentDidUpdate`、`componentWillUnmount`等生命周期方法。<br />在React 16.8及以后的版本中，引入了Hooks API（如`useEffect`、`useState`等），使得在没有类的情况下使用状态以及其他React特性成为可能。 |
 
 ### **模板引用**
@@ -1909,6 +2009,78 @@ function MyComponent() {
 **总结**
 
 Vue 2和Vue 3的模板引用都使用`ref`属性，但Vue 3通过Composition API提供了更灵活的方式来管理引用。而React则使用`useRef`钩子来创建和管理引用。这三个框架的模板引用方式都允许你访问和操作模板中的元素，但具体语法和用法有所不同。选择哪个框架取决于项目的需求、团队的偏好以及个人的经验。
+
+
+
+### **插槽/children 属性**
+
+### **Vue 插槽**
+
+### **React children 属性**
+
+在 React 中，并没有与 Vue 插槽完全对应的概念。Vue 的插槽允许你定义组件的可替换部分，这样父组件可以在使用子组件时插入自己的内容。而在 React 中，组件的复用通常通过 props 和组合的方式来实现。
+
+然而，React 社区中确实有一些模式和方法来模拟类似 Vue 插槽的功能。其中最常见的是使用 `children` prop 和渲染 props（render props）。
+
+**使用 `children` prop**
+
+在 React 中，每个组件都可以接收一个特殊的 prop 叫做 `children`。这个 prop 包含了组件标签之间的所有内容。你可以像操作其他 props 一样操作 `children`。
+
+```jsx
+const WrapperComponent = ({ children }) => (  
+  <div style={{ display: 'inline-block', background: 'skyblue' }}>  
+    {children}  
+  </div>  
+);  
+  
+const App = () => (  
+  <WrapperComponent>  
+    <ChildComponent name="Hello world!" />  
+  </WrapperComponent>  
+);
+```
+
+在这个例子中，`WrapperComponent` 接收 `children` prop 并将其渲染出来。`App` 组件在 `WrapperComponent` 标签内放置了 `ChildComponent`，这就像是 Vue 中的默认插槽。
+
+**使用 Render Props**
+
+Render props 是一种在 React 中实现更高级组件组合的技术。Render props 是一个函数 prop，该函数返回要渲染的 React 元素。
+
+```jsx
+const WrapperComponent = ({ render }) => (  
+  <div style={{ display: 'inline-block', background: 'skyblue' }}>  
+    {render()}  
+  </div>  
+);  
+  
+const App = () => (  
+  <WrapperComponent render={() => <ChildComponent name="Hello world!" />} />  
+);
+```
+
+在这个例子中，`WrapperComponent` 接受一个名为 `render` 的函数 prop，并在其内部调用它。`App` 组件在调用 `WrapperComponent` 时传递了一个函数，该函数返回 `ChildComponent` 元素。这允许 `WrapperComponent` 定义布局和样式，而 `App` 组件定义要渲染的具体内容。
+
+**类似于 Vue 命名插槽的 React 实现**
+
+虽然 React 没有内置的命名插槽概念，但你可以使用对象或特定的 props 来模拟类似的功能。例如，你可以定义一个接收多个渲染函数的 prop，每个函数对应一个“插槽”。
+
+```jsx
+const WrapperComponent = ({ header, content }) => (  
+  <div style={{ display: 'inline-block', background: 'skyblue' }}>  
+    {header()}  
+    {content()}  
+  </div>  
+);  
+  
+const App = () => (  
+  <WrapperComponent  
+    header={() => <h1>Header</h1>}  
+    content={() => <ChildComponent name="Hello world!" />}  
+  />  
+);
+```
+
+在这个例子中，`WrapperComponent` 接受 `header` 和 `content` 两个函数 props，分别用于渲染头部和内容。`App` 组件为这两个 props 提供了具体的实现。
 
 
 

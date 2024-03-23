@@ -45,6 +45,7 @@ module.exports = config({
         items: [
           { text: 'Vue 专题', link: '../vue/Vue2原理和源码分析' },
           { text: 'React 专题', link: '../React/' },
+          { text: 'Vue Vs React', link: '../React/VueVsReact' },
           { text: 'webpack 专题', link: '../webpack/webpack构建原理' },
           { text: 'vite 专题', link: '../vite/' },
           { text: 'Axios 专题', link: '../axios/' },
@@ -87,9 +88,9 @@ module.exports = config({
           { text: '前端工程化', link: '../Front-end-Engineering/前端工程化/' },
           { text: '前端渲染架构', link: '../Front-end-Engineering/前端渲染架构/' },
           { text: '前端架构实践', link: '../Front-end-Engineering/前端架构实践/' },
-          { text: 'npm', link: '../Front-end-Engineering/npm/' },
-          { text: 'Git', link: '../git/' },
           { text: '自动构建和部署', link: '../projectDeploy/自动构建和部署/' },
+          { text: 'Git', link: '../git/' },
+          { text: 'npm', link: '../Front-end-Engineering/npm/' },
         ]
       },
       {
@@ -208,11 +209,10 @@ module.exports = config({
           ]
         },
         {
-          title: '框架对比',
+          title: '版本对比',
           collapsable: false,
           children: [
-            'Vue2VsVue3',
-            'VueVsReact'
+            'Vue2VsVue3'
           ]
         }
       ],
