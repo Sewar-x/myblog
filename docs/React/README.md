@@ -1865,19 +1865,23 @@ const element = {
 
 ## **架构**
 
+
+
 React的架构主要由三个关键部分组成：调度器（Scheduler）、协调器（Reconciler）和渲染器（Renderer）。
 
 - 调度器（Scheduler）：
   - 这是React架构的新增部分，它在React 16版本中被引入。
   - 主要作用是**管理任务的优先级和调度顺序**。
   - 调度器允许高优先级的任务优先进入协调器进行处理，确保这些任务能够及时得到关注和执行。
-- 协调器（Reconciler）：它的主要作用是通过Diff算法找出哪些组件发生了变化。
+- 协调器（Reconciler）：它的主要作用是**通过Diff算法找出哪些组件发生了变化**。
 - 渲染器（Renderer）：
   - 其主要职责是**负责将协调器找出的需要更新的组件渲染到视图中**。
   - 在React中，渲染器会将协调器找出的需要更新的组件渲染到视图中。
   - 不同的渲染器可以将组件渲染到不同的宿主环境的视图中，例如React DOM会将组件渲染成HTML，而React Native则会渲染App的原生组件。
 
+参考资料：
 
+[React技术揭秘 (iamkasong.com)](https://react.iamkasong.com/)
 
 ## **工作流程**
 

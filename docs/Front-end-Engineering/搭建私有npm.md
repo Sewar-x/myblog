@@ -2,7 +2,11 @@
 
 ## **使用私服下载原理**
 
-![image-20240104084238082](../images/npm多源镜像和企业级部署私服原理.png)
+![Uplinks](../images/52976233-fb0e3980-33c8-11e9-8eea-5415e6018144.png)
+
+**参考资料**
+
+[Uplinks | Verdaccio](https://verdaccio.org/docs/uplinks/)
 
 ## **搭建私有npm方案**
 
@@ -31,59 +35,284 @@
 1.  拉取verdaccio docker镜像:
 
    ```dockerfile
-   docker pull verdaccio/verdaccio:nightly-master
+   docker pull verdaccio/verdaccio
    ```
 
 2. 运行 docker 镜像：
 
    ```dockerfile
-   docker run -it --rm --name verdaccio -p 4873:4873 verdaccio/verdaccio:nightly-master
+   docker run -d --name verdaccio -p 4873:4873  verdaccio/verdaccio
    ```
 
-> 这条命令的作用是：
->
-> 从 `verdaccio/verdaccio` 仓库启动一个名为 `verdaccio` 的新容器，基于 `nightly-master` 标签的镜像，并将宿主机的 `4873` 端口映射到容器的 `4873` 端口。同时，容器将在交互模式下运行，并且当容器退出时，它将被自动删除。
->
-> 1. **`docker run`**：这是 Docker 的命令，用于从指定的镜像启动一个新的容器。
->
-> 2. **`-it`**：
->
->    - **`-i`**（或 `--interactive`）：保持 STDIN 开放，即使没有附加。这通常与 `-t` 一起使用，以便你可以与容器进行交互。
->    - **`-t`**（或 `--tty`）：为容器分配一个伪终端（pseudo-TTY），这通常用于使容器中的命令表现得像它们在终端中运行一样。
->
->    这两个选项通常一起使用，以便你可以交互式地运行一个命令或程序（如 bash）并与容器交互。
->
-> 3. **`--rm`**：当容器退出时，自动删除该容器。这有助于保持 Docker 系统的整洁，避免留下不再需要的容器。
->
-> 4. **`--name verdaccio`**：为新容器指定一个名称，这里是 `verdaccio`。这样，你可以更容易地引用或管理这个特定的容器。
->
-> 5. **`-p 4873:4873`**：
->
->    - **`-p`**（或 `--publish` 或 `--publish-all`）：将容器的端口映射到宿主机的端口。
->    - **`4873:4873`**：这表示将宿主机的 `4873` 端口映射到容器的 `4873` 端口。这通常是 Verdaccio 默认的 HTTP 端口。
->
-> 6. **`verdaccio/verdaccio:nightly-master`**：
->
->    - 这是你想要基于的 Docker 镜像的名称和标签。
->    - **`verdaccio/verdaccio`**：这是 Verdaccio 官方 Docker 镜像的仓库名称。
->    - **`nightly-master`**：这是特定的标签，指示你希望从该仓库中使用哪个版本的 Verdaccio 镜像。在这种情况下，`nightly-master` 通常指的是每晚自动构建的开发或预发布版本，基于最新的 `master` 分支。
->
-> 如果您希望使用 Docker 在后台长期运行 Verdaccio，并且不希望与容器进行交互，那么您应该去掉 `-it` 参数，并且通常还需要加上 `-d` 参数来让容器在后台运行。此外，如果您希望容器在退出时不会自动删除，那么您也应该去掉 `--rm` 参数。
->
-> 下面是一个修改后的命令，它会在后台长期运行 Verdaccio：
->
-> ```bash
-> docker run -d --name verdaccio -p 4873:4873 verdaccio/verdaccio:nightly-master
-> ```
->
-> 这里是对命令各部分的解释：
+> 这条命令的作用是：使用 Docker 在后台长期运行 Verdaccio:
 >
 > - **`-d`**（或 `--detach`）：在后台运行容器，并返回容器 ID。这样，您可以在不阻塞终端的情况下启动容器。
-> - **`--name verdaccio`**：为容器指定一个名称，便于后续管理。
+>- **`--name verdaccio`**：为容器指定一个名称，便于后续管理。
 > - **`-p 4873:4873`**：将宿主机的 4873 端口映射到容器的 4873 端口，这样您就可以通过宿主机的这个端口来访问 Verdaccio 服务。
-> - **`verdaccio/verdaccio:nightly-master`**：指定要使用的 Docker 镜像。
->
-> 使用上述命令启动的 Verdaccio 容器将在后台运行，并且不会因为退出而自动删除。您可以随时使用 `docker ps` 命令来查看正在运行的容器，包括这个 Verdaccio 容器。如果需要停止或删除这个容器，您可以使用 `docker stop verdaccio` 和 `docker rm verdaccio` 命令。
+>- **`verdaccio/verdaccio`**：指定要使用的 Docker 镜像。
+> 
+>使用上述命令启动的 Verdaccio 容器将在后台运行，并且不会因为退出而自动删除。您可以随时使用 `docker ps` 命令来查看正在运行的容器，包括这个 Verdaccio 容器。如果需要停止或删除这个容器，您可以使用 `docker stop verdaccio` 和 `docker rm verdaccio` 命令。
+
+
+
+#### 将配置文件夹映射到宿主系统
+
+为了防止容器被删除后导致系统数据被删除，需要将容器的配置文件夹映射到宿主系统
+
+```shell
+# 在宿主系统创建文件夹
+mkdir -p /docker/verdaccio
+cd docker/verdaccio
+# 创建配置文件夹，插件文件夹和存储文件夹
+mkdir conf && mkdir plugins && mkdir storage
+
+# 创建配置文件 config.yaml 
+cd conf
+
+# 启动一个容器，进入容器中，将容器中的 Config.yaml 文件复制出来
+docker run -d --name verdaccio -p 4873:4873  verdaccio/verdaccio
+# 查看容器id
+docker ps -a
+# 进入容器
+docker exec -it  <容器名称或ID> /bin/sh
+# 以管理员身份进入容器 -u 0参数表示以管理员身份（即root用户）进入容器
+docker exec -u 0 -it <容器名称或ID> /bin/bash
+# 查找容器的 config.yaml 文件
+find /-name config.yaml
+# 进入容器中 config.yaml 目录，检查是否有 congfig.yaml 
+cd /verdaccio/conf
+ls -a
+# 检查配置文件内容
+cat config.yaml
+# 退出容器
+exit 
+# 将容器的配置文件复制到宿主机
+docker cp 容器id:/verdaccio/conf/config.yaml /home/app_webadmin/docker/verdaccio/conf/
+# 检查宿主机是否复制成功
+cd /home/app_webadmin/docker/verdaccio/conf/
+ls -a
+# 修改文件夹权限
+sudo chmod -R 777 config.yaml
+
+# 重新运行容器，没有容器将自动拉取镜像并运行
+docker run -d --name verdaccio -p 4873:4873 -v /home/app_webadmin/docker/verdaccio/conf/config.yaml:/verdaccio/conf/config.yaml -v /home/app_webadmin/docker/verdaccio/storage:/verdaccio/storage  -v /home/app_webadmin/docker/verdaccio/plugins:/verdaccio/plugins  verdaccio/verdaccio
+
+# 如果出现错误，查看日志
+docker logs verdaccio
+```
+
+`config.yaml`配置文件:
+
+```shell
+#
+# This is the default configuration file. It allows all users to do anything,
+# please read carefully the documentation and best practices to
+# improve security.
+#
+# Do not configure host and port under `listen` in this file
+# as it will be ignored when using docker.
+# see https://verdaccio.org/docs/en/docker#docker-and-custom-port-configuration
+#
+# Look here for more config file examples:
+# https://github.com/verdaccio/verdaccio/tree/5.x/conf
+#
+# Read about the best practices
+# https://verdaccio.org/docs/best
+
+# path to a directory with all packages
+storage: /verdaccio/storage/data
+# path to a directory with plugins to include
+plugins: /verdaccio/plugins
+
+# https://verdaccio.org/docs/webui
+web:
+  title: Verdaccio
+  # comment out to disable gravatar support
+  # gravatar: false
+  # by default packages are ordercer ascendant (asc|desc)
+  # sort_packages: asc
+  # convert your UI to the dark side
+  # darkMode: true
+  # html_cache: true
+  # by default all features are displayed
+  # login: true
+  # showInfo: true
+  # showSettings: true
+  # In combination with darkMode you can force specific theme
+  # showThemeSwitch: true
+  # showFooter: true
+  # showSearch: true
+  # showRaw: true
+  # showDownloadTarball: true
+  #  HTML tags injected after manifest <scripts/>
+  # scriptsBodyAfter:
+  #    - '<script type="text/javascript" src="https://my.company.com/customJS.min.js"></script>'
+  #  HTML tags injected before ends </head>
+  #  metaScripts:
+  #    - '<script type="text/javascript" src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>'
+  #    - '<script type="text/javascript" src="https://browser.sentry-cdn.com/5.15.5/bundle.min.js"></script>'
+  #    - '<meta name="robots" content="noindex" />'
+  #  HTML tags injected first child at <body/>
+  #  bodyBefore:
+  #    - '<div id="myId">html before webpack scripts</div>'
+  #  Public path for template manifest scripts (only manifest)
+  #  publicPath: http://somedomain.org/
+
+# https://verdaccio.org/docs/configuration#authentication
+auth:
+  htpasswd:
+    file: /verdaccio/storage/htpasswd
+    # Maximum amount of users allowed to register, defaults to "+infinity".
+    # You can set this to -1 to disable registration.
+    # max_users: 1000
+    # Hash algorithm, possible options are: "bcrypt", "md5", "sha1", "crypt".
+    # algorithm: bcrypt # by default is crypt, but is recommended use bcrypt for new installations
+    # Rounds number for "bcrypt", will be ignored for other algorithms.
+    # rounds: 10
+
+# https://verdaccio.org/docs/configuration#uplinks
+# a list of other known repositories we can talk to
+uplinks:
+  npmjs:
+    url: https://registry.npmjs.org/
+  yarn: 
+    url: https://registry.yarnpkg.com/
+  taobao:
+    url: https://registry.npm.taobao.org/
+
+# Learn how to protect your packages
+# https://verdaccio.org/docs/protect-your-dependencies/
+# https://verdaccio.org/docs/configuration#packages
+packages:
+  '@*/*':
+    # scoped packages
+    access: $all
+    publish: $authenticated
+    unpublish: $authenticated
+    proxy: npmjs taobao
+
+  '**':
+    # allow all users (including non-authenticated users) to read and
+    # publish all packages
+    #
+    # you can specify usernames/groupnames (depending on your auth plugin)
+    # and three keywords: "$all", "$anonymous", "$authenticated"
+    access: $all
+
+    # allow all known users to publish/publish packages
+    # (anyone can register by default, remember?)
+    publish: $authenticated
+    unpublish: $authenticated
+
+    # if package is not available locally, proxy requests to 'npmjs' registry
+    proxy: npmjs taobao
+
+# To improve your security configuration and  avoid dependency confusion
+# consider removing the proxy property for private packages
+# https://verdaccio.org/docs/best#remove-proxy-to-increase-security-at-private-packages
+
+# https://verdaccio.org/docs/configuration#server
+# You can specify HTTP/1.1 server keep alive timeout in seconds for incoming connections.
+# A value of 0 makes the http server behave similarly to Node.js versions prior to 8.0.0, which did not have a keep-alive timeout.
+# WORKAROUND: Through given configuration you can workaround following issue https://github.com/verdaccio/verdaccio/issues/301. Set to 0 in case 60 is not enough.
+server:
+  keepAliveTimeout: 60
+  # Allow `req.ip` to resolve properly when Verdaccio is behind a proxy or load-balancer
+  # See: https://expressjs.com/en/guide/behind-proxies.html
+  # trustProxy: '127.0.0.1'
+
+# https://verdaccio.org/docs/configuration#offline-publish
+# publish:
+#   allow_offline: false
+
+# https://verdaccio.org/docs/configuration#url-prefix
+# url_prefix: /verdaccio/
+# VERDACCIO_PUBLIC_URL='https://somedomain.org';
+# url_prefix: '/my_prefix'
+# // url -> https://somedomain.org/my_prefix/
+# VERDACCIO_PUBLIC_URL='https://somedomain.org';
+# url_prefix: '/'
+# // url -> https://somedomain.org/
+# VERDACCIO_PUBLIC_URL='https://somedomain.org/first_prefix';
+# url_prefix: '/second_prefix'
+# // url -> https://somedomain.org/second_prefix/'
+
+# https://verdaccio.org/docs/configuration#security
+# security:
+#   api:
+#     legacy: true
+#     jwt:
+#       sign:
+#         expiresIn: 29d
+#       verify:
+#         someProp: [value]
+#    web:
+#      sign:
+#        expiresIn: 1h # 1 hour by default
+#      verify:
+#         someProp: [value]
+
+# https://verdaccio.org/docs/configuration#user-rate-limit
+# userRateLimit:
+#   windowMs: 50000
+#   max: 1000
+
+# https://verdaccio.org/docs/configuration#max-body-size
+# max_body_size: 10mb
+
+# https://verdaccio.org/docs/configuration#listen-port
+# listen:
+# - localhost:4873            # default value
+# - http://localhost:4873     # same thing
+# - 0.0.0.0:4873              # listen on all addresses (INADDR_ANY)
+# - https://example.org:4873  # if you want to use https
+# - "[::1]:4873"                # ipv6
+# - unix:/tmp/verdaccio.sock    # unix socket
+
+# The HTTPS configuration is useful if you do not consider use a HTTP Proxy
+# https://verdaccio.org/docs/configuration#https
+# https:
+#   key: ./path/verdaccio-key.pem
+#   cert: ./path/verdaccio-cert.pem
+#   ca: ./path/verdaccio-csr.pem
+
+# https://verdaccio.org/docs/configuration#proxy
+# http_proxy: http://something.local/
+# https_proxy: https://something.local/
+
+# https://verdaccio.org/docs/configuration#notifications
+# notify:
+#   method: POST
+#   headers: [{ "Content-Type": "application/json" }]
+#   endpoint: https://usagge.hipchat.com/v2/room/3729485/notification?auth_token=mySecretToken
+#   content: '{"color":"green","message":"New package published: * {{ name }}*","notify":true,"message_format":"text"}'
+
+middlewares:
+  audit:
+    enabled: true
+
+# https://verdaccio.org/docs/logger
+# log settings
+log: { type: stdout, format: pretty, level: http }
+#experiments:
+#  # support for npm token command
+#  token: false
+#  # enable tarball URL redirect for hosting tarball with a different server, the tarball_url_redirect can be a template string
+#  tarball_url_redirect: 'https://mycdn.com/verdaccio/${packageName}/${filename}'
+#  # the tarball_url_redirect can be a function, takes packageName and filename and returns the url, when working with a js configuration file
+#  tarball_url_redirect(packageName, filename) {
+#    const signedUrl = // generate a signed url
+#    return signedUrl;
+#  }
+
+# translate your registry, api i18n not available yet
+# i18n:
+# list of the available translations https://github.com/verdaccio/verdaccio/blob/master/packages/plugins/ui-theme/src/i18n/ABOUT_TRANSLATIONS.md
+#   web: en-US
+
+```
+
+
 
 
 
@@ -132,8 +361,6 @@ nrm test <registry>
 ## 发布 npm 包
 
 ### **发布npm包到私有Verdaccio仓库**
-
-
 
 首先，确保你已经安装并正确配置了Verdaccio。你可以在本地机器上安装它，或者在一个服务器上安装，以便于团队共享。
 
@@ -247,3 +474,58 @@ npm publish --registry http://registry.npmjs.org
 
 
 ## **使用私有NPM包**
+
+在我的项目中，使用我刚刚发布的包 `xw-ui` ，进入我的项目，执行命令 `npm install xw-ui` 后，出现以下错误：
+
+<img src="../images/image-20240325095648019.png" alt="image-20240325095648019" style="zoom: 80%;" />
+
+> 错误提示 `npm ERR! 404 Not Found - GET http://xxxxx:4873/@types%2fnode - no such package available` 指出 npm 在尝试从您的私有 Verdaccio 服务中安装 `@types/node` 这个包时失败了，因为服务上没有找到这个包。
+>
+> 这个问题通常有几个可能的原因：
+>
+> 1. **私有 Verdaccio 服务上没有 `@types/node` 包**：`@types/node` 是一个来自 DefinitelyTyped 的 TypeScript 定义文件包，它通常是公开的，并从 npm 官方仓库中获取。如果 xw-ui 依赖 `@types/node`，并且您没有将它发布到您的私有 Verdaccio 服务上，npm 会尝试从您配置的 registry（在这种情况下是您的私有 Verdaccio 服务）中获取它。您需要确保所有需要的依赖包都在您的私有 registry 中可用，或者允许 npm 从默认的 npm registry 中获取这些包。
+> 2. **配置问题**：可能您的 Verdaccio 配置不允许从上游仓库（例如 npm 官方仓库）拉取缺失的包。通常，Verdaccio 可以配置为缓存上游仓库的包，但如果配置不当，它可能只尝试从本地存储中查找包。
+>
+> 解决方案：
+>
+> 1. **将 `@types/node` 包添加到您的私有 Verdaccio 服务**：如果 xw-ui 确实需要 `@types/node`，并且您希望所有包都从您的私有 Verdaccio 服务中获取，那么您需要将这个包也发布到您的私有 Verdaccio 服务中。
+>
+> 2. **配置 Verdaccio 允许上游代理**：确保您的 Verdaccio 配置正确，允许代理到上游仓库（比如 npm 官方仓库）。这通常是通过在 Verdaccio 的配置文件中设置 `uplinks` 和 `packages` 部分来实现的。例如：
+>
+>    ```yaml
+>    uplinks:  
+>      npmjs:  
+>        url: https://registry.npmjs.org/  
+>     
+>    packages:  
+>      '@*/*':  
+>        # 允许所有 scoped 包从 npmjs 代理  
+>        access: $all  
+>        publish: $authenticated  
+>        proxy: npmjs  
+>     
+>      '**':  
+>        # 允许所有其他包从 npmjs 代理  
+>        access: $all  
+>        publish: $authenticated  
+>        proxy: npmjs
+>    ```
+>
+>    上述配置允许 Verdaccio 代理所有缺失的包到 npmjs.org。
+>
+> 3. **使用 npm 的 fallback 功能**：如果您只希望在特定的包缺失时才从上游仓库获取，可以在 npm 配置中设置 fallback 选项。这通常在 `.npmrc` 文件中完成，例如：
+>
+>    ```
+>    registry=http://xxxxx:4873/  
+>    @your-scope:registry=http://xxxxx:4873/  
+>    always-auth=true  
+>    //registry.npmjs.org/:_authToken=YOUR_NPM_TOKEN  
+>    fallback=https://registry.npmjs.org/
+>    ```
+>
+>    `fallback` 配置项会告诉 npm 当私有 registry 中找不到包时，尝试从 npm 官方仓库获取。
+>
+> 4. **检查依赖**：确认 xw-ui 是否真的需要 `@types/node`。也许你可以通过调整 xw-ui 的 `package.json` 中的依赖，移除对 `@types/node` 的直接依赖，或者改用其他方式引入 TypeScript 类型定义。
+>
+> 确保在尝试上述任何解决方案后，清除 npm 缓存（使用 `npm cache clean --force`）并重新尝试安装 xw-ui 包。如果问题依旧存在，请检查 Verdaccio 的日志以获取更多详细信息
+
