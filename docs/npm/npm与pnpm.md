@@ -24,7 +24,9 @@ npm 允许在`package.json`文件里面，使用`scripts`字段定义脚本命�
 2. `npm run `新建的这个 Shell，会将当前目录的 `node_modules/.bin` 子目录加入`PATH`变量
 3. 执行结束后，再将`PATH`变量恢复原样。
 
+在全局模式下，可执行文件链接到 Unix 上的 `{prefix}/bin`，或直接链接到 Windows 上的 `{prefix}`。确保路径在终端的 `PATH` 环境中以运行它们。
 
+在本地模式下，可执行文件被链接到 `./node_modules/.bin`，以便它们可用于通过 npm 运行的脚本。（例如，当你运行 `npm test` 时，测试运行程序将在路径中。）
 
 ### **npm run 创建出来的 Shell 有什么特别之处?**
 
@@ -175,13 +177,86 @@ npm 的生命周期脚本主要定义在 `package.json` 文件的 `scripts` 字�
 
 
 
+## **`package.json` 文件**
+
+> 关于 `package.json` 文件的详细配置信息可以参考官网：[package.json | npm 中文网 (nodejs.cn)](https://npm.nodejs.cn/cli/v10/configuring-npm/package-json)
+>
+> 以下介绍几个重要和易混淆的知识
+
+### **文件入口配置**
+
+在`package.json`文件中，与入口相关的字段主要如下：
+
+|  字段名   | 作用                                                         |
+| :-------: | :----------------------------------------------------------- |
+|  `main`   | 指定Node.js环境中模块的入口文件。当其他模块通过`require`引入这个包时，会加载此字段指定的文件。 |
+| `browser` | 指定浏览器环境中模块的入口文件。当使用Webpack等打包工具时，它们会识别此字段，并据此处理模块。 |
+| `module`  | 指定ES6模块的入口文件。当使用支持ES6模块的打包工具或环境时，会加载此字段指定的文件。这常用于支持tree shaking等高级特性。 |
+| `esnext`  | 与`module`类似，但通常用于指定更现代的ES模块入口，可能包含实验性或尚未标准化的ES特性。 |
+| `exports` | 提供一个更细粒度的入口点映射，允许定义不同条件下的导出文件。这可以用于替代`main`、`module`等字段，并提供更好的封装和兼容性。 |
+|   `bin`   | 指定可执行文件的入口。如果包中包含可执行的命令行工具，可以通过此字段指定。 |
+
+这些字段为开发者提供了灵活性，以支持不同的运行环境和使用场景。注意，不是所有的字段都需要在`package.json`中指定，具体取决于你的模块如何被使用以及目标环境是什么。而且，一些字段可能需要配合特定的工具或构建系统来使用。
+
+以下是一个简单的`package.json`示例，其中包含了一些与入口相关的字段，以及它们的作用说明：
+
+```json
+{  
+  "name": "my-package",  
+  "version": "1.0.0",  
+  "description": "A simple package with multiple entry points",  
+  "main": "dist/main.js", // Node.js环境中的默认入口文件  
+  "browser": "dist/browser.js", // 浏览器环境中的默认入口文件  
+  "module": "src/index.mjs", // ES6模块的入口文件，支持tree shaking等特性  
+  "exports": {  
+    ".": "./dist/main.js", // 包的默认导出，相当于main字段  
+    "./browser": "./dist/browser.js", // 指定browser字段的导出  
+    "./module": "./src/index.mjs" // 指定module字段的导出  
+  },  
+  "bin": {  
+    "my-cli": "./bin/my-cli.js" // 命令行工具的入口文件  
+  },  
+  "scripts": {  
+    "build": "build-script" // 构建脚本，用于生成dist目录下的文件  
+  },  
+  "dependencies": {  
+    // 依赖项...  
+  },  
+  "devDependencies": {  
+    // 开发依赖项...  
+  }  
+}
+```
+
+在这个示例中：
+
+- `main`字段指定了Node.js环境中模块的入口文件为`dist/main.js`。当其他Node.js模块通过`require('my-package')`引入这个包时，会加载`dist/main.js`文件。
+- `browser`字段指定了浏览器环境中模块的入口文件为`dist/browser.js`。当使用支持此字段的打包工具（如Webpack）时，它们会加载这个文件而不是`main`字段指定的文件。
+- `module`字段指定了ES6模块的入口文件为`src/index.mjs`。这意味着支持ES6模块的构建工具或环境会加载这个文件，并可以利用ES6模块的特性，如静态导入和tree shaking。
+- `exports`字段提供了一个更细粒度的入口点映射。在这个例子中，它定义了包的默认导出（`.`对应`main`字段），以及特定的子路径导出（如`./browser`和`./module`）。这允许消费者精确地指定他们想要加载的模块版本。
+- `bin`字段指定了`my-cli`这个命令行工具的入口文件为`bin/my-cli.js`。这意味着当用户全局安装这个包后，可以直接在命令行中运行`my-cli`命令。
+
+请注意，这些字段的作用和如何使用它们取决于你的构建流程、目标环境以及使用的工具。在实际项目中，你可能需要根据你的具体需求来配置这些字段，并且可能需要配合构建脚本（如`scripts`字段中的`build`命令）来生成这些入口文件。
+
+
+
+### **注意**
+
+- `name` 会作为参数传递给`require()`
+
+
+
+**参考资料**
+
+[package.json | npm 中文网 (nodejs.cn)](https://npm.nodejs.cn/cli/v10/configuring-npm/package-json)
+
 ## **参考资料**
 
-[npm pack](https://www.axihe.com/api/npm/cli/npm-pack.html)
+[npm 中文网 (nodejs.cn)](https://npm.nodejs.cn/)
+
+[NPM 文档丨阿西河 (axihe.com)](https://www.axihe.com/api/npm/api/api.html)
 
 [使用vue在npm上发布自己的ui组件包](https://blog.csdn.net/weixin_44003190/article/details/90713012)
-
-
 
 # **pnpm**
 

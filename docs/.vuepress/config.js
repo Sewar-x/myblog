@@ -89,8 +89,10 @@ module.exports = config({
           { text: '前端渲染架构', link: '../Front-end-Engineering/前端渲染架构/' },
           { text: '前端架构实践', link: '../Front-end-Engineering/前端架构实践/' },
           { text: '自动构建和部署', link: '../projectDeploy/自动构建和部署/' },
-          { text: 'Git', link: '../git/' },
-          { text: 'npm', link: '../Front-end-Engineering/npm/' },
+          { text: '前端组件化', link: '../vue/Vue组件基础' },
+          { text: '前端模块化', link: '../Front-end-Engineering/前端模块化' },
+          { text: '包管理器', link: '../npm/npm与pnpm' },
+          { text: 'Git', link: '../git/' }
         ]
       },
       {
@@ -304,6 +306,10 @@ module.exports = config({
             '前端发版静态资源404问题'
           ]
         }
+      ],
+      '/npm/': [
+        'npm与pnpm',
+        '搭建私有npm'
       ]
     },
 
