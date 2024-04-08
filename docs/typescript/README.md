@@ -2661,7 +2661,7 @@ function loggingIdentity<T extends Lengthwise>(arg: T): T {
 
 以下是一些常用的 TypeScript 泛型工具类型：
 
-1. **Partial<T>**
+1. **`Partial<T>`**
    将对象类型 `T` 的所有属性变为可选。
 
    ```typescript
@@ -2670,7 +2670,7 @@ function loggingIdentity<T extends Lengthwise>(arg: T): T {
    // type PartialType = { a?: number; b?: string };
    ```
 
-2. **Required<T>**
+2. **`Required<T>`**
    将对象类型 `T` 的所有属性变为必需。
 
    ```typescript
@@ -2679,7 +2679,7 @@ function loggingIdentity<T extends Lengthwise>(arg: T): T {
    // type RequiredType = { a: number; b: string };
    ```
 
-3. **Readonly<T>**
+3. **`Readonly<T>`**
    将对象类型 `T` 的所有属性设置为只读。
 
    ```typescript
@@ -2688,7 +2688,7 @@ function loggingIdentity<T extends Lengthwise>(arg: T): T {
    // type ReadonlyType = { readonly a: number; readonly b: string };
    ```
 
-4. **Record<K extends keyof any, T>**
+4. **`Record<K extends keyof any, T>`**
    构造一个类型，其属性是键为 `K` 类型，值为 `T` 类型的对象。
 
    ```typescript
@@ -2697,7 +2697,7 @@ function loggingIdentity<T extends Lengthwise>(arg: T): T {
    // type RecordType = { a: number; b: number };
    ```
 
-5. **Pick<T, K extends keyof T>**
+5. **`Pick<T, K extends keyof T>`**
    从类型 `T` 中挑选出属性键为 `K` 的属性。
 
    ```typescript
@@ -2706,7 +2706,7 @@ function loggingIdentity<T extends Lengthwise>(arg: T): T {
    // type PickType = { a: number; c: boolean };
    ```
 
-6. **Omit<T, K extends keyof T>**
+6. **`Omit<T, K extends keyof T>`**
    构造一个类型，该类型是从类型 `T` 中去除了属性键为 `K` 的属性后的剩余属性组成的。
 
    ```typescript
@@ -2715,7 +2715,7 @@ function loggingIdentity<T extends Lengthwise>(arg: T): T {
    // type OmitType = { a: number };
    ```
 
-7. **Exclude<T, U>**
+7. **`Exclude<T, U>`**
    从类型 `T` 中排除掉可以赋值给类型 `U` 的所有属性。
 
    ```typescript
@@ -2724,7 +2724,7 @@ function loggingIdentity<T extends Lengthwise>(arg: T): T {
    // type ExcludeType = 'a' | 'c';
    ```
 
-8. **Extract<T, U>**
+8. **`Extract<T, U>`**
    提取类型 `T` 中可以赋值给类型 `U` 的所有属性。
 
    ```typescript
@@ -2733,7 +2733,7 @@ function loggingIdentity<T extends Lengthwise>(arg: T): T {
    // type ExtractType = 'b' | 'd';
    ```
 
-9. **NonNullable<T>**
+9. **`NonNullable<T>`**
    排除 `null` 和 `undefined` 从类型 `T` 中。
 
    ```typescript
@@ -2742,7 +2742,7 @@ function loggingIdentity<T extends Lengthwise>(arg: T): T {
    // type NonNullableType = string;
    ```
 
-10. **ReturnType<T extends (...args: any) => any>**
+10. **`ReturnType<T extends (...args: any) => any>`**
     获取函数类型 `T` 的返回类型。
 
     ```typescript
@@ -2751,7 +2751,7 @@ function loggingIdentity<T extends Lengthwise>(arg: T): T {
     // type ReturnTypeExample = string;
     ```
 
-11. **InstanceType<T extends new (...args: any) => any>**
+11. **`InstanceType<T extends new (...args: any) => any>`**
     获取构造函数类型 `T` 的实例类型。
 
     ```typescript

@@ -28,7 +28,7 @@
 
 在 Linux 下 shell 脚本为：
 
-![image-20240207170711059](../images/vite.png)
+![image-20240207170711059](../images/vite1.png)
 
 通过以上脚本，解析 `vite` 命令时，会在不同平台下加载对应 Shell 脚本， shell 中使用 node 执行 vite 脚本，vite 脚本位于 `./node_modules/vite/bin/vite.js` 目录下：
 
