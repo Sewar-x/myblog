@@ -6,6 +6,12 @@ import { hopeTheme } from "vuepress-theme-hope";
 import navbar from "./navbar.js";
 // 我们默认导出了主题对象
 export default hopeTheme({
+    hostname: "https://github.com/Sewar-x/myblog/",
+    author: {
+        name: "Sewen",
+        url: "https://github.com/Sewar-x",
+        email: "596777598@qq.com",
+    },
     navbar,
     sidebar: "structure",
     navbarLayout: {
@@ -82,9 +88,8 @@ export default hopeTheme({
     blog: {
         avatar: './mylogo.png',
         name: 'Sewen',
-        description: '前端开发者, 热爱前端,喜欢折腾',
+        description: '前端开发者, 热爱前端,喜欢探索',
         roundAvatar: true,
-        sidebarDisplay: "always",
         intro: 'https://github.com/Sewar-x',
         medias: {
             GitHub: "https://github.com/Sewar-x",
