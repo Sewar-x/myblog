@@ -4,6 +4,8 @@ specifiers:
   '@vuepress/bundler-webpack': 2.0.0-rc.9
   '@vuepress/helper': 2.0.0-rc.3
   '@vuepress/plugin-blog': 2.0.0-rc.24
+  '@vuepress/plugin-copyright': 2.0.0-rc.7
+  '@vuepress/plugin-search': 2.0.0-rc.24
   '@vuepress/plugin-shiki': 2.0.0-rc.24
   markdown-it-disable-url-encode: ^1.0.1
   sass-loader: ^14.1.0
@@ -13,12 +15,14 @@ specifiers:
 
 dependencies:
   '@vuepress/helper': 2.0.0-rc.3_vuepress@2.0.0-rc.9
+  '@vuepress/plugin-copyright': 2.0.0-rc.7_vuepress@2.0.0-rc.9
   markdown-it-disable-url-encode: 1.0.1
-  vuepress-theme-hope: 2.0.0-rc.34_4wdwpnb5gohkq5c7rnlmjuhplm
+  vuepress-theme-hope: 2.0.0-rc.34_grxwrij6jzbedvnkxhhhdhmvvu
 
 devDependencies:
   '@vuepress/bundler-webpack': 2.0.0-rc.9
   '@vuepress/plugin-blog': 2.0.0-rc.24_vuepress@2.0.0-rc.9
+  '@vuepress/plugin-search': 2.0.0-rc.24_vuepress@2.0.0-rc.9
   '@vuepress/plugin-shiki': 2.0.0-rc.24_vuepress@2.0.0-rc.9
   sass-loader: 14.1.1
   vue: 3.4.21
@@ -1015,6 +1019,21 @@ packages:
       - typescript
     dev: false
 
+  /@vuepress/helper/2.0.0-rc.7_vuepress@2.0.0-rc.9:
+    resolution: {integrity: sha512-O4kaFjNqICs4IKxwmyMPGcaDENod7vTqHgMBcR77fKhnGI8YDNOh+x1QA8+ajChqoUQhc96ULwqrpQI/IxBphA==}
+    peerDependencies:
+      vuepress: 2.0.0-rc.2
+    dependencies:
+      '@vue/shared': 3.4.21
+      cheerio: 1.0.0-rc.12
+      fflate: 0.8.2
+      gray-matter: 4.0.3
+      vue: 3.4.21
+      vuepress: 2.0.0-rc.9_daa5fyfzn4gafqkrp3n2pcrq3e
+    transitivePeerDependencies:
+      - typescript
+    dev: false
+
   /@vuepress/markdown/2.0.0-rc.9:
     resolution: {integrity: sha512-e7as2ar3RQp0bUyMiwBPi7L/G2fzscb3s0BywNcAwubFR22o0/dBEYRYdrN0clPQ2FXpPxF6AFj4aD7O1heCbw==}
     dependencies:
@@ -1143,6 +1162,21 @@ packages:
       - typescript
     dev: false
 
+  /@vuepress/plugin-copyright/2.0.0-rc.7_vuepress@2.0.0-rc.9:
+    resolution: {integrity: sha512-vFysGEx7TWVEgi/eBICJAqkpU3MJ1yYQac/8r0KPqTKVo7c+8AxGuGV34M9J4LdAEKa9/6CUXrMWMJICJpdPbw==}
+    peerDependencies:
+      vuepress: 2.0.0-rc.2
+    dependencies:
+      '@vuepress/helper': 2.0.0-rc.7_vuepress@2.0.0-rc.9
+      '@vueuse/core': 10.9.0_vue@3.4.21
+      vue: 3.4.21
+      vue-router: 4.3.0_vue@3.4.21
+      vuepress: 2.0.0-rc.9_daa5fyfzn4gafqkrp3n2pcrq3e
+    transitivePeerDependencies:
+      - '@vue/composition-api'
+      - typescript
+    dev: false
+
   /@vuepress/plugin-external-link-icon/2.0.0-rc.24_vuepress@2.0.0-rc.9:
     resolution: {integrity: sha512-kry1EFkv6WaGOCzk9vRGHGcAuQHNVQ/jDEgtagUFaRk5+HtCQB60VzhmFdwM08DC2XAmDieBLm1MMR0T2DdHSw==}
     peerDependencies:
@@ -1231,6 +1265,17 @@ packages:
     transitivePeerDependencies:
       - typescript
     dev: false
+
+  /@vuepress/plugin-search/2.0.0-rc.24_vuepress@2.0.0-rc.9:
+    resolution: {integrity: sha512-GgjKMCb+IUYTo/Nui7vCIzQV5KpZD05VknhPmy3aySYXGd55vem8IVDVOV71CU1mX9qnHnQt5DFX2sBtmu2SRQ==}
+    peerDependencies:
+      vuepress: 2.0.0-rc.9
+    dependencies:
+      chokidar: 3.6.0
+      vue: 3.4.21
+      vuepress: 2.0.0-rc.9_daa5fyfzn4gafqkrp3n2pcrq3e
+    transitivePeerDependencies:
+      - typescript
 
   /@vuepress/plugin-seo/2.0.0-rc.24_vuepress@2.0.0-rc.9:
     resolution: {integrity: sha512-E0dRCNqV6RLoVV4j8xchmlsnlR7OyPQxWmWrk20mBiyluRI05OXdb20ZQbYJe3PfK8f8DnyETzob943HBg3sVA==}
@@ -4255,7 +4300,7 @@ packages:
       - typescript
     dev: false
 
-  /vuepress-theme-hope/2.0.0-rc.34_4wdwpnb5gohkq5c7rnlmjuhplm:
+  /vuepress-theme-hope/2.0.0-rc.34_grxwrij6jzbedvnkxhhhdhmvvu:
     resolution: {integrity: sha512-ZSsYH4ErU18b86N8XA2DmKJdp6J8Sptpng5SX/HKlkQYkZ2qt0RJfZvoeRxSw7e+2zwIq4Gv5kifCw3CZz0MNQ==}
     engines: {node: '>=18.16.0', npm: '>=8', pnpm: '>=7', yarn: '>=2'}
     peerDependencies:
@@ -4302,6 +4347,7 @@ packages:
       '@vuepress/plugin-prismjs': 2.0.0-rc.21_vuepress@2.0.0-rc.9
       '@vuepress/plugin-reading-time': 2.0.0-rc.24_vuepress@2.0.0-rc.9
       '@vuepress/plugin-rtl': 2.0.0-rc.21_vuepress@2.0.0-rc.9
+      '@vuepress/plugin-search': 2.0.0-rc.24_vuepress@2.0.0-rc.9
       '@vuepress/plugin-seo': 2.0.0-rc.24_vuepress@2.0.0-rc.9
       '@vuepress/plugin-sitemap': 2.0.0-rc.24_vuepress@2.0.0-rc.9
       '@vuepress/plugin-theme-data': 2.0.0-rc.21_vuepress@2.0.0-rc.9

@@ -10,11 +10,9 @@ heroImage: /logo.png
 heroImageDark: /logo.png
 heroAlt:  Sewen Blog
 bgImage: false
-projects: 
-  name: XW-UI
-  desc: 基于 ElementUI、ElementPlus、AntDesign 组件库二次封装，JSON 配置化快速开发中后台组件库
-  link: https://sewar-x.github.io/X-UI/
-
+lastUpdated: true
+contributors: true
+editLink: false
 footer: <a href="https://github.com/Sewar-x">Sewen</a>
 copyright: MIT LICENSE
 ---

@@ -1,3 +1,7 @@
+/**
+ * 使用 vuepress-theme-hope 主题插件
+ * docs: https://theme-hope.vuejs.press/zh/
+ */
 import { hopeTheme } from "vuepress-theme-hope";
 import navbar from "./navbar.js";
 // 我们默认导出了主题对象
@@ -11,7 +15,20 @@ export default hopeTheme({
     },
     plugins: {
         blog: true,
-        prismjs: true
+        prismjs: true,
+        search: true,
+        copyright: {
+            global: true,
+            author: "Sewen",
+            license: "MIT"
+        },
+        comment: {
+            provider: "Giscus",
+            repo: "Sewar-x/myblog",
+            repoId: "MDEwOlJlcG9zaXRvcnkzODAyOTIzOTU=",
+            category: "Announcements",
+            categoryId: "DIC_kwDOFqrNK84Ceik1",
+        },
     },
     blog: {
         avatar: './mylogo.png',
