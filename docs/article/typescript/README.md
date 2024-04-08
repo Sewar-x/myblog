@@ -1,3 +1,10 @@
+---
+star: false
+category:
+  - TypeScript
+tag:
+  - TypeScript
+---
 # TypeScript
 
 ![TypeScript](../images/TypeScript.png)

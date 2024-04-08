@@ -1,3 +1,10 @@
+---
+star: false
+category:
+  - JavaScript
+tag:
+  - JavaScript
+---
 # JavaScript 基础
 
 ## ES6新特性

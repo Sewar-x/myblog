@@ -1,4 +1,11 @@
-# JSON组件
+---
+star: true
+category:
+  - 组件
+tag:
+  - JSON配置化组件
+---
+# JSON配置化组件
 
 JSON 配置化组件是对 [element-plus](https://element-plus.org/zh-CN/) 组件的二次封装，通过二次封装 elementPlus 组件后，可以通过 JSON 配置生成 elements 组件
 

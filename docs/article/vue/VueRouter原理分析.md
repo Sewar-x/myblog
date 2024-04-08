@@ -1,3 +1,11 @@
+---
+star: true
+category:
+  - 源码分析
+  - Vue
+tag:
+  - VueRouter
+---
 # VueRouter原理分析
 
 # Vue-Router 3.x

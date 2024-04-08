@@ -1,5 +1,9 @@
 ---
 star: true
+category:
+  - 组件
+tag:
+  - Element 二次封装
 ---
 # Element 二次封装
 

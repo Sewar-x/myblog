@@ -1,5 +1,9 @@
 ---
 star: true
+category:
+  - 项目总结
+tag:
+  - SSR项目
 ---
 # 从零到一搭建SSR项目
 

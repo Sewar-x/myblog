@@ -1,4 +1,11 @@
-# **搭建私有NPM仓库**
+---
+star: false
+category:
+  - NPM
+tag:
+  - 搭建私有NPM仓库
+---
+# 搭建私有NPM仓库
 
 ## **代码共享方案**
 

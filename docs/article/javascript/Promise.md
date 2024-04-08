@@ -1,7 +1,10 @@
-
-
-
-
+---
+star: false
+category:
+  - JavaScript
+tag:
+  - Promise
+---
 # Promise 专题
 
 ## Promise 基础

@@ -1,3 +1,11 @@
+---
+star: true
+category:
+  - 源码分析
+  - Vue
+tag:
+  - VUEX
+---
 # Vuex原理分析
 
 # VUEX

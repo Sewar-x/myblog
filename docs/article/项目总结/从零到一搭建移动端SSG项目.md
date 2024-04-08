@@ -1,5 +1,9 @@
 ---
 star: true
+category:
+  - 项目总结
+tag:
+  - SSG项目
 ---
 # 从零到一搭建移动端SSG项目
 

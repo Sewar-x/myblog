@@ -1,3 +1,10 @@
+---
+star: true
+category:
+  - Git
+tag:
+  - Git 规范实践
+---
 # Git 规范
 
 ## 常见研发模式的分支管理规范

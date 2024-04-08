@@ -1,3 +1,10 @@
+---
+star: true
+category:
+  - 项目总结
+tag:
+  - Echarts 二次封装
+---
 # Echarts 二次封装
 
 ## 为什么要对 Echarts 二次封装？

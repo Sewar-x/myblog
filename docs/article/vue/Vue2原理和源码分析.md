@@ -1,5 +1,11 @@
 ---
 star: true
+category:
+  - 源码分析
+  - Vue
+tag:
+  - Vue2
+  - Vue2.x 原理源码分析
 ---
 
 # Vue2.x 原理源码分析

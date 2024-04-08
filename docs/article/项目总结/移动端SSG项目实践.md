@@ -1,3 +1,10 @@
+---
+star: true
+category:
+  - 项目总结
+tag:
+  - SSG 移动端项目
+---
 # SSG 移动端项目实践
 
 ## 项目特点

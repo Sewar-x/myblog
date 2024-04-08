@@ -1,4 +1,10 @@
-
+---
+star: false
+category:
+  - 组件
+tag:
+  - 组件基础
+---
 # Vue 组件基础
 
 ## [组件基础](https://cn.vuejs.org/v2/guide/components.html)

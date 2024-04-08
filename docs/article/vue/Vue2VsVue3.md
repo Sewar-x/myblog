@@ -1,5 +1,9 @@
 ---
 star: true
+category:
+  - Vue
+tag:
+  - Vue2 Vs Vue3
 ---
 # Vue2 Vs Vue3
 
