@@ -16,7 +16,7 @@ specifiers:
   markmap-view: ^0.16.0
   mermaid: ^10.9.0
   reveal.js: ^5.0.5
-  sass-loader: ^14.1.0
+  sass-loader: ^14.1.1
   vue: ^3.4.21
   vuepress: 2.0.0-rc.9
   vuepress-theme-hope: 2.0.0-rc.34
@@ -341,60 +341,60 @@ packages:
       '@lit-labs/ssr-dom-shim': 1.2.0
     dev: false
 
-  /@mdit-vue/plugin-component/2.0.0:
-    resolution: {integrity: sha512-cTRxlocav/+mfgDcp0P2z/gWuWBez+iNuN4D+b74LpX4AR6UAx2ZvWtCrUZ8VXrO4eCt1/G0YC/Af7mpIb3aoQ==}
+  /@mdit-vue/plugin-component/2.1.0:
+    resolution: {integrity: sha512-C3y7/hB90WcCpuxw+Z7uWmF3+NJpjv89PI8EVdxFJMFUfdX9JGBAkW34UA9+JdQSx7ARVeXgcb06zkD5z37cbw==}
     dependencies:
-      '@types/markdown-it': 13.0.7
+      '@types/markdown-it': 14.0.0
       markdown-it: 14.1.0
 
-  /@mdit-vue/plugin-frontmatter/2.0.0:
-    resolution: {integrity: sha512-/LrT6E60QI4XV4mqx3J87hqYXlR7ZyMvndmftR2RGz7cRAwa/xL+kyFLlgrMxkBIKitOShKa3LS/9Ov9b0fU+g==}
+  /@mdit-vue/plugin-frontmatter/2.1.0:
+    resolution: {integrity: sha512-vVDjrv1RZorGo1yW7PZg7/dwRupSBzMt8YE8mmM+TMA0NtFEhYfWdHj8vWgkXm1ZJUugmXheL6SxJzo6fz6uHA==}
     dependencies:
-      '@mdit-vue/types': 2.0.0
-      '@types/markdown-it': 13.0.7
+      '@mdit-vue/types': 2.1.0
+      '@types/markdown-it': 14.0.0
       gray-matter: 4.0.3
       markdown-it: 14.1.0
 
-  /@mdit-vue/plugin-headers/2.0.0:
-    resolution: {integrity: sha512-ITMMPCnLEYHHgj3XEUL2l75jsNn8guxNqr26YrMSi1f5zcgq4XVy1LIvfwvJ1puqM6Cc5v4BHk3oAyorAi7l1A==}
+  /@mdit-vue/plugin-headers/2.1.0:
+    resolution: {integrity: sha512-vau2AtVIN+nqjlMrvYOpz2toBkJJGUcqJY48Mlo33YybBYNDRCBrX/1VFWJ++B3IeJpdFFMLwhZvRN5tsuhPhQ==}
     dependencies:
-      '@mdit-vue/shared': 2.0.0
-      '@mdit-vue/types': 2.0.0
-      '@types/markdown-it': 13.0.7
+      '@mdit-vue/shared': 2.1.0
+      '@mdit-vue/types': 2.1.0
+      '@types/markdown-it': 14.0.0
       markdown-it: 14.1.0
 
-  /@mdit-vue/plugin-sfc/2.0.0:
-    resolution: {integrity: sha512-OXrMXOyk0iwdIou2jRoIHIbjskwghkO14C9/OjgVHXSSX+iM/WQ4l4yi1aWmNlbQNjtP8IXcVAyJB9K0DFYmLg==}
+  /@mdit-vue/plugin-sfc/2.1.0:
+    resolution: {integrity: sha512-7M07z3sADHQXwf9CuOXQBK4+Ga+wxnyTNrwsuk0knnvXRO7l6N6yL5sPgzgz67e4UBsqDwsxgWzTgsnzmv6OMg==}
     dependencies:
-      '@mdit-vue/types': 2.0.0
-      '@types/markdown-it': 13.0.7
+      '@mdit-vue/types': 2.1.0
+      '@types/markdown-it': 14.0.0
       markdown-it: 14.1.0
 
-  /@mdit-vue/plugin-title/2.0.0:
-    resolution: {integrity: sha512-eqBoETPVkMXNLvwFshz/A2+Cz81VB5HEkXDm0tt6RBW/rTvnoWmGJ1Z+mvcjR5ck5W4nYdIyT68oHxX2JI2M4g==}
+  /@mdit-vue/plugin-title/2.1.0:
+    resolution: {integrity: sha512-16KmXwMnWxDwj6CelA1Fyf12/OYvkA2c2MN1iFAdJQnK7wOSPcUscdVO7nxverThuPQLENt/8500/AJqjH4/3Q==}
     dependencies:
-      '@mdit-vue/shared': 2.0.0
-      '@mdit-vue/types': 2.0.0
-      '@types/markdown-it': 13.0.7
+      '@mdit-vue/shared': 2.1.0
+      '@mdit-vue/types': 2.1.0
+      '@types/markdown-it': 14.0.0
       markdown-it: 14.1.0
 
-  /@mdit-vue/plugin-toc/2.0.0:
-    resolution: {integrity: sha512-PKQ8sZna3D5chTnt2lxL+ddpyXd++6Nyc0l8VXCeDgStlySQwiP9jaLeeC88oqY4BtRu4cAmILmxDrvuX0Rrdg==}
+  /@mdit-vue/plugin-toc/2.1.0:
+    resolution: {integrity: sha512-CUVIHELx73yPypYKvnG+6cwjudUCq5vqXOCb3HfFQOICVXk9Y5W0MFOnGBcyt2JxY4D1dUWusj3YT4o0MDm/Eg==}
     dependencies:
-      '@mdit-vue/shared': 2.0.0
-      '@mdit-vue/types': 2.0.0
-      '@types/markdown-it': 13.0.7
+      '@mdit-vue/shared': 2.1.0
+      '@mdit-vue/types': 2.1.0
+      '@types/markdown-it': 14.0.0
       markdown-it: 14.1.0
 
-  /@mdit-vue/shared/2.0.0:
-    resolution: {integrity: sha512-PdxpQpbyTazeo2JT87qms6RPZIzyJd+gwuB+1jSwLDI7+0u5g79y2XgTAbZromSVgY2f3UU5HWdwaLbV9w4uOw==}
+  /@mdit-vue/shared/2.1.0:
+    resolution: {integrity: sha512-eLPdmaB9f7VGjC6AzA5Q2pOzj1s5uJMtF+925SQTjlZIzlJbv1KFwjcO57dlr8aOzF1XrWm8j8nB1qYlecW4Ig==}
     dependencies:
-      '@mdit-vue/types': 2.0.0
-      '@types/markdown-it': 13.0.7
+      '@mdit-vue/types': 2.1.0
+      '@types/markdown-it': 14.0.0
       markdown-it: 14.1.0
 
-  /@mdit-vue/types/2.0.0:
-    resolution: {integrity: sha512-1BeEB+DbtmDMUAfvbNUj5Hso8cSl2sBVK2iTyOMAqhfDVLdh+/9+D0JmQHaCeUk/vuJoMhOwbweZvh55wHxm4w==}
+  /@mdit-vue/types/2.1.0:
+    resolution: {integrity: sha512-TMBB/BQWVvwtpBdWD75rkZx4ZphQ6MN0O4QB2Bc0oI5PC2uE57QerhNxdRZ7cvBHE2iY2C+BUNUziCfJbjIRRA==}
 
   /@mdit/plugin-alert/0.8.0:
     resolution: {integrity: sha512-mxA/lhOyDDR6/qSAegGG/XZRjUbr1wjwdULudbpkA/CCQi6piW9D0Z8crDQGYz4KPQM9Bgx4Ac81QFSzHOV66Q==}
@@ -936,7 +936,7 @@ packages:
   /@types/markdown-it-emoji/2.0.5:
     resolution: {integrity: sha512-iJLsmCNpSWKtV6Ia3mLSjcXJPEt7ubGG342z+hGvYx++TpM19oTUrJcI7XjbOqRQ+W2UQ323E7B0eCLwlgT/9g==}
     dependencies:
-      '@types/markdown-it': 13.0.7
+      '@types/markdown-it': 14.0.0
 
   /@types/markdown-it/13.0.7:
     resolution: {integrity: sha512-U/CBi2YUUcTHBt5tjO2r5QV/x0Po6nsYwQU4Y04fBS6vfoImaiZ6f8bi3CjTCxBPQSO1LMyUqkByzi8AidyxfA==}
@@ -949,7 +949,6 @@ packages:
     dependencies:
       '@types/linkify-it': 3.0.5
       '@types/mdurl': 1.0.5
-    dev: false
 
   /@types/mdast/3.0.15:
     resolution: {integrity: sha512-LnwD+mUEfxWMa1QpDraczIn6k0Ee3SMicuYSSzS6ZYl2gKS09EClnJYGd8Du6rfc5r/GZEk5o1mRb8TaTj03sQ==}
@@ -1235,14 +1234,14 @@ packages:
   /@vuepress/markdown/2.0.0-rc.9:
     resolution: {integrity: sha512-e7as2ar3RQp0bUyMiwBPi7L/G2fzscb3s0BywNcAwubFR22o0/dBEYRYdrN0clPQ2FXpPxF6AFj4aD7O1heCbw==}
     dependencies:
-      '@mdit-vue/plugin-component': 2.0.0
-      '@mdit-vue/plugin-frontmatter': 2.0.0
-      '@mdit-vue/plugin-headers': 2.0.0
-      '@mdit-vue/plugin-sfc': 2.0.0
-      '@mdit-vue/plugin-title': 2.0.0
-      '@mdit-vue/plugin-toc': 2.0.0
-      '@mdit-vue/shared': 2.0.0
-      '@mdit-vue/types': 2.0.0
+      '@mdit-vue/plugin-component': 2.1.0
+      '@mdit-vue/plugin-frontmatter': 2.1.0
+      '@mdit-vue/plugin-headers': 2.1.0
+      '@mdit-vue/plugin-sfc': 2.1.0
+      '@mdit-vue/plugin-title': 2.1.0
+      '@mdit-vue/plugin-toc': 2.1.0
+      '@mdit-vue/shared': 2.1.0
+      '@mdit-vue/types': 2.1.0
       '@types/markdown-it': 13.0.7
       '@types/markdown-it-emoji': 2.0.5
       '@vuepress/shared': 2.0.0-rc.9
@@ -1522,7 +1521,7 @@ packages:
   /@vuepress/shared/2.0.0-rc.9:
     resolution: {integrity: sha512-XfI6CWNv4/Vp9Iew6GJil9RUSy1rM7zGdjwikr0j3Rkh55q3f00w1wud47wE9kxRqsZ0PIvsMget5CxEn5rA/w==}
     dependencies:
-      '@mdit-vue/types': 2.0.0
+      '@mdit-vue/types': 2.1.0
 
   /@vuepress/utils/2.0.0-rc.9:
     resolution: {integrity: sha512-qk6Pel4JVKYKxp3bWxyvnwchvx3QaCWc7SqUw7L6qUo/um+0U2U45L0anWoAfckw12RXYhoIEbJ9UZpueiKOPg==}
@@ -1785,7 +1784,7 @@ packages:
       postcss: ^8.1.0
     dependencies:
       browserslist: 4.23.0
-      caniuse-lite: 1.0.30001606
+      caniuse-lite: 1.0.30001607
       fraction.js: 4.3.7
       normalize-range: 0.1.2
       picocolors: 1.0.0
@@ -1858,8 +1857,8 @@ packages:
     engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
     hasBin: true
     dependencies:
-      caniuse-lite: 1.0.30001606
-      electron-to-chromium: 1.4.729
+      caniuse-lite: 1.0.30001607
+      electron-to-chromium: 1.4.730
       node-releases: 2.0.14
       update-browserslist-db: 1.0.13_browserslist@4.23.0
 
@@ -1909,8 +1908,8 @@ packages:
     engines: {node: '>=6'}
     dev: false
 
-  /caniuse-lite/1.0.30001606:
-    resolution: {integrity: sha512-LPbwnW4vfpJId225pwjZJOgX1m9sGfbw/RKJvw/t0QhYOOaTXHvkjVGFGPpvwEzufrjvTlsULnVTxdy4/6cqkg==}
+  /caniuse-lite/1.0.30001607:
+    resolution: {integrity: sha512-WcvhVRjXLKFB/kmOFVwELtMxyhq3iM/MvmXcyCe2PNf166c39mptscOc/45TTS96n2gpNV2z7+NakArTWZCQ3w==}
 
   /chalk/2.4.2:
     resolution: {integrity: sha512-Mti+f9lpJNcwF4tWV8/OrTTtF1gZi+f8FqlyAdouralcFWFQWF2+NgCHShjkCb+IFBLq9buZwE1xckQU4peSuQ==}
@@ -2630,8 +2629,8 @@ packages:
   /ee-first/1.1.1:
     resolution: {integrity: sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==}
 
-  /electron-to-chromium/1.4.729:
-    resolution: {integrity: sha512-bx7+5Saea/qu14kmPTDHQxkp2UnziG3iajUQu3BxFvCOnpAJdDbMV4rSl+EqFDkkpNNVUFlR1kDfpL59xfy1HA==}
+  /electron-to-chromium/1.4.730:
+    resolution: {integrity: sha512-oJRPo82XEqtQAobHpJIR3zW5YO3sSRRkPz2an4yxi1UvqhsGm54vR/wzTFV74a3soDOJ8CKW7ajOOX5ESzddwg==}
 
   /elkjs/0.9.2:
     resolution: {integrity: sha512-2Y/RaA1pdgSHpY0YG4TYuYCD2wh97CRvu22eLG3Kz0pgQ/6KbIFTxsTnDc4MH/6hFlg2L/9qXrDMG0nMjP63iw==}
