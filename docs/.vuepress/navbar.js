@@ -25,8 +25,8 @@ export default [ // 导航栏配置
         text: '框架和源码分析',
         ariaLabel: '框架和源码分析',
         children: [
-            { text: 'Vue 专题', link: '/article/vue/Vue2原理和源码分析' },
-            { text: 'React 专题', link: '/article/React/' },
+            { text: 'Vue 专题', link: '/article/vue/Vue2原理和源码分析.md' },
+            { text: 'React 专题', link: '/article/React/React基础.md' },
             { text: 'Vue Vs React', link: '/article/React/VueVsReact.md' },
             { text: 'webpack 专题', link: '/article/webpack/webpack构建原理.md' },
             { text: 'vite 专题', link: '/article/vite/' },
