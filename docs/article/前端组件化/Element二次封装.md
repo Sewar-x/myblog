@@ -1,7 +1,7 @@
 ---
 star: true
 category:
-  - 组件
+  - 组件化
 tag:
   - Element 二次封装
 ---

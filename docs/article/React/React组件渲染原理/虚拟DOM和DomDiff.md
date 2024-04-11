@@ -1,3 +1,21 @@
+---
+star: true
+
+order: 4
+
+category:
+
+  - React
+
+tag:
+
+  - React组件渲染
+
+
+---
+
+
+
 # **Virtual DOM**
 
 
@@ -8,7 +26,7 @@
 
 Real DOM，真实 `DOM`，意思为文档对象模型，是一个结构化文本的抽象，在页面渲染出的每一个结点都是一个真实 `DOM` 结构，如下：
 
-![img](../images/fc7ba8d0-d302-11eb-85f6-6fac77c0c9b3.png)
+![img](../../images/fc7ba8d0-d302-11eb-85f6-6fac77c0c9b3.png)
 
 Real DOM（真实DOM）是浏览器原生提供的，它表示当前页面的实际HTML结构。当页面中的数据发生变化时，Real DOM 会进行重新渲染和更新。它是我们与网页进行交互的基础，通过操作Real DOM，我们可以改变网页的内容、样式和行为。
 
@@ -26,22 +44,60 @@ Real DOM（真实DOM）是浏览器原生提供的，它表示当前页面的实
 
 ```js
 const element = {
-  element: 'ul',
-  props: { id: 'ulist' },
+  // 节点标签名
+  tagName: 'ul',
+  // DOM属性,用一个对象存储键值对
+  props: {
+    id: 'list',
+  },
+  // 该节点的子节点
   children: [
-    { element: 'li', props: { id: 'first' }, children: ['这是第一个List元素'] },
-    { element: 'li', props: { id: 'second' }, children: ['这是第二个List元素'] },
+    { tagName: 'li', props: { class: 'item' }, children: ['Item 1'] },
+    { tagName: 'li', props: { class: 'item' }, children: ['Item 2'] },
+    { tagName: 'li', props: { class: 'item' }, children: ['Item 3'] },
   ],
 };
 ```
 
+对应的 DOM 树中的 HTML 写法：
+
+```html
+<ul id="list">
+  <li class="item">Item1</li>
+  <li class="item">Item2</li>
+  <li class="item">Item3</li>
+</ul>
+```
+
 在浏览器控制台显示的 Virtual DOM 结构:
 
-![image-20240410143428873](../images/image-20240410143428873.png)
+![image-20240410143428873](../../images/image-20240410143428873.png)
 
 
 
-### **为什么不直接操作 Real dom, 而是使用 Virtual dom**？
+
+
+##  **Diff 算法**
+
+### **思路**
+
+
+
+### 实现流程
+
+1. **生成新的虚拟 DOM**：当组件的状态或属性发生变化时，React 会重新调用组件的渲染方法，生成一个新的虚拟 DOM 树。
+2. **分层比较**：React 会将虚拟 DOM 树按层级（即深度优先遍历的顺序）进行比较，而不是对整个树进行一次性比较。
+3. **同层节点比较**：React 会对新旧两个虚拟 DOM 树的同层节点进行比较。如果节点顺序或数量有变化，React 会采用特定的算法来找出最小的操作集合，使得旧的 DOM 树能够转变为新的 DOM 树。
+4. **节点类型与属性比较**：对于每个变化的节点，React 会比较其类型和属性。如果节点类型不同，React 会直接删除旧的 DOM 节点并创建新的 DOM 节点。如果节点类型相同但属性有变化，React 会仅更新变化的属性。
+5. **子节点比较**：对于节点的子节点，React 会采用一种称为“key”的机制来优化比较过程。如果子节点有唯一的 `key` 属性，React 可以更高效地识别出哪些子节点是新增的、哪些子节点是删除的、哪些子节点是移动的。这样，即使子节点的顺序发生了变化，React 也可以只进行必要的 DOM 操作，而不是重新渲染整个子节点列表。
+6. **应用 DOM 操作**：一旦找出了虚拟 DOM 树之间的差异，React 就会将这些差异应用到实际的 DOM 上。这通常包括添加、更新或删除 DOM 节点，以及修改节点的属性。
+7. **更新完成**：一旦 DOM 更新完成，React 会触发相应的生命周期方法或钩子（如 `componentDidUpdate` 或 `useEffect`），以便开发者可以执行更新后的逻辑。
+
+
+
+
+
+## **为什么不直接操作 Real dom, 而是使用 Virtual dom**？
 
 1. **性能优化**：
 

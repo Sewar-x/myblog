@@ -25,7 +25,8 @@ export default [ // 导航栏配置
         text: '框架和源码分析',
         ariaLabel: '框架和源码分析',
         children: [
-            { text: 'Vue 专题', link: '/article/vue/Vue2原理和源码分析.md' },
+            { text: 'Vue2 专题', link: '/article/vue2/Vue2原理和源码分析.md' },
+            { text: 'Vue3 专题', link: '/article/vue3/Vue3基础.md' },
             { text: 'React 专题', link: '/article/React/React基础.md' },
             { text: 'Vue Vs React', link: '/article/React/VueVsReact.md' },
             { text: 'webpack 专题', link: '/article/webpack/webpack构建原理.md' },
@@ -71,7 +72,7 @@ export default [ // 导航栏配置
             { text: '前端渲染架构', link: '/article/前端工程化/前端渲染架构.md' },
             { text: '前端架构实践', link: '/article/前端工程化/前端架构实践.md' },
             { text: '自动构建和部署', link: '/article/项目部署/自动构建和部署.md' },
-            { text: '前端组件化', link: '/article/vue/Vue组件基础.md' },
+            { text: '前端组件化', link: '/article/前端组件化/Vue组件基础.md' },
             { text: '前端模块化', link: '/article/前端工程化/前端模块化.md' },
             { text: '包管理器', link: '/article/npm/npm与pnpm.md' },
             { text: 'Git', link: '/article/git/' }
