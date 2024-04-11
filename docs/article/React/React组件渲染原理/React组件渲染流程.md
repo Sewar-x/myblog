@@ -17,9 +17,33 @@ tag:
 
 # **组件渲染流程**
 
+![image-20240410143142963](../../images/image-20240410143142963.png)
+
+1. **开发者**：这是整个流程的起点，开发者使用 React 编写应用程序的 JSX 代码。
+
+2. **编写 JSX 代码**：开发者在开发过程中使用 JSX 语法来描述 UI 组件的结构和外观。
+
+3. **Babel 编译**：开发者编写的 JSX 代码通过 Babel 进行编译。Babel 是一个 JavaScript 编译器，它可以将现代 JavaScript 代码以及 JSX 转换为浏览器能够理解的 JavaScript 代码。
+
+4. **React.createElement 调用**：Babel 将 JSX 代码转换为 `React.createElement` 方法调用。这个方法是 React 用来创建虚拟 DOM 节点的核心方法。
+
+5. **ReactElement 调用**：`React.createElement` 方法生成的是 ReactElement 对象，这些对象代表了虚拟 DOM 中的节点。
+
+6. **作为参数处理**：ReactElement 对象被作为参数传递给 React 的渲染处理流程。
+
+7. **虚拟 DOM 渲染**：React 使用虚拟 DOM 来提高应用性能。虚拟 DOM 是真实 DOM 的一个轻量级描述，React 通过比较虚拟 DOM 来计算出最小的更新操作，从而高效地更新真实 DOM。
+
+8. **ReactDOM.render()**：这是 React 将虚拟 DOM 转换为真实 DOM 的方法。`ReactDOM.render(元素, 容器)` 接受一个 ReactElement 和一个 DOM 节点作为参数，它会将 ReactElement 渲染到指定的容器中。
+
+9. **真实 DOM**：最终，React 通过 `render` 方法将虚拟 DOM 更新到真实 DOM 上，从而在浏览器中展示出开发者编写的 UI 界面。
+
+
+
+
+
 ## **组件初始化**
 
-![image-20240410143142963](../../images/image-20240410143142963.png)
+
 
 1. **编写 JSX 组件实例**：
 
