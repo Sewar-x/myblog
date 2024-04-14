@@ -19,23 +19,32 @@ tag:
 
 ![image-20240410143142963](../../images/image-20240410143142963.png)
 
-1. **开发者**：这是整个流程的起点，开发者使用 React 编写应用程序的 JSX 代码。
+1. **开发者编写 JSX 代码**：
+   - 开发者使用 JSX 语法编写用户界面的代码。
+   - JSX 允许开发者在 JavaScript 代码中编写类似 HTML 的结构，从而创建 React 元素和组件。
 
-2. **编写 JSX 代码**：开发者在开发过程中使用 JSX 语法来描述 UI 组件的结构和外观。
+2. **Babel 编译**：
+   - JSX 代码需要被转换成浏览器可以理解的 JavaScript 代码。
+   - Babel 是一个 JavaScript 编译器，它可以将现代 JavaScript 代码和 JSX 转换为向后兼容的 JavaScript 代码。
+   - Babel 会将 JSX 标签转换为 `React.createElement` 调用。例如，`<div>Hello, world!</div>` 会被转换成 `React.createElement('div', null, 'Hello, world!')`。
+3. **React.createElement 调用**：
+   - 转换后的 JavaScript 代码会使用 `React.createElement` 方法来创建 React 元素。这些元素是描述 UI 树的 JavaScript 对象。
+4. **ReactElement 调用**：
+   - `React.createElement` 方法返回一个 `ReactElement` 实例，它是 React 元素的内部表示。
+   - `ReactElement` 包含了创建真实 DOM 节点所需的所有信息，如标签名、属性和子元素。
+5. **作为参数处理**：
+   - `ReactElement` 实例会被作为参数传递给 React 的渲染系统。React 会使用这些元素来构建虚拟 DOM。
+6. **“虚拟 DOM”**：
+   - 虚拟 DOM 是一个轻量级的 JavaScript 对象，它表示真实 DOM 的状态。
+   - React 使用虚拟 DOM 来提高性能，因为它允许 React 在内存中进行 UI 更新，而不是直接操作真实 DOM。
+7. **ReactDoM.render()**：
+   - `ReactDOM.render()` 方法是将虚拟 DOM 渲染到真实 DOM 的入口点。这个方法接收一个 `ReactElement` 和一个 DOM 节点的选择器或引用作为参数。
+   - React 会使用 Diff 算法比较新旧虚拟 DOM 树的差异，并计算出最小的更新操作。
+8. **真实 DOM 传入**：
+   - 根据计算出的更新操作，React 会更新传入的 DOM 节点。这个过程可能包括创建新的 DOM 节点、修改现有节点的属性或样式、删除不再需要的节点等。
+   - 最终，更新后的真实 DOM 会反映在浏览器中，用户可以看到更新后的界面。
 
-3. **Babel 编译**：开发者编写的 JSX 代码通过 Babel 进行编译。Babel 是一个 JavaScript 编译器，它可以将现代 JavaScript 代码以及 JSX 转换为浏览器能够理解的 JavaScript 代码。
-
-4. **React.createElement 调用**：Babel 将 JSX 代码转换为 `React.createElement` 方法调用。这个方法是 React 用来创建虚拟 DOM 节点的核心方法。
-
-5. **ReactElement 调用**：`React.createElement` 方法生成的是 ReactElement 对象，这些对象代表了虚拟 DOM 中的节点。
-
-6. **作为参数处理**：ReactElement 对象被作为参数传递给 React 的渲染处理流程。
-
-7. **虚拟 DOM 渲染**：React 使用虚拟 DOM 来提高应用性能。虚拟 DOM 是真实 DOM 的一个轻量级描述，React 通过比较虚拟 DOM 来计算出最小的更新操作，从而高效地更新真实 DOM。
-
-8. **ReactDOM.render()**：这是 React 将虚拟 DOM 转换为真实 DOM 的方法。`ReactDOM.render(元素, 容器)` 接受一个 ReactElement 和一个 DOM 节点作为参数，它会将 ReactElement 渲染到指定的容器中。
-
-9. **真实 DOM**：最终，React 通过 `render` 方法将虚拟 DOM 更新到真实 DOM 上，从而在浏览器中展示出开发者编写的 UI 界面。
+整个流程展示了从编写 JSX 代码到最终渲染在浏览器中的真实 DOM 的完整过程。通过这个过程，React 能够在保持性能的同时，提供一种简单直观的方式来构建和更新用户界面。
 
 
 

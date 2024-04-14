@@ -1,5 +1,6 @@
 ---
 star: false
+order: 1
 category:
   - React
 tag:
@@ -306,7 +307,64 @@ ReactDOM.render(
 );
 ```
 
-**JSX 规则：**
+### React JSX 本质是什么,它和 JS 之间是什么关系
+
+React JSX（JavaScript XML）是一种 JavaScript 的语法扩展，它允许你在 JavaScript 代码中写类似 HTML 的代码。
+
+JSX 本质上是一种结构化的语法，用于描述 UI 组件的树形结构。
+
+它不是真正的 HTML，而是一种标记语言，可以被转换成相应的 JavaScript 代码。
+
+### JSX 和 JS 的关系
+
+1. **语法糖**：
+   - JSX 可以被看作是 JavaScript 的一种语法糖，它提供了一种更加直观和声明式的方式来表达 UI。
+   - 尽管 JSX 看起来像是在 JavaScript 代码中混合了 HTML，但它最终会被转换成纯 JavaScript 代码，因此可以在任何支持 JavaScript 的环境中运行。
+2. **转换过程**：
+   - 在构建过程中，React 会使用 JSX 转换器（通常是一个 Babel 插件）将 JSX 代码转换成相应的 JavaScript 函数调用。
+   - 这些函数调用会创建 JavaScript 对象，这些对象代表了 UI 的结构，即虚拟 DOM。
+3. **组件描述**：
+   - 使用 JSX，开发者可以定义组件的界面结构，包括元素类型、属性和子元素。
+   - JSX 表达式可以包含 JavaScript 表达式，例如变量、函数调用和条件语句，这使得 UI 的动态创建成为可能。
+4. **虚拟 DOM**：
+   - JSX 描述的 UI 结构会被用来构建虚拟 DOM，这是 React 性能优化策略的核心。
+   - 虚拟 DOM 是一种轻量级的 JavaScript 对象，它代表了真实 DOM 的状态。React 使用虚拟 DOM 来计算最小的更新操作，然后高效地更新到真实 DOM。
+5. **声明式编程**：
+   - JSX 使得开发者能够以声明式的方式编写 UI 代码，即描述“UI 应该是什么样”，而不是“如何让 UI 变成这样”。
+   - 这种编程范式简化了 UI 的管理和更新，因为状态变化时，React 会自动处理 UI 的更新。
+6. **集成性**：
+   - JSX 可以与 JavaScript 代码无缝集成，使得逻辑和 UI 可以紧密地结合在一起。
+   - 这种集成性是 React 组件模型的一部分，它允许开发者将 UI 和与之相关的逻辑封装在单个组件中。
+
+###  JSX 和 React 运行机制之间的联系
+
+1. **虚拟 DOM 的创建**：
+   - JSX 使得开发者能够以一种直观的方式描述 UI。
+   - 当 React 应用运行时，JSX 会被转换成对应的 JavaScript 对象，这些对象构成了虚拟 DOM 的基础。
+   - 虚拟 DOM 是一个轻量级的 DOM 树表示，它允许 React 高效地更新 UI。
+2. **组件化结构**：
+   - JSX 支持组件化的开发方式，允许开发者将 UI 划分为独立的、可复用的组件。
+   - React 的运行机制利用这些组件来构建虚拟 DOM，并且在状态或属性变化时，只更新变化的部分，而不是重新渲染整个应用。
+3. **声明式编程**：
+   - JSX 采用声明式语法，开发者只需描述 UI 的最终状态，而不是如何达到这个状态。
+   - React 的运行机制通过 Diff 算法计算出新旧虚拟 DOM 之间的差异，并应用最小的更新操作到真实 DOM，从而实现高效的 UI 更新。
+4. **响应式更新**：
+   - JSX 中的 JavaScript 表达式可以动态地插入数据和逻辑，使得 UI 能够响应数据的变化。
+   - React 的运行机制通过监听状态和属性的变化，触发组件的重新渲染，确保 UI 总是反映当前的状态。
+5. **性能优化**：
+   - JSX 允许开发者编写高性能的 UI 代码，因为它支持元素的复用和条件渲染。
+   - React 的运行机制通过虚拟 DOM 和组件的生命周期方法来优化性能，例如，使用 `shouldComponentUpdate` 来避免不必要的渲染。
+6. **跨平台渲染**：
+   - JSX 语法不依赖于特定的平台，使得 React 能够在不同的环境下运行，如 Web、iOS、Android 等。
+   - React 的运行机制支持跨平台渲染，通过特定的平台适配器（如 `react-dom`、`react-native`）来将虚拟 DOM 映射到不同平台上的真实 DOM。
+
+总结来说，JSX 是 React 运行机制的一部分，它提供了一种直观的方式来描述 UI，而 React 的运行机制则负责将这些描述转换为实际的 UI 并进行高效的更新。
+
+JSX 和 React 运行机制共同构成了 React 框架的核心，使得开发者能够以一种简单、高效且可预测的方式来构建复杂的用户界面。
+
+
+
+### **JSX 规则**
 
 * 只能返回一个根元素 
 
@@ -1730,130 +1788,6 @@ React的核心API主要包括用于创建组件、管理状态、处理生命周
 这些API提供了构建React应用所需的基本功能，从创建和渲染组件，到管理状态和处理副作用，再到处理用户输入和生命周期事件。你可以根据具体的应用需求选择使用哪些API。
 
 
-
-## **生命周期**
-
-React的生命周期是指React组件从创建到销毁的整个过程，这个过程可以分为三个阶段：
-
-- 挂载阶段（Mounting）
-  - `constructor`
-  - `static getDerivedStateFromProps`
-  - `render`
-  - `componentDidMount`
-- 更新阶段（Updating）
-  - `static getDerivedStateFromProps`
-  - `shouldComponentUpdate`
-  - `render`
-  - `getSnapshotBeforeUpdate`
-  - `componentDidUpdate`
-- 卸载阶段（Unmounting）
-  - `componentWillUnmount`
-
-从纵向划分，可以划分为 Render 阶段和 Commit 阶段。
-
-- Render 阶段：纯净且不包含副作用，可能会被 React 暂停、中止或重新启动
-- Commit 阶段：可以使用 DOM，运行副作用，安排更新
-
-更清晰了解生命周期的阶段图表 [React Lifecycle Methods Diagram](http://projects.wojtekmaj.pl/react-lifecycle-methods-diagram/)
-
-![React Lifecycle Methods Diagram](../images/react组件生命周期.png)
-
-### **挂载阶段（Mounting）**
-
-**在挂载阶段，React组件被创建并插入到DOM中**
-
-这个阶段包含以下几个方法：
-
-- **constructor(props)**：构造函数，用于**初始化组件的状态和绑定事件处理函数**。在这个阶段，你可以通过`this.state`来定义组件的初始状态。
-- **[static getDerivedStateFromProps(props, state)](https://react.docschina.org/reference/react/Component#static-getderivedstatefromprops)**：这是一个静态方法，用于**在组件实例化后和接收新的props之前，根据props来更新state**。注意，这个方法在React 16.3版本后引入，用于替代`componentWillReceiveProps`。
-- **render()**：用于**根据组件的props和state来渲染组件的UI**。这个方法必须是一个纯函数，也就是说，对于相同的props和state，它应该总是返回相同的结果。
-- **componentDidMount()**：**在组件挂载后立即调用，此时组件已经被插入到DOM中**。你可以在这个方法中进行网络请求、订阅事件等初始化操作。
-
-**挂载阶段组件生命周期图:**
-
-<img src="../images/image-20240410135130057.png" alt="image-20240410135130057" style="zoom: 50%;" />
-
-#### constructor
-
-📜 **语法**：`constructor(props, context, updater)`
-
-- `props`：继承 React.Component 的属性方法，它是不可变的 read-only
-- `context`：全局上下文。
-- `updater`:包含一些更新方法的对象
-  - `this.setState` 最终调用的是 `this.updater.enqueueSetState`
-  - `this.forceUpdate` 最终调用的是 `this.updater.enqueueForceUpdate` 方法，所以这些 API 更多是 React 调用使用，暴露出来以备开发者不时之需。
-
-⏱ **触发时机**：在组件初始化的时候触发一次。
-
-实例过程中自动调用的方法，在方法内部通过`super`关键字获取来自父组件的`props`；
-
-在该方法中，通常的操作为初始化`state`状态或者在`this`上挂载方法：
-
-```react
-class MyComponent extends React.Component {  
-  constructor(props) {  //初始化组件的状态和绑定事件处理函数
-    super(props);  //通过`super`关键字获取来自父组件的`props`
-    this.state = {  
-      // 使用props来初始化状态（如果需要的话）  
-      value: props.initialValue,  
-    };  
-    this.handleClick = this.handleClick.bind(this); //在`this`上挂载方法
-  }  
-  
-  render() {  
-    // ...  
-  }  
-}
-```
-
-在上面的示例中，构造函数首先调用`super(props)`来确保`this.props`的可用性，然后使用`this.props`来初始化组件的状态。如果不调用`super(props)`，那么`this.props`将会是`undefined`，导致状态初始化失败。
-
-> **在构造函数调用 super 并将 props 作为参数传入的作用?**
-
-在React的类组件中，构造函数（constructor）是一个特殊的方法，用于初始化组件的状态（state）和绑定事件处理函数。在构造函数中调用`super(props)`是一个必要的步骤，它有几个重要的作用：
-
-1. **继承父类属性**：在JavaScript中，类是通过继承机制来工作的。`super`关键字用于调用父类（在这里是`React.Component`）的构造函数。通过将`props`作为参数传递给`super()`，我们确保父类的构造函数能够正确执行，并且组件实例能够访问到`this.props`。
-2. **确保props的可用性**：在类组件中，`props`是通过组件的实例来访问的（即`this.props`）。**如果在构造函数中不调用`super(props)`，那么`this.props`将会是`undefined`，因为构造函数中的`this`指向的是当前组件的实例，而实例的`props`属性是由父类（`React.Component`）的构造函数来初始化的**。
-3. **遵循React的生命周期**：React组件的生命周期是严格定义的，并且依赖于特定的方法和步骤来正确执行。调用`super(props)`是组件生命周期中的一个关键步骤，它确保了组件实例能够按照React的预期来工作。
-4. **状态初始化**：虽然`super(props)`主要用于确保`props`的可用性，但构造函数通常也用于初始化组件的状态。在调用`super(props)`之后，你可以安全地访问`this.props`，并且可以使用它来初始化状态（如果需要的话）。
-
-#### `static getDerivedStateFromProps(props, state)` 
-
-> 官方文档：[Component – React 中文文档 (docschina.org)](https://react.docschina.org/reference/react/Component#static-getderivedstatefromprops)
-
-如果你定义了 `static getDerivedStateFromProps`，React 会**在初始挂载和后续更新时调用 [`render`](https://react.docschina.org/reference/react/Component#render) 之前调用它**。它应该返回一个对象来更新 state，或者返回 `null` 就不更新任何内容。
-
-
-
-### **更新阶段（Updating）**
-
-当组件的props或state发生变化时，组件会进入更新阶段。这个阶段包含以下几个方法：
-
-- **static getDerivedStateFromProps(props, state)**：在更新阶段也会调用这个方法，用于根据新的props来更新state。
-- **shouldComponentUpdate(nextProps, nextState)**：返回一个布尔值，决定是否根据新的props和state重新渲染组件。默认返回true，但你可以在这里实现自己的逻辑来避免不必要的渲染。
-- **render()**：根据新的props和state来重新渲染组件。
-- **getSnapshotBeforeUpdate(prevProps, prevState)**：在DOM更新之前被调用，它使你的组件能在可能更改的DOM上捕获一些信息（例如滚动位置）。此生命周期返回的任何值都将作为第三个参数传递给`componentDidUpdate()`。
-- **componentDidUpdate(prevProps, prevState, snapshot)**：在更新后立即调用，当组件的props或state更新后，可以在此进行DOM操作或网络请求等。
-
-**更新阶段组件生命周期图：**
-
-![image-20240410134952614](../images/image-20240410134952614.png)
-
-
-
-### **卸载阶段（Unmounting）**
-
-当组件不再需要，并且从DOM中移除时，会进入卸载阶段。这个阶段只有一个方法：
-
-- **componentWillUnmount()**：在组件卸载及销毁之前直接调用。你可以在这个方法中进行清理操作，如取消网络请求、移除事件监听器等。
-
-<img src="../images/image-20240410135350377.png" alt="image-20240410135350377" style="zoom: 50%;" />
-
-需要注意的是，React 16.3版本之后，一些旧的生命周期方法（如`componentWillMount`、`componentWillReceiveProps`和`componentWillUpdate`）被认为是不安全的，并且可能在未来的版本中被移除。因此，建议开发者使用新的生命周期方法（如`getDerivedStateFromProps`和`getSnapshotBeforeUpdate`）来替代这些旧方法。同时，React团队还引入了Hooks API，使得组件逻辑可以更加独立和可重用，进一步简化了组件的生命周期管理。
-
-**参考资料**
-
-[生命周期 - React Guidebook (tsejx.github.io)](https://tsejx.github.io/react-guidebook/foundation/main-concepts/lifecycle)
 
 ---
 

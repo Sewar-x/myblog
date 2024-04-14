@@ -17,6 +17,10 @@ tag:
 
 
 
+
+
+## **Babel 编译结果**
+
 Babel 可以通过特定的插件（如 `@babel/plugin-transform-react-jsx`）将 JSX 语法转换为 `React.createElement` 调用，例如：
 
 ```jsx
@@ -25,6 +29,8 @@ Babel 可以通过特定的插件（如 `@babel/plugin-transform-react-jsx`）�
   <Hello />
 </div>
 ```
+
+JSX  通过 Babel 编译后会被编译成 `React.createElement()`，该方法将返回一个叫做 `React Element` 的 JS 对象。
 
 会被`bebel`转化成如下：
 
@@ -40,9 +46,33 @@ React.createElement(
 );
 ```
 
+### **`React.createElement` 函数分析**
+
+<img src="../../images/image-20240414111629078.png" alt="image-20240414111629078" style="zoom:50%;" />
+
+**`React.createElement` 逻辑**
+
+<img src="../../images/image-20240414112001897.png" alt="image-20240414112001897" style="zoom:50%;" />
+
+`React.createElement` 主要对参数进行格式化，最后实现 ReactElement:
+
+<img src="../../images/image-20240414112200156.png" alt="image-20240414112200156" style="zoom:50%;" />
 
 
-## 编译过程
+
+
+
+
+
+> 为什么不直接使用 `React.createElement()` 来创建 React 的 元素？
+
+因为直接使用 `React.createElement()` 代码会使代码结构混乱，编写代码复杂化
+
+如下图，左侧是使用  `React.createElement()` 编写的代码，该代码复杂且混乱
+
+![image-20240414111344958](../../images/image-20240414111344958.png)
+
+## Babel 编译 JSX 过程
 
 Babel 编译 JSX ，将 JSX 语法转换为浏览器可以理解的 JavaScript 代码。
 

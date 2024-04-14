@@ -1,7 +1,7 @@
 ---
 
 star: true
-
+order: 3
 category:
 
   - React
@@ -12,13 +12,7 @@ tag:
 
 ---
 
-
-
 # React Fiber
-
-
-
-
 
 ## **提出背景**
 
