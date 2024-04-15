@@ -14,34 +14,139 @@ tag:
 
 # **生命周期**
 
-React的生命周期是指React组件从创建到销毁的整个过程，这个过程可以分为三个阶段：
+## React15 的生命周期
 
-- 挂载阶段（Mounting）
-  - `constructor`
-  - `static getDerivedStateFromProps`
-  - `render`
-  - `componentDidMount`
-- 更新阶段（Updating）
-  - `static getDerivedStateFromProps`
-  - `shouldComponentUpdate`
-  - `render`
-  - `getSnapshotBeforeUpdate`
-  - `componentDidUpdate`
-- 卸载阶段（Unmounting）
-  - `componentWillUnmount`
+- `constructor()`
+- `componentWillReceiveProps()`
+- `shouldComponentUpdate()`
+- `componentWillMount()`
+- `componentWillUpdate()`
+- `componentDidUpdate()`
+- `componentDidMount()`
+- `render()`
+- ``componentWillUnmount()`
+
+![image-20240415084336213](../images/image-20240415084336213.png)
+
+
+
+
+
+React 的生命周期是指React组件从创建到销毁的整个过程，这个过程可以分为三个阶段：
+
+* 挂载阶段（Mounting）
+* 更新阶段（Updating）
+* 卸载阶段（Unmounting）
+
+### 组件挂载 (Mounting)
+
+**constructor()**：
+
+- 组件的构造函数，在组件实例化时调用。
+- 用于初始化组件的状态（`this.state`）和绑定事件处理函数。
+
+**componentWillMount()**：
+
+- 在组件挂载到 DOM 之前调用。
+- 用于执行挂载前的准备工作，如设置初始状态或订阅服务。
+
+**render()**：
+
+- 组件的渲染方法，根据组件的状态和属性生成 React 元素。
+- 必须返回一个 React 元素或 null，表示组件的 UI 结构。
+- render 方法在执行过程中不会操作真实 DOM，它的职能是把需要渲染的内容返回出来。
+
+**componentDidMount()**：
+
+- 在组件挂载到 DOM 后调用。渲染结束后触发。
+- 用于执行真实 DOM 操作、发起网络请求或添加事件监听器等。
+
+### 组件更新 (Updating)
+
+<img src="../images/image-20240415095832041.png" alt="image-20240415095832041" style="zoom:67%;" />
+
+**componentWillReceiveProps()**：
+
+- 当组件接收到新的属性（props）时调用。
+- 用于处理属性变化前的准备工作，如更新组件状态。
+- **`componentWillReceiveProps()` 并不是由 Props 的变化触发的，而是由父组件的更新触发的**。如果父组件导致组件重新渲染，即使 Props 没有更改，也会调用该方法。如果只想处理更改，请确保进行当前值与变化值的比较。
+
+**shouldComponentUpdate(nextProps,nextState)**：
+
+- 在组件更新之前调用，用于决定组件是否需要重新渲染。
+- 返回布尔值，如果返回 `false`，则组件跳过更新。
+
+**componentWillUpdate()**：
+
+- 在组件接收到新的属性或状态变化并准备重新渲染之前调用。
+- 用于执行更新前的准备工作，如数据获取。
+
+**render()**：
+
+- 与挂载阶段相同，每次组件更新时都会调用。
+- 根据新的状态和属性生成新的 React 元素。
+
+**componentDidUpdate()**：
+
+- 在组件更新到 DOM 后调用。
+- 用于执行更新后的副作用，如根据 DOM 变化执行操作。
+
+
+
+### 组件卸载 (Unmounting)
+
+<img src="../images/image-20240415103057995.png" alt="image-20240415103057995" style="zoom:67%;" />
+
+**componentWillUnmount()**：
+
+- 在组件从 DOM 卸载和销毁之前调用。
+- 用于执行清理工作，如取消网络请求、清除定时器或移除事件监听器。
+- 触发条件：
+  - 组件在父组件中被移除了；
+  - 组件中设置了 key 属性，父组件在 render 的过程中，发现 key 值和上一次不一致；
+
+## **React16+ 生命周期**
+
+![React Lifecycle Methods Diagram](../images/react组件生命周期.png)
+
+> 更清晰了解生命周期的阶段图表 [React Lifecycle Methods Diagram](http://projects.wojtekmaj.pl/react-lifecycle-methods-diagram/)
+>
+
+
+
+各生命周期包含的生命周期方法：
+
+**挂载阶段（Mounting）**
+
+- `constructor`
+- `static getDerivedStateFromProps`
+- `render`
+- `componentDidMount`
+
+**更新阶段（Updating）**
+
+- `static getDerivedStateFromProps`
+- `shouldComponentUpdate`
+- `render`
+- `getSnapshotBeforeUpdate`
+- `componentDidUpdate`
+
+**卸载阶段（Unmounting）**
+
+- `componentWillUnmount`
 
 从纵向划分，可以划分为 Render 阶段和 Commit 阶段。
 
 - Render 阶段：纯净且不包含副作用，可能会被 React 暂停、中止或重新启动
 - Commit 阶段：可以使用 DOM，运行副作用，安排更新
 
-更清晰了解生命周期的阶段图表 [React Lifecycle Methods Diagram](http://projects.wojtekmaj.pl/react-lifecycle-methods-diagram/)
 
-![React Lifecycle Methods Diagram](../images/react组件生命周期.png)
 
-## **挂载阶段（Mounting）**
+### **挂载阶段（Mounting）**
 
 **在挂载阶段，React组件被创建并插入到DOM中**
+
+<img src="../images/image-20240410135130057.png" alt="image-20240410135130057" style="zoom: 50%;" />
 
 这个阶段包含以下几个方法：
 
@@ -50,11 +155,9 @@ React的生命周期是指React组件从创建到销毁的整个过程，这个�
 - **render()**：用于**根据组件的props和state来渲染组件的UI**。这个方法必须是一个纯函数，也就是说，对于相同的props和state，它应该总是返回相同的结果。
 - **componentDidMount()**：**在组件挂载后立即调用，此时组件已经被插入到DOM中**。你可以在这个方法中进行网络请求、订阅事件等初始化操作。
 
-### **挂载阶段组件生命周期图**
 
-<img src="../images/image-20240410135130057.png" alt="image-20240410135130057" style="zoom: 50%;" />
 
-### constructor
+#### constructor
 
 📜 **语法**：`constructor(props, context, updater)`
 
@@ -98,7 +201,7 @@ class MyComponent extends React.Component {
 3. **遵循React的生命周期**：React组件的生命周期是严格定义的，并且依赖于特定的方法和步骤来正确执行。调用`super(props)`是组件生命周期中的一个关键步骤，它确保了组件实例能够按照React的预期来工作。
 4. **状态初始化**：虽然`super(props)`主要用于确保`props`的可用性，但构造函数通常也用于初始化组件的状态。在调用`super(props)`之后，你可以安全地访问`this.props`，并且可以使用它来初始化状态（如果需要的话）。
 
-### `static getDerivedStateFromProps(props, state)` 
+#### `static getDerivedStateFromProps(props, state)` 
 
 > 官方文档：[Component – React 中文文档 (docschina.org)](https://react.docschina.org/reference/react/Component#static-getderivedstatefromprops)
 
@@ -106,7 +209,7 @@ class MyComponent extends React.Component {
 
 
 
-## **更新阶段（Updating）**
+### **更新阶段（Updating）**
 
 当组件的props或state发生变化时，组件会进入更新阶段。这个阶段包含以下几个方法：
 
@@ -122,7 +225,7 @@ class MyComponent extends React.Component {
 
 
 
-## **卸载阶段（Unmounting）**
+### **卸载阶段（Unmounting）**
 
 当组件不再需要，并且从DOM中移除时，会进入卸载阶段。这个阶段只有一个方法：
 

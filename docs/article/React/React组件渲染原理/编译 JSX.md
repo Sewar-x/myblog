@@ -52,9 +52,9 @@ React.createElement(
 
 **`React.createElement` 逻辑**
 
-<img src="../../images/image-20240414112001897.png" alt="image-20240414112001897" style="zoom:50%;" />
+<img src="../../images/image-20240414112001897.png" alt="image-20240414112001897" style="zoom:50%;" />  
 
-`React.createElement` 主要对参数进行格式化，最后实现 ReactElement:
+**`React.createElement` 主要对参数进行格式化**，最后实现 ReactElement:
 
 <img src="../../images/image-20240414112200156.png" alt="image-20240414112200156" style="zoom:50%;" />
 
