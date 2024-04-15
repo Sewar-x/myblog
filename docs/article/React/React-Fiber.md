@@ -111,7 +111,7 @@ Fiber 节点除了包含指向其他节点的指针外，还包含组件的类�
 ::: normal-demo 演示
 
 ```js
-type Fiber = {
+{
   // 用于标记fiber的WorkTag类型，主要表示当前fiber代表的组件类型如FunctionComponent、ClassComponent等
   tag: WorkTag,
   // ReactElement里面的key
@@ -251,6 +251,14 @@ React的架构主要由三个关键部分组成：调度器（Scheduler）、协
 
 ## **工作流程**
 
+Fiber 架构的重要特征就是可以被打断的异步渲染模式，根据“能否被打断”这一标准 React 16 的生命周期被划分为了渲染阶段（ render） 和提交阶段（commit ）两个阶段。
+
+提交阶段（commit ）又被细分为 Pre-commit 阶段和 Commit 阶段。
+
+**render 阶段在执行过程中允许被打断，而 commit 阶段则总是同步执行的。**
+
+![image-20240415145004639](../images/image-20240415145004639.png)
+
 ### **三个阶段**
 
 React的工作流程包括计算阶段、渲染阶段和提交阶段。
@@ -262,14 +270,19 @@ React的工作流程包括计算阶段、渲染阶段和提交阶段。
 
 **渲染阶段**:
 
+* 纯净且没有副作用，可以被 React 暂停，中断或重新开始。这就导致 render 阶段的生命周期都是有可能被重复执行的。
 * React会根据工作单元的类型和优先级，执行相应的渲染操作。
 * 渲染阶段重点在于生成EffectList，即收集并准备需要应用到DOM的更改。
 
 **提交阶段**:
 
-* React会将更新后的虚拟DOM节点映射到实际的DOM，更新用户界面。
+* 提交阶段（commit ）又被细分为 Pre-commit 阶段和 Commit 阶段。
+* **Pre-commit 阶段**：可以读取 DOM;
+*  **Commit 阶段**：
+  * 可以操作 DOM，运行副作用和更新队列；
+  *  React会将更新后的虚拟DOM节点映射到实际的DOM，更新用户界面。
 
-  
+
 
 ### **大致工作步骤**
 

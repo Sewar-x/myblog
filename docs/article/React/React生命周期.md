@@ -24,7 +24,7 @@ tag:
 - `componentDidUpdate()`
 - `componentDidMount()`
 - `render()`
-- ``componentWillUnmount()`
+- `componentWillUnmount()`
 
 ![image-20240415084336213](../images/image-20240415084336213.png)
 
@@ -205,13 +205,49 @@ class MyComponent extends React.Component {
 
 > 官方文档：[Component – React 中文文档 (docschina.org)](https://react.docschina.org/reference/react/Component#static-getderivedstatefromprops)
 
-如果你定义了 `static getDerivedStateFromProps`，React 会**在初始挂载和后续更新时调用 [`render`](https://react.docschina.org/reference/react/Component#render) 之前调用它**。它应该返回一个对象来更新 state，或者返回 `null` 就不更新任何内容。
+如果你定义了 `static getDerivedStateFromProps`，React 会**在初始挂载和后续更新时调用 [`render`](https://react.docschina.org/reference/react/Component#render) 之前调用它**。
 
+它应该返回一个对象来更新 state，或者返回 `null` 就不更新任何内容。
 
+该方法有且仅有一个用途: **使用 props 来派生/更新 state**；
+
+**参数**
+
+- `props`：组件即将用来渲染的下一个 props。
+- `state`：组件即将渲染的下一个 state。
+
+**返回值**
+
+`static getDerivedStateFromProps` 返回一个**对象**来更新 state，或返回 `null` 不更新任何内容。
+
+**注意**
+
+在更新和挂载两个阶段都会触发。
+
+这是一个静态方法，因此在方法内部访问不了组件的 `this`，既此方法无权访问组件实例。
+
+getDerivedStateFromProps 方法对 state 的更新动作并非“覆盖”式的更新，而是针对某个属性的定向更新。
+
+**QA**
+
+> 为什么要用 getDerivedStateFromProps 代替 componentWillReceiveProps?
+
+与componentDidUpdate 一起，这个新的生命周期涵盖过FcomponentWillReceiveProps的所有用例。 --React官方
+
+* getDerivedStateFromProps是作为一个试图代替 componentWillReceiveProps 的API 而出现的;
+* getDerivedStateFromProps 不能完全和 componentWillReceiveProps 画等号;
+
+getDerivedStateFromProps 可以代替 componentWillReceiveProps 实现基于 props 派生 state，原则上来说getDerivedStateFromProps 能做且只能做这一件事。getDerivedStateFromProps 相比componentWillReceiveProps 能实现的机制更专注， 因此 getDerivedStateFromProps 不能完全和 componentWillReceiveProps 画等号。
+
+该方法改变表明 React 16 在强制推行“只用 getDerivedStateFromProps 来完成 props 到state 的映射“，来确保生命周期的行为更加可控。
 
 ### **更新阶段（Updating）**
 
-当组件的props或state发生变化时，组件会进入更新阶段。这个阶段包含以下几个方法：
+**当组件的props或state发生变化时，组件会进入更新阶段**。
+
+![image-20240410134952614](../images/image-20240410134952614.png)
+
+这个阶段包含以下几个方法：
 
 - **static getDerivedStateFromProps(props, state)**：在更新阶段也会调用这个方法，用于根据新的props来更新state。
 - **shouldComponentUpdate(nextProps, nextState)**：返回一个布尔值，决定是否根据新的props和state重新渲染组件。默认返回true，但你可以在这里实现自己的逻辑来避免不必要的渲染。
@@ -219,11 +255,24 @@ class MyComponent extends React.Component {
 - **getSnapshotBeforeUpdate(prevProps, prevState)**：在DOM更新之前被调用，它使你的组件能在可能更改的DOM上捕获一些信息（例如滚动位置）。此生命周期返回的任何值都将作为第三个参数传递给`componentDidUpdate()`。
 - **componentDidUpdate(prevProps, prevState, snapshot)**：在更新后立即调用，当组件的props或state更新后，可以在此进行DOM操作或网络请求等。
 
-**更新阶段组件生命周期图：**
+#### `getSnapshotBeforeUpdate(prevProps, prevState)`
 
-![image-20240410134952614](../images/image-20240410134952614.png)
+> 官方文档：[Component – React 中文文档 (docschina.org)](https://react.docschina.org/reference/react/Component#getsnapshotbeforeupdate)
 
+如果你实现了 `getSnapshotBeforeUpdate`，React 会在 React 更新 DOM 之前时直接调用它。它使你的组件能够在 DOM 发生更改之前捕获一些信息（例如滚动的位置）。此生命周期方法返回的任何值都将作为参数传递给 [`componentDidUpdate`](https://react.docschina.org/reference/react/Component#componentdidupdate)。
 
+**参数**
+
+- `prevProps`：更新之前的 Props。`prevProps` 将会与 [`this.props`](https://react.docschina.org/reference/react/Component#props) 进行比较来确定发生了什么改变。
+- `prevState`：更新之前的 State。`prevState` 将会与 [`this.state`](https://react.docschina.org/reference/react/Component#state) 进行比较来确定发生了什么改变。
+
+**返回值**
+
+你应该返回你想要的任何类型的快照值，或者是 `null`。你返回的值将作为第三个参数传递给 [`componentDidUpdate`](https://react.docschina.org/reference/react/Component#componentdidupdate)。
+
+**注意**
+
+- 如果你定义了 [`shouldComponentUpdate`](https://react.docschina.org/reference/react/Component#shouldcomponentUpdate) 并返回了 `false`，则 `getSnapshotBeforeUpdate` 不会被调用。
 
 ### **卸载阶段（Unmounting）**
 
@@ -234,6 +283,32 @@ class MyComponent extends React.Component {
 <img src="../images/image-20240410135350377.png" alt="image-20240410135350377" style="zoom: 50%;" />
 
 需要注意的是，React 16.3版本之后，一些旧的生命周期方法（如`componentWillMount`、`componentWillReceiveProps`和`componentWillUpdate`）被认为是不安全的，并且可能在未来的版本中被移除。因此，建议开发者使用新的生命周期方法（如`getDerivedStateFromProps`和`getSnapshotBeforeUpdate`）来替代这些旧方法。同时，React团队还引入了Hooks API，使得组件逻辑可以更加独立和可重用，进一步简化了组件的生命周期管理。
+
+
+
+## React15 到16 废弃的生命周期
+
+- componentWillMount
+- componentWillUpdate
+- componentWillReceiveProps
+
+由于 React 渲染时render 阶段是允许暂停、终止和重启的，这就导致以上处于 render 阶段的生命周期都是有可能被重复执行！
+
+例如，你可以会在 componentWillMount 生命周期中执行以下操作：
+
+* setState()
+* fetch 发起异步请求
+* 操作真实 DOM
+
+以上操作会由于 React 渲染时render 阶段下，渲染可以暂停、终止和重启，导致一些 bug，如：在 componentWillMount 发起异步请求发起付款，由于 render 阶段里的生命周期都可以重复执行，在 componentWillxxx 被打断+重启多次后就会发出多个付款请求。
+
+此外，在 componentWillUpdate 和 componentWillReceiveProps 滥用 setState 容易导致渲染死循环。
+
+
+
+**总结**
+
+React 16 改造生命周期的主要动机是：为了配合 Fiber架构带来的异步渲染机制，针对生命周期中长期被滥用的部分推行了具有强制性的最佳实践，确保了 Fiber 机制下数据和视图的安全性同时也确保了生命周期方法的行为更加纯粹、可控、可预测。
 
 **参考资料**
 
