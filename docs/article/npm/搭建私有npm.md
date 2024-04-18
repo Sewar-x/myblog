@@ -98,7 +98,7 @@ docker ps -a
 # 进入容器
 docker exec -it  <容器名称或ID> /bin/sh
 # 以管理员身份进入容器 -u 0参数表示以管理员身份（即root用户）进入容器
-docker exec -u 0 -it <容器名称或ID> /bin/bash
+docker exec -u 0 -it <容器名称或ID> /bin/sh
 # 查找容器的 config.yaml 文件
 find /-name config.yaml
 # 进入容器中 config.yaml 目录，检查是否有 congfig.yaml 

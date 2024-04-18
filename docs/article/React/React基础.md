@@ -91,9 +91,18 @@ React定义组件主要有三种方式：
 
 #### 类组件（Class Components）
 
+类组件是面向对象编程思想的一种表征。
+
+类组件特性：
+
+- **封装**: 将一类属性和方法，“聚拢”到一个 Class 里
+- **继承**: 新的 Class 可以通过继承现有 Class实现对某一类属性和方法的复用
+
 类组件是使用ES6的类语法定义的React组件。
 
-它们**具有更完整的生命周期方法**，包括组件挂载、更新和卸载等各个阶段的方法。类组件也支持状态（state）和事件处理。
+它们**具有更完整的生命周期方法**，包括组件挂载、更新和卸载等各个阶段的方法。
+
+类组件也支持状态（state）和事件处理。
 
 **特征：**
 
@@ -166,11 +175,20 @@ function MyFunctionComponent() {
 |    **复杂性**    | 相对复杂，需要处理类的继承、this绑定等问题        | 简单直观，易于理解和维护                 |
 |     **性能**     | 可能略逊于函数组件，因为有类的开销                | 性能较好，没有类的开销                   |
 
-总的来说，类组件和函数组件在React中都有各自的应用场景：
-
 * 类组件提供了更完整的生命周期方法和状态管理，适用于复杂的组件逻辑；
 
 * 而函数组件则更加轻量、简单，并且随着Hooks的引入，其功能得到了极大的增强。
+
+* 类组件需要继承 class，函数组件不需要；
+
+* 类组件可以访问生命周期方法，函数组件不能；
+
+* 类组件中可以获取到实例化后的 this，并基于这个 this 做各种各样的事情，而函数组件不可以；
+
+* 类组件中可以定义并维护 state(状态)，而函数组件不可以；
+
+* 函数组件会捕获 render内部的状态，这是两类组件最大的不同；函数组件真正地把数据和渲染绑定到了一起；
+
 
 
 
@@ -417,6 +435,10 @@ function App() {
 
 
 ## **Prop**
+
+**单向数据流**
+
+当前组件的 state 以 props 的形式流动时，只能流向组件树中比自己层级更低的组件
 
 **摘要：**
 
@@ -897,6 +919,12 @@ class ExampleComponent extends React.Component {
 
 ### **useState 如何工作**
 
+**为什么需要 useState?**
+
+早期的函数组件相比于类组件其一大劣势是缺乏定义和维护 state 的能力，useState 正是这样一个能够为函数组件引入状态的 API
+
+**useState 是什么？**
+
 `useState` 是React原生的Hook，其本质是为函数组件提供状态管理的能力。
 
 具体来说，useState接受一个初始状态值作为参数，并返回一个数组，该数组包含两个元素：当前的状态值和一个用于更新该状态值的函数。
@@ -1156,419 +1184,6 @@ renderComponent();
 
 ---
 
-
-
-## **事件**
-
-**摘要**
-
-- 事件通常在你的组件 **内部** 定义。事件处理函数在组件内部定义，所以它们可以访问 props。
-- 名称以 `handle` 开头，后跟事件名称。
-- 可以将事件处理函数作为 props 传递给组件。
-- 事件处理函数 props 应该以 `on` 开头，后跟一个大写字母。
-- 事件处理函数不需要是 [纯函数](https://react.docschina.org/learn/keeping-components-pure)，因此它是用来 *更改* 某些值的绝佳位置 。
-- 事件冒泡与捕获：React 中的事件处理遵循与原生 DOM 事件相同的冒泡和捕获机制。你可以通过事件对象的 `stopPropagation` 和 `preventDefault` 方法来控制事件的行为。
-
-> 详细内容参考：[响应事件 – React 中文文档 (docschina.org)](https://react.docschina.org/learn/responding-to-events)
-
-### **函数组件事件**
-
-````react
-export default function Button() {
-  function handleClick() {
-    alert('你点击了我！');
-  }
-
-  return (
-    <button onClick={handleClick}>
-      点我
-    </button>
-  );
-}
-
-````
-
-### **类组件事件**
-
-在 React 的类组件中定义事件与函数组件略有不同，因为类组件有自己的实例方法和生命周期方法。
-
-**在类组件中，你通常需要手动绑定事件处理器到组件实例**（使用 `.bind(this)`）:
-
-**手动绑定 `this`**
-
-```jsx
-import React, { Component } from 'react';  
-  
-class MyButton extends Component {  
-  constructor(props) {  
-    super(props);  
-  
-    // 在构造函数中绑定 this 到 handleClick 方法  
-    this.handleClick = this.handleClick.bind(this);  
-  }  
-  
-  // 定义事件处理器方法  
-  handleClick() {  
-    alert('Button clicked!');  
-  }  
-  
-  // 渲染组件并绑定事件  
-  render() {  
-    return (  
-      <button onClick={this.handleClick}>  
-        Click me  
-      </button>  
-    );  
-  }  
-}  
-  
-export default MyButton;
-```
-
-> 在这个例子中，`MyButton` 是一个类组件。我们在构造函数中调用了 `this.handleClick.bind(this)` 来确保 `handleClick` 方法中的 `this` 指向组件实例。然后，在 `render` 方法中，我们将 `handleClick` 方法作为 `onClick` prop 绑定到 `<button>` 元素上。
-
-**箭头函数自动绑定 `this`**
-
-另一种绑定事件处理器的方式是在方法定义时就使用箭头函数，这样可以自动绑定 `this`：
-
-```jsx
-import React, { Component } from 'react';  
-  
-class MyButton extends Component {  
-  // 使用箭头函数定义事件处理器，自动绑定 this  
-  handleClick = () => {  
-    alert('Button clicked!');  
-  }  
-  
-  render() {  
-    return (  
-      <button onClick={this.handleClick}>  
-        Click me  
-      </button>  
-    );  
-  }  
-}  
-  
-export default MyButton;
-```
-
-> 使用箭头函数的好处是你可以在类的方法定义中直接使用它们，而无需在构造函数中进行额外的绑定。这有助于减少样板代码，并使代码更加简洁。
->
-> 但是，请注意，这种方式可能会导致每个实例都创建一个新的函数，这可能会影响性能，特别是在渲染大量组件时。在大多数情况下，这种性能影响可以忽略不计，但如果你确实遇到了性能问题，那么你可能需要考虑使用其他方法，比如在构造函数中进行绑定。
-
-
-
-### **合成事件**
-
-**什么是合成事件？**
-
-* React的合成事件（SyntheticEvent）是React提供的一种统一的事件系统，它可以在不同浏览器中使用同一套API以及一致的行为。React根据W3C规范来定义合成事件，兼容所有浏览器，拥有与浏览器原生事件相同的接口。
-
-*  **React把所有事件都封装为合成事件，不是原生DOM事件**，但可以通过e.nativeEvent属性获取DOM事件。比如，**在React中，当我们在JSX中直接绑定事件时，我们实际上绑定的是合成事件**。这些合成事件是对原生事件的封装，React会根据原生事件类型来使用不同的合成事件对象。
-
-**为什么要用合成事件？**
-
-* React合成事件解决了浏览器兼容性问题，使得开发者可以更方便、更统一地处理各种事件。
-
-* 同时，由于React合成事件对原生事件的封装，开发者可以更容易地操作文本输入框以及其他使用文本输入的组件，如复制、剪切和粘贴等事件。
-
----
-
-
-
-## **Hooks**
-
-在 React 中，**以 `use` 开头的函数——只能在组件或[自定义 Hook](https://react.docschina.org/learn/reusing-logic-with-custom-hooks) 的最顶层调用**，`useState` 以及任何其他以“`use`”开头的函数都被称为 **Hook**。
-
-> 如何编写 Hooks 参考文档：[使用自定义 Hook 复用逻辑 – React 中文文档 (docschina.org)](https://react.docschina.org/learn/reusing-logic-with-custom-hooks)
-
-### **特性**
-
-* 只能在组件的最顶层调用。
-
-* **Hook 内部使用了 state，Effect 以及其他的 React 特性**。
-* Hook 是特殊的函数，只在 React [渲染](https://react.docschina.org/learn/render-and-commit#step-1-trigger-a-render)时有效。**每次组件重新渲染时，所有的 Hook 会重新运行**。
-* 自定义 Hook 共享的只是状态逻辑而不是状态本身。对 Hook 的每个调用完全独立于对同一个 Hook 的其他调用。
-
-### **命名公约**
-
-1. **React 组件名称必须以大写字母开头**，比如 `StatusBar` 和 `SaveButton`。React 组件还需要返回一些 React 能够显示的内容，比如一段 JSX。
-2. **Hook 的名称必须以 `use` 开头，然后紧跟一个大写字母**，就像内置的 [`useState`](https://react.docschina.org/reference/react/useState) 或者本文早前的自定义 `useOnlineStatus` 一样。Hook 可以返回任意值。
-
-如果你在组件内部看见 `getColor()` 函数调用，就可以确定它里面不可能包含 React state，因为它的名称没有以 `use` 开头。但是像 `useOnlineStatus()` 这样的函数调用就很可能包含对内部其他 Hook 的调用！
-
-### **Hook使用注意的问题和原因**
-
-在使用React的Hook时，需要注意以下几个问题和原因：
-
-**只在函数组件的顶层调用Hook**
-
-- 原因：React依靠Hook的调用顺序来正确管理组件的状态。如果Hook在循环、条件或嵌套函数中调用，React无法确定组件的状态，这可能会导致意外的行为、状态丢失或内存泄漏。
-
-**不要在循环、条件或嵌套函数中调用Hook**
-
-- 原因：同上，React需要确定Hook的调用顺序。在循环或条件语句中调用Hook，每次组件渲染时Hook的调用顺序可能会改变，这违反了React的规则。
-
-**避免在自定义Hook中执行副作用操作**
-
-- 原因：自定义Hook应该只包含逻辑代码，而不应该直接执行副作用操作（如设置订阅或修改DOM）。副作用操作应该放在组件中，并使用`useEffect` Hook来管理。
-
-**确保Hook的依赖项正确**
-
-- 对于`useEffect` Hook，需要明确指定依赖项数组。如果遗漏了某个依赖项，当该依赖项变化时，`useEffect`不会重新运行，可能导致状态不同步或逻辑错误。
-- 原因：React使用依赖项数组来确定何时重新运行`useEffect`。如果依赖项未正确指定，React无法准确判断何时需要更新副作用。
-
-**避免在渲染过程中直接修改状态**
-
-- 原因：React的状态更新是异步的，并且在渲染过程中直接修改状态可能导致不可预测的行为。应该使用`setState`函数来更新状态。
-
-**注意闭包问题**
-
-- 在`useEffect`或事件处理函数中，如果引用了组件的state或props，可能会遇到闭包问题。这意味着，在函数执行时，它捕获的是当前的state或props值，而不是最新的值。
-- 原因：JavaScript的闭包特性导致函数记住并访问其词法作用域，包括外部函数的变量和`this`值。在React中，这可能导致状态或属性值的延迟或错误使用。
-
-**Hook命名约定**
-
-- 自定义Hook应以“use”开头，这是一个约定，有助于其他开发者更容易地识别和理解你的代码。
-- 原因：这是一个编码习惯和约定，有助于提高代码的可读性和可维护性。
-
-正确使用Hook并遵循这些注意事项，可以帮助你编写更可靠、可预测和可维护的React组件。
-
----
-
-
-
-## **Reducer**
-
-**React中的reducer是一种特殊的函数，用于处理应用的状态变化**。
-
-Reducer 接收一个旧的状态和一个动作对象，并返回一个新的状态。
-
-**摘要：**
-
-把 `useState` 转化为 `useReducer`：
-
-1. 通过事件处理函数 dispatch actions；
-2. 编写一个 reducer 函数，它接受传入的 state 和一个 action，并返回一个新的 state；
-3. 使用 `useReducer` 替换 `useState`；
-
-> 如何转化详细内容参考官网：[迁移状态逻辑至 Reducer 中 – React 中文文档 (docschina.org)](https://react.docschina.org/learn/extracting-state-logic-into-a-reducer#)
-
-**特点：**
-
-1. 集中管理状态更新：reducer可以将组件的所有状态更新整合到一个外部函数中，使得状态管理更加集中和有序。
-2. 响应动作：reducer通过接收动作对象来指明“用户刚刚做了什么”，根据动作类型来更新状态，使得状态的变化与用户的操作紧密关联。
-3. 易于测试：reducer的逻辑相对独立，可以单独对它进行测试。可以针对特定的初始状态和动作，断言reducer返回的特定状态。
-
-在编写reducer时，你需要遵循一定的规则和结构。以下是一个简单的reducer编写示例：
-
-```javascript
-// 状态的初始值
-const initialState = {  
-  count: 0  
-};  
-// reducer 函数：封装 action, action 对状态进行操作
-function reducer(state = initialState, action) {  
-  switch (action.type) {  
-    case 'increment':  
-      return { count: state.count + 1 };  
-    case 'decrement':  
-      return { count: state.count - 1 };  
-    default:  
-      return state;  
-  }  
-}
-```
-
-> 在这个示例中，我们首先定义了一个初始状态`initialState`，它包含了一个`count`属性，初始值为0。
->
-> 然后，我们定义了一个名为`reducer`的函数，它接收两个参数：`state`和`action`。`state`是当前的状态，`action`是一个包含`type`属性的对象，用于描述要执行的操作。
->
-> 在`reducer`函数中，我们使用一个`switch`语句来根据`action.type`的值执行不同的操作。
->
-> 在这个示例中，我们定义了两个操作类型：`increment`和`decrement`，分别用于增加和减少`count`的值。如果`action.type`的值不是这两个之一，我们就返回当前的状态，不做任何改变。
-
-
-
-最后，你可以在React组件中使用`useReducer`钩子来管理状态。例如：
-
-```javascript
-import React, { useReducer } from 'react';  
-  
-function Counter() {  
-  const [state, dispatch] = useReducer(reducer, initialState);  
-  
-  return (  
-    <div>  
-      <p>Count: {state.count}</p>  
-      <button onClick={() => dispatch({ type: 'increment' })}>Increment</button>  
-      <button onClick={() => dispatch({ type: 'decrement' })}>Decrement</button>  
-    </div>  
-  );  
-}
-```
-
-> 在这个组件中，我们使用`useReducer`钩子来创建一个状态和一个调度函数`dispatch`。
->
-> 然后，我们在按钮的点击事件处理程序中调用`dispatch`函数，并传入一个包含`type`属性的对象来触发状态更新。这样，每当用户点击按钮时，就会通过reducer函数更新状态，并重新渲染组件。
-
----
-
-
-
-## **Context**
-
-**React中的Context提供了一种在组件之间共享数据的方法，无需通过组件树逐层显式地传递props，解决Prop逐级透传问题**。
-
-它可以让你避免在多个层级间手动传递props，从而使你的代码更简洁且易于管理。
-
-通过Context，你可以在整个组件树中访问共享的数据，如当前认证的用户、主题或首选语言等。
-
-**摘要：**
-
-- Context 使组件向其下方的整个树提供信息。
-- 传递 Context 的方法:
-  1. 通过 `export const MyContext = createContext(defaultValue)` 创建并导出 context。
-  2. 在无论层级多深的任何子组件中，把 context 传递给 `useContext(MyContext)` Hook 来读取它。
-  3. 在父组件中把 children 包在 `<MyContext.Provider value={...}>` 中来提供 context。
-- Context 会穿过中间的任何组件。
-- Context 可以让你写出 “较为通用” 的组件。
-- 在使用 context 之前，先试试传递 props 或者将 JSX 作为 `children` 传递。
-
-> 如何使用context参考官网：[使用 Context 深层传递参数 – React 中文文档 (docschina.org)](https://react.docschina.org/learn/passing-data-deeply-with-context#)
-
-> 在 Vue 中使用 provide` 和 `inject 来解决 Prop 逐级透传问题：[依赖注入 | Vue.js (vuejs.org)](https://cn.vuejs.org/guide/components/provide-inject.html#prop-drilling)
-
-
-
-对于**全局、不常修改的数据共享**，就比较适合用 Context API 来实现。
-
-- 当前认证的用户
-- 主题方案
-- 首选语言
-
-除了业务场景外，很多 React 相关的功能库也是使用 Context API 实现：
-
-- [React Redux](https://github.com/reduxjs/react-redux)：`<Provider>` 组件，通过 Context 提供一个全局态的 `store`
-- [React Router](https://github.com/ReactTraining/react-router)：路由组件，通过 Context 管理路由状态
-
-**参考资料**
-
-[Context - React Guidebook (tsejx.github.io)](https://tsejx.github.io/react-guidebook/foundation/advanced-guides/context/)
-
-
-
-
-
----
-
-
-
-## **Ref**
-
-**摘要**
-
-- ref 是一种脱围机制，用于**保留不用于渲染的值**。 你不会经常需要它们。
-- ref 是一个普通的 JavaScript 对象，具有一个名为 `current` 的属性，你可以对其进行读取或设置。
-- 你可以通过调用 `useRef` Hook 来让 React 给你一个 ref。
-- 与 state 一样，**ref 允许你在组件的重新渲染之间保留信息**。
-- 与 state 不同，**设置 ref 的 `current` 值不会触发重新渲染**。
-- 不要在渲染过程中读取或写入 `ref.current`。这使你的组件难以预测。
-
-> ref详细解释参考官网：[使用 ref 引用值 – React 中文文档 (docschina.org)](https://react.docschina.org/learn/referencing-values-with-refs#)
-
-### **使用**
-
-通过从 React 导入 `useRef` Hook 来为你的组件添加一个 ref：
-
-```js
-import { useRef } from 'react';
-```
-
-在你的组件内，调用 `useRef` Hook 并传入你想要引用的初始值作为唯一参数。例如，这里的 ref 引用的值是“0”：
-
-```js
-const ref = useRef(0);
-```
-
-`useRef` 返回一个这样的对象:
-
-```js
-{ 
-  current: 0 // 你向 useRef 传入的值
-}
-```
-
-你可以用 `ref.current` 属性访问该 ref 的当前值。
-
-### **ref 和 state 的不同之处** 
-
-| ref                                                         | state                                                        |
-| ----------------------------------------------------------- | ------------------------------------------------------------ |
-| `useRef(initialValue)`返回 `{ current: initialValue }`      | `useState(initialValue)` 返回 state 变量的当前值和一个 state 设置函数 ( `[value, setValue]`) |
-| **更改时不会触发重新渲染**                                  | 更改时触发重新渲染。                                         |
-| **可变** —— 你可以在渲染过程之外修改和更新 `current` 的值。 | “不可变” —— 你必须使用 state 设置函数来修改 state 变量，从而排队重新渲染。 |
-| 你不应在渲染期间读取（或写入） `current` 值。               | 你可以随时读取 state。但是，每次渲染都有自己不变的 state [快照](https://react.docschina.org/learn/state-as-a-snapshot)。 |
-
-### **ref 和 DOM**
-
-
-
-你可以将 ref 指向任何值。但是，ref 最常见的用法是访问 DOM 元素。
-
-当你将 ref 传递给 JSX 中的 `ref` 属性时，比如 `<div ref={myRef}>`，React 会将相应的 DOM 元素放入 `myRef.current` 中。当元素从 DOM 中删除时，React 会将 `myRef.current` 更新为 `null`。
-
-要访问由 React 管理的 DOM 节点，首先，引入 `useRef` Hook：
-
-```jsx
-import { useRef } from 'react';
-```
-
-然后，在你的组件中使用它声明一个 ref：
-
-```jsx
-const myRef = useRef(null);
-```
-
-最后，将 ref 作为 `ref` 属性值传递给想要获取的 DOM 节点的 JSX 标签：
-
-```jsx
-<div ref={myRef}>
-```
-
-### **React 何时添加 refs** 
-
-在 React 中，每次更新都分为 [两个阶段](https://react.docschina.org/learn/render-and-commit#step-3-react-commits-changes-to-the-dom)：
-
-- 在 **渲染** 阶段， React 调用你的组件来确定屏幕上应该显示什么。
-- 在 **提交** 阶段， React 把变更应用于 DOM。
-
-在第一次渲染期间，DOM 节点尚未创建，因此 `ref.current` 将为 `null`。在渲染更新的过程中，DOM 节点还没有更新。所以读取它们还为时过早。
-
-React 在提交阶段设置 `ref.current`。在更新 DOM 之前，React 将受影响的 `ref.current` 值设置为 `null`。更新 DOM 后，React 立即将它们设置到相应的 DOM 节点。
-
-
-
-**摘要**
-
-- Refs 是一个通用概念，但大多数情况下你会使用它们来保存 DOM 元素。
-- 你通过传递 `<div ref={myRef}>` 指示 React 将 DOM 节点放入 `myRef.current`。
-- 通常，你会将 refs 用于非破坏性操作，例如聚焦、滚动或测量 DOM 元素。
-- 默认情况下，组件不暴露其 DOM 节点。 您可以通过使用 `forwardRef` 并将第二个 `ref` 参数传递给特定节点来暴露 DOM 节点。
-- 避免更改由 React 管理的 DOM 节点。
-
-
-
-**参考资料**
-
-[Refs - React Guidebook (tsejx.github.io)](https://tsejx.github.io/react-guidebook/foundation/advanced-guides/refs/)
-
-[使用 ref 引用值 – React 中文文档 (docschina.org)](https://react.docschina.org/learn/referencing-values-with-refs)
-
-----
-
-
-
 ## **Effect**
 
 Effect是一种用于处理副作用操作的机制（副作用操作是指与组件渲染无关的任务，比如数据获取、订阅事件、手动修改DOM等）。
@@ -1590,6 +1205,16 @@ Effect是一种用于处理副作用操作的机制（副作用操作是指与�
 - React 将在下次 Effect 运行之前以及卸载期间这两个时候调用清理函数。
 
 ### 编写 Effect 
+
+**为什么需要 useEffect?**
+
+使用函数式组件缺少对生命周期的管理控制，useEffect 则在一定程度上弥补了函数式组件生命周期的缺席。
+
+**useEffect 能够为函数组件引入副作用**：过去习惯放在componentDidMount、componentDidUpdate 和componentWillUnmount 三个生命周期里来做的事现在可以放在 useEffect 里来做。
+
+
+
+**编写 Effect**
 
 > 官方文档详细解释了编写 Effect 流程：[使用 Effect 同步 – React 中文文档 (docschina.org)](https://react.docschina.org/learn/synchronizing-with-effects#)
 
@@ -1718,6 +1343,542 @@ useEffect(() => {
 3. **卸载阶段 (Unmounting)**
    - 当组件从 DOM 中卸载时（例如，由于父组件的条件渲染或路由切换），`useEffect` 中的回调函数会再次执行，但此时会带有一个清理函数（cleanup function）。
    - 清理函数是 `useEffect` 回调函数中返回的那个函数，它会在组件卸载前执行，用于执行必要的清理操作，如取消事件监听、清除定时器或清除之前创建的资源等。
+
+### **useEffect 用法**
+
+**每一次渲染后都执行的副作用**: 传入回调函数，不传依赖数组
+
+```js
+useEffect(callBack)
+```
+
+**仅在挂载阶段执行一次的副作用**: 传入回调函数，且这个函数的返回值不是一个函数，同时传入一个空数组
+
+```js
+useEffect(()=>{
+//这里是业务逻辑
+},[])
+```
+
+**仅在挂载阶段和卸载阶段执行的副作用**: 传入回调函数，且这个函数的返回值是一个函数，同时传入一个空数组
+
+```js
+useEffect(()=>{
+// 这里是A的业务逻辑
+//返回一个函数记为 B
+return ()=>{}
+},[])
+```
+
+**每一次渲染都触发，且卸载阶段也会被触发的副作用**: 传入回调函数，且这个函数的返回值是一个函数，同时不传第二个参数
+
+```js
+useEffect(()=>{
+//这里是 A的业务逻辑
+// 返回一个函数记为 B
+return ()=>{}
+})
+```
+
+**根据一定的依赖条件来触发的副作用**: 传入回调函数，同时传入一个非空的数组
+
+```js
+useEffect(()=>{
+//这是回调函数的业务逻辑
+// 若 xxx 是一个函数，则 xxx 会在组件卸载时被触发
+return xxx
+},[numl,num2,num3])
+```
+
+
+
+## **Hooks**
+
+### 本质
+
+一套能够使函数组件更强大、更灵活的“钩子”
+
+函数组件比起类组件“少”了很多东西，给函数组件的使用带来了非常多的局限性，引入 hooks 能够使函数组件更强大、更灵活。
+
+### **特性**
+
+在 React 中，**以 `use` 开头的函数——只能在组件或[自定义 Hook](https://react.docschina.org/learn/reusing-logic-with-custom-hooks) 的最顶层调用**，`useState` 以及任何其他以“`use`”开头的函数都被称为 **Hook**。
+
+> 如何编写 Hooks 参考文档：[使用自定义 Hook 复用逻辑 – React 中文文档 (docschina.org)](https://react.docschina.org/learn/reusing-logic-with-custom-hooks)
+
+* 只能在组件的最顶层调用。
+
+* **Hook 内部使用了 state，Effect 以及其他的 React 特性**。
+* Hook 是特殊的函数，只在 React [渲染](https://react.docschina.org/learn/render-and-commit#step-1-trigger-a-render)时有效。**每次组件重新渲染时，所有的 Hook 会重新运行**。
+* 自定义 Hook 共享的只是状态逻辑而不是状态本身。对 Hook 的每个调用完全独立于对同一个 Hook 的其他调用。
+
+### **命名公约**
+
+1. **React 组件名称必须以大写字母开头**，比如 `StatusBar` 和 `SaveButton`。React 组件还需要返回一些 React 能够显示的内容，比如一段 JSX。
+2. **Hook 的名称必须以 `use` 开头，然后紧跟一个大写字母**，就像内置的 [`useState`](https://react.docschina.org/reference/react/useState) 或者本文早前的自定义 `useOnlineStatus` 一样。Hook 可以返回任意值。
+
+如果你在组件内部看见 `getColor()` 函数调用，就可以确定它里面不可能包含 React state，因为它的名称没有以 `use` 开头。但是像 `useOnlineStatus()` 这样的函数调用就很可能包含对内部其他 Hook 的调用！
+
+### **Hook使用注意的问题和原因**
+
+在使用React的Hook时，需要注意以下几个问题和原因：
+
+**只在函数组件的顶层调用Hook**
+
+- 原因：React依靠Hook的调用顺序来正确管理组件的状态。如果Hook在循环、条件或嵌套函数中调用，React无法确定组件的状态，这可能会导致意外的行为、状态丢失或内存泄漏。
+
+**不要在循环、条件或嵌套函数中调用Hook**
+
+- 原因：同上，React需要确定Hook的调用顺序。在循环或条件语句中调用Hook，每次组件渲染时Hook的调用顺序可能会改变，这违反了React的规则。
+
+**避免在自定义Hook中执行副作用操作**
+
+- 原因：自定义Hook应该只包含逻辑代码，而不应该直接执行副作用操作（如设置订阅或修改DOM）。副作用操作应该放在组件中，并使用`useEffect` Hook来管理。
+
+**确保Hook的依赖项正确**
+
+- 对于`useEffect` Hook，需要明确指定依赖项数组。如果遗漏了某个依赖项，当该依赖项变化时，`useEffect`不会重新运行，可能导致状态不同步或逻辑错误。
+- 原因：React使用依赖项数组来确定何时重新运行`useEffect`。如果依赖项未正确指定，React无法准确判断何时需要更新副作用。
+
+**避免在渲染过程中直接修改状态**
+
+- 原因：React的状态更新是异步的，并且在渲染过程中直接修改状态可能导致不可预测的行为。应该使用`setState`函数来更新状态。
+
+**注意闭包问题**
+
+- 在`useEffect`或事件处理函数中，如果引用了组件的state或props，可能会遇到闭包问题。这意味着，在函数执行时，它捕获的是当前的state或props值，而不是最新的值。
+- 原因：JavaScript的闭包特性导致函数记住并访问其词法作用域，包括外部函数的变量和`this`值。在React中，这可能导致状态或属性值的延迟或错误使用。
+
+**Hook命名约定**
+
+- 自定义Hook应以“use”开头，这是一个约定，有助于其他开发者更容易地识别和理解你的代码。
+- 原因：这是一个编码习惯和约定，有助于提高代码的可读性和可维护性。
+
+正确使用Hook并遵循这些注意事项，可以帮助你编写更可靠、可预测和可维护的React组件。
+
+
+
+### **为什么需要 React Hooks**
+
+1. 告别难以理解的 Class
+2. Hooks 解决业务逻辑难以拆分的问题：
+   * 生命周期使逻辑与生命周期耦合在一起。
+   * Hooks 能够帮助我们实现业务逻辑的聚合避免复杂的组件和冗余的代码
+3. Hooks  使状态逻辑复用变得简单可行
+4. 函数组件从设计思想上来看，更加契合 React 的理念
+
+**告别难以理解的 Class**
+
+类组件的两大痛点：
+
+1. this 指向不明确问题
+2. 生命周期管理
+
+**this 指向不明确问题**
+
+```react
+class Example extends Component {
+    state ={
+        name:'sewen',
+        age: '99'
+    }
+
+    changeAge() {
+    // 这里会报错
+        this.setState({
+         age: '100'
+        });
+    }
+    
+    render() {
+        return <button onClick={this.changeAge}>{this.state.name}的年龄是{this.state.age}</button>
+    }
+}
+```
+
+> 以上代码点击按钮时候，程序报错，报错原因是 `changeAge` 中 找不到 this，this 指向有问题：
+>
+> * 在 React 类组件中，如果你在构造函数中没有绑定事件处理函数，或者没有使用箭头函数来自动绑定 `this`，那么在事件触发时，`this` 指向的可能是 `undefined`，这会导致运行时错误.
+>
+> 为了解决这个问题，你可以在构造函数中绑定 `this.changeAge`：
+>
+> ```javascript
+> constructor(props) {  
+>     super(props);  
+>     this.changeAge = this.changeAge.bind(this);  
+> }
+> ```
+>
+> 或者使用箭头函数在类中定义 `changeAge` 方法，这样 `this` 会自动绑定到组件实例上：
+>
+> ```javascript
+> changeAge = () => {  
+>     this.setState({  
+>         age: '100'  
+>     });  
+> }
+> ```
+
+以上问题本质上都是在用实践层面的约束来解决设计层面的问题
+
+**生命周期管理问题**
+
+* 学习成本
+
+* 不合理的逻辑规划方式： 逻辑与生命周期耦合在一起。
+
+  
+
+
+
+---
+
+## **事件**
+
+**摘要**
+
+- 事件通常在你的组件 **内部** 定义。事件处理函数在组件内部定义，所以它们可以访问 props。
+- 名称以 `handle` 开头，后跟事件名称。
+- 可以将事件处理函数作为 props 传递给组件。
+- 事件处理函数 props 应该以 `on` 开头，后跟一个大写字母。
+- 事件处理函数不需要是 [纯函数](https://react.docschina.org/learn/keeping-components-pure)，因此它是用来 *更改* 某些值的绝佳位置 。
+- 事件冒泡与捕获：React 中的事件处理遵循与原生 DOM 事件相同的冒泡和捕获机制。你可以通过事件对象的 `stopPropagation` 和 `preventDefault` 方法来控制事件的行为。
+
+> 详细内容参考：[响应事件 – React 中文文档 (docschina.org)](https://react.docschina.org/learn/responding-to-events)
+
+### **函数组件事件**
+
+````react
+export default function Button() {
+  function handleClick() {
+    alert('你点击了我！');
+  }
+
+  return (
+    <button onClick={handleClick}>
+      点我
+    </button>
+  );
+}
+
+````
+
+### **类组件事件**
+
+在 React 的类组件中定义事件与函数组件略有不同，因为类组件有自己的实例方法和生命周期方法。
+
+**在类组件中，你通常需要手动绑定事件处理器到组件实例**（使用 `.bind(this)`）:
+
+**手动绑定 `this`**
+
+```jsx
+import React, { Component } from 'react';  
+  
+class MyButton extends Component {  
+  constructor(props) {  
+    super(props);  
+  
+    // 在构造函数中绑定 this 到 handleClick 方法  
+    this.handleClick = this.handleClick.bind(this);  
+  }  
+  
+  // 定义事件处理器方法  
+  handleClick() {  
+    alert('Button clicked!');  
+  }  
+  
+  // 渲染组件并绑定事件  
+  render() {  
+    return (  
+      <button onClick={this.handleClick}>  
+        Click me  
+      </button>  
+    );  
+  }  
+}  
+  
+export default MyButton;
+```
+
+> 在这个例子中，`MyButton` 是一个类组件。我们在构造函数中调用了 `this.handleClick.bind(this)` 来确保 `handleClick` 方法中的 `this` 指向组件实例。然后，在 `render` 方法中，我们将 `handleClick` 方法作为 `onClick` prop 绑定到 `<button>` 元素上。
+
+**箭头函数自动绑定 `this`**
+
+另一种绑定事件处理器的方式是在方法定义时就使用箭头函数，这样可以自动绑定 `this`：
+
+```jsx
+import React, { Component } from 'react';  
+  
+class MyButton extends Component {  
+  // 使用箭头函数定义事件处理器，自动绑定 this  
+  handleClick = () => {  
+    alert('Button clicked!');  
+  }  
+  
+  render() {  
+    return (  
+      <button onClick={this.handleClick}>  
+        Click me  
+      </button>  
+    );  
+  }  
+}  
+  
+export default MyButton;
+```
+
+> 使用箭头函数的好处是你可以在类的方法定义中直接使用它们，而无需在构造函数中进行额外的绑定。这有助于减少样板代码，并使代码更加简洁。
+>
+> 但是，请注意，这种方式可能会导致每个实例都创建一个新的函数，这可能会影响性能，特别是在渲染大量组件时。在大多数情况下，这种性能影响可以忽略不计，但如果你确实遇到了性能问题，那么你可能需要考虑使用其他方法，比如在构造函数中进行绑定。
+
+
+
+### **合成事件**
+
+**什么是合成事件？**
+
+* React的合成事件（SyntheticEvent）是React提供的一种统一的事件系统，它可以在不同浏览器中使用同一套API以及一致的行为。React根据W3C规范来定义合成事件，兼容所有浏览器，拥有与浏览器原生事件相同的接口。
+
+* **React把所有事件都封装为合成事件，不是原生DOM事件**，但可以通过e.nativeEvent属性获取DOM事件。比如，**在React中，当我们在JSX中直接绑定事件时，我们实际上绑定的是合成事件**。这些合成事件是对原生事件的封装，React会根据原生事件类型来使用不同的合成事件对象。
+
+**为什么要用合成事件？**
+
+* React合成事件解决了浏览器兼容性问题，使得开发者可以更方便、更统一地处理各种事件。
+
+* 同时，由于React合成事件对原生事件的封装，开发者可以更容易地操作文本输入框以及其他使用文本输入的组件，如复制、剪切和粘贴等事件。
+
+## **Reducer**
+
+**React中的reducer是一种特殊的函数，用于处理应用的状态变化**。
+
+Reducer 接收一个旧的状态和一个动作对象，并返回一个新的状态。
+
+**摘要：**
+
+把 `useState` 转化为 `useReducer`：
+
+1. 通过事件处理函数 dispatch actions；
+2. 编写一个 reducer 函数，它接受传入的 state 和一个 action，并返回一个新的 state；
+3. 使用 `useReducer` 替换 `useState`；
+
+> 如何转化详细内容参考官网：[迁移状态逻辑至 Reducer 中 – React 中文文档 (docschina.org)](https://react.docschina.org/learn/extracting-state-logic-into-a-reducer#)
+
+**特点：**
+
+1. 集中管理状态更新：reducer可以将组件的所有状态更新整合到一个外部函数中，使得状态管理更加集中和有序。
+2. 响应动作：reducer通过接收动作对象来指明“用户刚刚做了什么”，根据动作类型来更新状态，使得状态的变化与用户的操作紧密关联。
+3. 易于测试：reducer的逻辑相对独立，可以单独对它进行测试。可以针对特定的初始状态和动作，断言reducer返回的特定状态。
+
+在编写reducer时，你需要遵循一定的规则和结构。以下是一个简单的reducer编写示例：
+
+```javascript
+// 状态的初始值
+const initialState = {  
+  count: 0  
+};  
+// reducer 函数：封装 action, action 对状态进行操作
+function reducer(state = initialState, action) {  
+  switch (action.type) {  
+    case 'increment':  
+      return { count: state.count + 1 };  
+    case 'decrement':  
+      return { count: state.count - 1 };  
+    default:  
+      return state;  
+  }  
+}
+```
+
+> 在这个示例中，我们首先定义了一个初始状态`initialState`，它包含了一个`count`属性，初始值为0。
+>
+> 然后，我们定义了一个名为`reducer`的函数，它接收两个参数：`state`和`action`。`state`是当前的状态，`action`是一个包含`type`属性的对象，用于描述要执行的操作。
+>
+> 在`reducer`函数中，我们使用一个`switch`语句来根据`action.type`的值执行不同的操作。
+>
+> 在这个示例中，我们定义了两个操作类型：`increment`和`decrement`，分别用于增加和减少`count`的值。如果`action.type`的值不是这两个之一，我们就返回当前的状态，不做任何改变。
+
+
+
+最后，你可以在React组件中使用`useReducer`钩子来管理状态。例如：
+
+```javascript
+import React, { useReducer } from 'react';  
+  
+function Counter() {  
+  const [state, dispatch] = useReducer(reducer, initialState);  
+  
+  return (  
+    <div>  
+      <p>Count: {state.count}</p>  
+      <button onClick={() => dispatch({ type: 'increment' })}>Increment</button>  
+      <button onClick={() => dispatch({ type: 'decrement' })}>Decrement</button>  
+    </div>  
+  );  
+}
+```
+
+> 在这个组件中，我们使用`useReducer`钩子来创建一个状态和一个调度函数`dispatch`。
+>
+> 然后，我们在按钮的点击事件处理程序中调用`dispatch`函数，并传入一个包含`type`属性的对象来触发状态更新。这样，每当用户点击按钮时，就会通过reducer函数更新状态，并重新渲染组件。
+
+---
+
+
+
+## **Context**
+
+
+
+**React中的Context提供了一种在组件之间共享数据的方法，无需通过组件树逐层显式地传递props，解决Prop逐级透传问题**。
+
+它可以让你避免在多个层级间手动传递props，从而使你的代码更简洁且易于管理。
+
+通过Context，你可以在整个组件树中访问共享的数据，如当前认证的用户、主题或首选语言等。
+
+**摘要：**
+
+- Context 使组件向其下方的整个树提供信息。
+- 传递 Context 的方法:
+  1. 通过 `export const MyContext = createContext(defaultValue)` 创建并导出 context。
+  2. 在无论层级多深的任何子组件中，把 context 传递给 `useContext(MyContext)` Hook 来读取它。
+  3. 在父组件中把 children 包在 `<MyContext.Provider value={...}>` 中来提供 context。
+- Context 会穿过中间的任何组件。
+- Context 可以让你写出 “较为通用” 的组件。
+- 在使用 context 之前，先试试传递 props 或者将 JSX 作为 `children` 传递。
+
+> 如何使用context参考官网：[使用 Context 深层传递参数 – React 中文文档 (docschina.org)](https://react.docschina.org/learn/passing-data-deeply-with-context#)
+
+> 在 Vue 中使用 provide` 和 `inject 来解决 Prop 逐级透传问题：[依赖注入 | Vue.js (vuejs.org)](https://cn.vuejs.org/guide/components/provide-inject.html#prop-drilling)
+
+### **Context API 数据流**
+
+<img src="../images/image-20240416094838507.png" alt="image-20240416094838507" style="zoom:50%;" />
+
+对于**全局、不常修改的数据共享**，就比较适合用 Context API 来实现。
+
+- 当前认证的用户
+- 主题方案
+- 首选语言
+
+除了业务场景外，很多 React 相关的功能库也是使用 Context API 实现：
+
+- [React Redux](https://github.com/reduxjs/react-redux)：`<Provider>` 组件，通过 Context 提供一个全局态的 `store`
+- [React Router](https://github.com/ReactTraining/react-router)：路由组件，通过 Context 管理路由状态
+
+**参考资料**
+
+[Context - React Guidebook (tsejx.github.io)](https://tsejx.github.io/react-guidebook/foundation/advanced-guides/context/)
+
+
+
+
+
+---
+
+
+
+## **Ref**
+
+**摘要**
+
+- ref 是一种脱围机制，用于**保留不用于渲染的值**。 你不会经常需要它们。
+- ref 是一个普通的 JavaScript 对象，具有一个名为 `current` 的属性，你可以对其进行读取或设置。
+- 你可以通过调用 `useRef` Hook 来让 React 给你一个 ref。
+- 与 state 一样，**ref 允许你在组件的重新渲染之间保留信息**。
+- 与 state 不同，**设置 ref 的 `current` 值不会触发重新渲染**。
+- 不要在渲染过程中读取或写入 `ref.current`。这使你的组件难以预测。
+
+> ref详细解释参考官网：[使用 ref 引用值 – React 中文文档 (docschina.org)](https://react.docschina.org/learn/referencing-values-with-refs#)
+
+### **使用**
+
+通过从 React 导入 `useRef` Hook 来为你的组件添加一个 ref：
+
+```js
+import { useRef } from 'react';
+```
+
+在你的组件内，调用 `useRef` Hook 并传入你想要引用的初始值作为唯一参数。例如，这里的 ref 引用的值是“0”：
+
+```js
+const ref = useRef(0);
+```
+
+`useRef` 返回一个这样的对象:
+
+```js
+{ 
+  current: 0 // 你向 useRef 传入的值
+}
+```
+
+你可以用 `ref.current` 属性访问该 ref 的当前值。
+
+### **ref 和 state 的不同之处** 
+
+| ref                                                         | state                                                        |
+| ----------------------------------------------------------- | ------------------------------------------------------------ |
+| `useRef(initialValue)`返回 `{ current: initialValue }`      | `useState(initialValue)` 返回 state 变量的当前值和一个 state 设置函数 ( `[value, setValue]`) |
+| **更改时不会触发重新渲染**                                  | 更改时触发重新渲染。                                         |
+| **可变** —— 你可以在渲染过程之外修改和更新 `current` 的值。 | “不可变” —— 你必须使用 state 设置函数来修改 state 变量，从而排队重新渲染。 |
+| 你不应在渲染期间读取（或写入） `current` 值。               | 你可以随时读取 state。但是，每次渲染都有自己不变的 state [快照](https://react.docschina.org/learn/state-as-a-snapshot)。 |
+
+### **ref 和 DOM**
+
+
+
+你可以将 ref 指向任何值。但是，ref 最常见的用法是访问 DOM 元素。
+
+当你将 ref 传递给 JSX 中的 `ref` 属性时，比如 `<div ref={myRef}>`，React 会将相应的 DOM 元素放入 `myRef.current` 中。当元素从 DOM 中删除时，React 会将 `myRef.current` 更新为 `null`。
+
+要访问由 React 管理的 DOM 节点，首先，引入 `useRef` Hook：
+
+```jsx
+import { useRef } from 'react';
+```
+
+然后，在你的组件中使用它声明一个 ref：
+
+```jsx
+const myRef = useRef(null);
+```
+
+最后，将 ref 作为 `ref` 属性值传递给想要获取的 DOM 节点的 JSX 标签：
+
+```jsx
+<div ref={myRef}>
+```
+
+### **React 何时添加 refs** 
+
+在 React 中，每次更新都分为 [两个阶段](https://react.docschina.org/learn/render-and-commit#step-3-react-commits-changes-to-the-dom)：
+
+- 在 **渲染** 阶段， React 调用你的组件来确定屏幕上应该显示什么。
+- 在 **提交** 阶段， React 把变更应用于 DOM。
+
+在第一次渲染期间，DOM 节点尚未创建，因此 `ref.current` 将为 `null`。在渲染更新的过程中，DOM 节点还没有更新。所以读取它们还为时过早。
+
+React 在提交阶段设置 `ref.current`。在更新 DOM 之前，React 将受影响的 `ref.current` 值设置为 `null`。更新 DOM 后，React 立即将它们设置到相应的 DOM 节点。
+
+
+
+**摘要**
+
+- Refs 是一个通用概念，但大多数情况下你会使用它们来保存 DOM 元素。
+- 你通过传递 `<div ref={myRef}>` 指示 React 将 DOM 节点放入 `myRef.current`。
+- 通常，你会将 refs 用于非破坏性操作，例如聚焦、滚动或测量 DOM 元素。
+- 默认情况下，组件不暴露其 DOM 节点。 您可以通过使用 `forwardRef` 并将第二个 `ref` 参数传递给特定节点来暴露 DOM 节点。
+- 避免更改由 React 管理的 DOM 节点。
+
+
+
+**参考资料**
+
+[Refs - React Guidebook (tsejx.github.io)](https://tsejx.github.io/react-guidebook/foundation/advanced-guides/refs/)
+
+[使用 ref 引用值 – React 中文文档 (docschina.org)](https://react.docschina.org/learn/referencing-values-with-refs)
+
+
 
 
 

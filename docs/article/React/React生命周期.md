@@ -55,6 +55,7 @@ React 的生命周期是指React组件从创建到销毁的整个过程，这个
 - 组件的渲染方法，根据组件的状态和属性生成 React 元素。
 - 必须返回一个 React 元素或 null，表示组件的 UI 结构。
 - render 方法在执行过程中不会操作真实 DOM，它的职能是把需要渲染的内容返回出来。
+- 注意： 不要在 `render` 里面 `setState`, 否则会触发死循环导致内存崩溃
 
 **componentDidMount()**：
 
@@ -261,6 +262,20 @@ getDerivedStateFromProps 可以代替 componentWillReceiveProps 实现基于 pro
 
 如果你实现了 `getSnapshotBeforeUpdate`，React 会在 React 更新 DOM 之前时直接调用它。它使你的组件能够在 DOM 发生更改之前捕获一些信息（例如滚动的位置）。此生命周期方法返回的任何值都将作为参数传递给 [`componentDidUpdate`](https://react.docschina.org/reference/react/Component#componentdidupdate)。
 
+该方法返回的一个`Snapshot`值，作为`componentDidUpdate`第三个参数传入
+
+```jsx
+getSnapshotBeforeUpdate(prevProps, prevState) {
+    console.log('#enter getSnapshotBeforeUpdate');
+    return 'foo';
+}
+
+componentDidUpdate(prevProps, prevState, snapshot) {
+    console.log('#enter componentDidUpdate snapshot = ', snapshot);
+    //输出 #enter componentDidUpdate snapshot =  foo
+}
+```
+
 **参数**
 
 - `prevProps`：更新之前的 Props。`prevProps` 将会与 [`this.props`](https://react.docschina.org/reference/react/Component#props) 进行比较来确定发生了什么改变。
@@ -286,7 +301,7 @@ getDerivedStateFromProps 可以代替 componentWillReceiveProps 实现基于 pro
 
 
 
-## React15 到16 废弃的生命周期
+## React15 到16 废生命周期变化
 
 - componentWillMount
 - componentWillUpdate
@@ -304,7 +319,10 @@ getDerivedStateFromProps 可以代替 componentWillReceiveProps 实现基于 pro
 
 此外，在 componentWillUpdate 和 componentWillReceiveProps 滥用 setState 容易导致渲染死循环。
 
+同时也新增了两个生命周期函数：
 
+- getDerivedStateFromProps
+- getSnapshotBeforeUpdate
 
 **总结**
 
