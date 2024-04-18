@@ -1088,6 +1088,22 @@ updateDOM();
 
 每次调用 setState 时候，会将传入的新的 state 更新到同一个变量 `pair[0]` 中，`pair[0]` 为 useState 返回数组第一个下标值。因此也可以解释为什么 state 是异步更新的。
 
+
+
+以 useState 为例，分析 React Hooks 的调用链路：
+
+* 首次渲染调用链路：mountState(首次渲染)构建链表并渲染。
+
+<img src="../images/image-20240418200215161.png" alt="image-20240418200215161" style="zoom:50%;" />
+
+* 更新渲染调用链路：updateState 依次遍历链表并渲染
+
+<img src="../images/image-20240418200409296.png" alt="image-20240418200409296" style="zoom: 50%;" />
+
+通过以上分析：hooks 的渲染是通过“依次遍历”来定位每个hooks 内容的。如果前后两次读到的链表在顺序上出现差异，那么渲染的结果自然是不可控的。
+
+
+
 #### 实现 `useState`  
 
 实现一个简化版本的 `useState` 需要考虑几个关键点：
@@ -1527,9 +1543,12 @@ class Example extends Component {
 
 * 不合理的逻辑规划方式： 逻辑与生命周期耦合在一起。
 
-  
 
+### 原理
 
+Hooks 的正常运作，在底层依赖于顺序链表
+
+**Hooks 的数据结构本质是链表**
 
 ---
 
