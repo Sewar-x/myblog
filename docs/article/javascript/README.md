@@ -1945,30 +1945,32 @@ v8的垃圾回收机制基于分代回收机制，这个机制又基于世代假
 
 
 
-- 应用：
+**应用**：
 
-  >  实现事件代理的效果跟直接给节点的事件效果相同。如：列表中点击 `<li>` 触发事件使用事件代理实现
+>  如：在一个列表中，需要点击列表中的 `<li>` 元素触发事件，获取到 `<li>` 标签内的文本内容
 
-  解决方案:
+解决方案: 
 
-  * Event 对象提供了一个属性叫 target，可以返回事件的目标节点；标准浏览器用ev.target，IE浏览器用event.srcElement；通过 target.nodeName 获取签名。
+**事件委托**：获取所有 `<li>` 元素的父元素 `<ul>`, 通过事件冒泡机制，获取冒泡到 `<ul>` 的事件，再获取目标元素的内容。
 
-  * 根据标签名称在 `<li>` 父节点获取 `target.nodeName` 判断子节点类型，分类处理。
+* Event 对象提供了一个属性叫 target，可以返回事件的目标节点；标准浏览器用 `ev.target`，IE浏览器用event.srcElement；通过 `target.nodeName` 获取签名。
 
-    ```js
-    window.onload = function(){
-            let myul = document.getElementById('ul');
-            myul.onclick = function(ev){ // 标准浏览器ev ie是event
-                let ev = ev || window.event // 兼容ie
-                let target = ev.target || ev.srcElement
-                switch( target.nodeName.toLowerCase()){
-                    case 'li': //do somthing...
-                }
-            }
-        }
-    ```
+* 根据标签名称在 `<li>` 父节点获取 `target.nodeName` 判断子节点类型，分类处理。
 
-    
+  ```js
+  window.onload = function(){
+          let myul = document.getElementById('ul');
+          myul.onclick = function(ev){ // 标准浏览器ev ie是event
+              let ev = ev || window.event // 兼容ie
+              let target = ev.target || ev.srcElement
+              switch( target.nodeName.toLowerCase()){
+                  case 'li': //do somthing...
+              }
+          }
+      }
+  ```
+
+  
 
 ****
 
