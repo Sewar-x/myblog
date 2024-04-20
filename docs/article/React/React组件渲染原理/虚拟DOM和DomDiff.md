@@ -18,7 +18,7 @@ tag:
 
 # **Virtual DOM**
 
-> virtual-dom github: https://github.com/Matt-Esch/virtual-dom
+> virtual dom 是单独存在的一个库， github: https://github.com/Matt-Esch/virtual-dom
 
 ## **Real DOM**
 
@@ -89,6 +89,82 @@ React 将结合JSX 的描述，构建出虚拟DOM 树，然后通过`ReactDOM.re
 
 <img src="../../images/image-20240418202625023.png" alt="image-20240418202625023" style="zoom:67%;" />
 
+**更新流程：**
+
+1. **渲染新的虚拟 DOM 树 (Render New Virtual DOM Tree)**：
+   - 当组件的状态（state）或属性（props）发生变化时，React 会触发重新渲染。
+   - 重新渲染会调用组件的 `render` 方法，该方法返回一个新的虚拟 DOM 树的描述。
+2. **生成补丁集 (Generate Patch - Diffing)**：
+   - React 使用 diff 算法比较旧的虚拟 DOM 树和新的虚拟 DOM 树之间的差异。
+   - 这个比较过程是高效的，**React 只会检查发生变化的部分**，而不是比较整个树。
+3. **补丁集 (Patch - Updating)**：
+   - 通过 diff 算法，React 生成一个补丁集，它包含了**需要更新到真实 DOM 的最小操作集**。
+   - 这些补丁包含了如属性更新、文本内容更改或 DOM 节点的增删等操作。
+4. **应用补丁集到真实 DOM (Patch - Committing)**：
+   - React 将补丁集应用到真实 DOM 上，从而更新浏览器的渲染树。
+   - 这个过程是通过 React 的 `ReactDOM` 模块完成的，它会调用 DOM API 执行必要的更新。
+5. **完成更新 (Update Complete)**：
+   - 一旦补丁集被应用，真实 DOM 就会更新为新的虚拟 DOM 树的状态。
+   - 用户界面现在反映了新的数据或状态，而不需要重新渲染整个应用。
+6. **返回新的虚拟 DOM 树 (Return to New Virtual DOM Tree)**：
+   - 更新完成后，React 会返回新的虚拟 DOM 树，作为下一次更新的起点。
+
+
+
+::: detail 虚拟 DOM 创建和更新过程代码示例
+
+```json
+// 用于创建虚拟 DOM
+var h = require('virtual-dom/h');
+// 用于比较虚拟 DOM 差异生成补丁集
+var diff = require('virtual-dom/diff');
+// 应用补丁集到真实 DOM
+var patch = require('virtual-dom/patch');
+// 更新真实 DOM
+var createElement = require('virtual-dom/create-element');
+
+// 1: Create a function that declares what the DOM should look like
+function render(count)  {
+    return h('div', {
+        style: {
+            textAlign: 'center',
+            lineHeight: (100 + count) + 'px',
+            border: '1px solid red',
+            width: (100 + count) + 'px',
+            height: (100 + count) + 'px'
+        }
+    }, [String(count)]);
+}
+
+// 2: Initialise the document
+var count = 0;      // We need some app data. Here we just store a count.
+
+var tree = render(count);               // We need an initial tree
+var rootNode = createElement(tree);     // Create an initial root DOM node ...
+document.body.appendChild(rootNode);    // ... and it should be in the document
+
+// 3: Wire up the update logic
+setInterval(function () {
+      count++; // 数据更新
+	  // 重新构建新的虚拟 DOM 树
+      var newTree = render(count);
+      // 比较新旧虚拟 DOM 树
+      var patches = diff(tree, newTree);
+      // 应用补丁集到真实 DOM
+      rootNode = patch(rootNode, patches);
+      tree = newTree;
+}, 1000);
+```
+
+:::
+
+> 以上代码引用自 [Virtual DOM 官方文档库示例](https://github.com/Matt-Esch/virtual-dom)您可以找到单独组件的文档 在他们的自述文件中
+>
+> - 有关 `create-element.js`，请参阅 [vdom 自述文件](https://github.com/Matt-Esch/virtual-dom/blob/master/vdom/README.md)
+> - 有关 `diff.js`，请参阅 [vtree 自述文件](https://github.com/Matt-Esch/virtual-dom/blob/master/vtree/README.md)
+> - 有关 `h.js`，请参阅[虚拟超脚本自述文件](https://github.com/Matt-Esch/virtual-dom/blob/master/virtual-hyperscript/README.md)
+> - 有关 `patch.js`，请参阅 [vdom 自述文件](https://github.com/Matt-Esch/virtual-dom/blob/master/vdom/README.md)
+
 ### 虚拟 DOM 如何工作
 
 通过数据和模板结合，生成虚拟 DOM，再通过虚拟DOM 映射到 真实 DOM，最后挂载到页面中：
@@ -96,20 +172,6 @@ React 将结合JSX 的描述，构建出虚拟DOM 树，然后通过`ReactDOM.re
 <img src="../../images/image-20240418202354837.png" alt="image-20240418202354837" style="zoom:50%;" />
 
 
-
-##  **Diff 算法**
-
-### **思路**
-
-### 实现流程
-
-1. **生成新的虚拟 DOM**：当组件的状态或属性发生变化时，React 会重新调用组件的渲染方法，生成一个新的虚拟 DOM 树。
-2. **分层比较**：React 会将虚拟 DOM 树按层级（即深度优先遍历的顺序）进行比较，而不是对整个树进行一次性比较。
-3. **同层节点比较**：React 会对新旧两个虚拟 DOM 树的同层节点进行比较。如果节点顺序或数量有变化，React 会采用特定的算法来找出最小的操作集合，使得旧的 DOM 树能够转变为新的 DOM 树。
-4. **节点类型与属性比较**：对于每个变化的节点，React 会比较其类型和属性。如果节点类型不同，React 会直接删除旧的 DOM 节点并创建新的 DOM 节点。如果节点类型相同但属性有变化，React 会仅更新变化的属性。
-5. **子节点比较**：对于节点的子节点，React 会采用一种称为“key”的机制来优化比较过程。如果子节点有唯一的 `key` 属性，React 可以更高效地识别出哪些子节点是新增的、哪些子节点是删除的、哪些子节点是移动的。这样，即使子节点的顺序发生了变化，React 也可以只进行必要的 DOM 操作，而不是重新渲染整个子节点列表。
-6. **应用 DOM 操作**：一旦找出了虚拟 DOM 树之间的差异，React 就会将这些差异应用到实际的 DOM 上。这通常包括添加、更新或删除 DOM 节点，以及修改节点的属性。
-7. **更新完成**：一旦 DOM 更新完成，React 会触发相应的生命周期方法或钩子（如 `componentDidUpdate` 或 `useEffect`），以便开发者可以执行更新后的逻辑。
 
 
 
@@ -130,13 +192,22 @@ React 将结合JSX 的描述，构建出虚拟DOM 树，然后通过`ReactDOM.re
   > * 当你在一次操作时，需要更新 10 个 `DOM` 节点，浏览器没这么智能，收到第一个更新 `DOM` 请求后，并不知道后续还有 9 次更新操作，因此会马上执行流程，最终执行 10 次流程
   >
   > 而通过 `VNode`，同样更新 10 个 `DOM` 节点，虚拟 `DOM` 不会立即操作 `DOM`，而是将这 10 次更新的 `diff` 内容保存到本地的一个 `js` 对象中，最终将这个 `js` 对象一次性 `attach` 到 `DOM` 树上，避免大量的无谓计算
+  >
+  > 因此，真实 DOM 是全量更新，而虚拟 DOM 是差量更新。
+  >
+  > **注意：**
+  >
+  > * 虚拟 DOM 不一定会有更好的性能，虚拟 DOM 的优越之处在于拥有更高效的研发效率同时保持不错的性能。
+  >
+  > * 因为差量更新不一定比全量更新性能更好：数据内容变化非常大(或者说整个发生了改变)，促使差量更新计算出来的结果和全量更新极为接近(或者说完全一样)，这种情况 DOM 更新渲染消耗一致，但虚拟 DOM 存在更多计算消耗。
 
 <img src="../../images/image-20240418203529030.png" alt="image-20240418203529030" style="zoom: 50%;" />
 
-**简化复杂操作**：
+**提高研发效率**：
 
 * 对于复杂的页面UI，往往会定义大量的Real DOM元素。频繁地操作这些元素不仅会降低性能，还会使代码变得复杂且难以维护。
 * 使用Virtual DOM可以将这些操作抽象化，使开发人员能够更专注于业务逻辑和UI设计，而不是陷入繁琐的DOM操作中。
+* 虚拟 DOM 使**数据驱动视图**提供基础。
 
 **跨平台兼容性**：
 
@@ -167,3 +238,110 @@ React 将结合JSX 的描述，构建出虚拟DOM 树，然后通过`ReactDOM.re
 * Real DOM具有可靠性和功能丰富性，但由于直接操作DOM，性能较低且内存消耗大。
 
 * 而Virtual DOM则通过抽象和比较实现有效更新，提高了性能和内存效率，但在初次渲染时可能较慢。此外，Virtual DOM还可以结合框架实现跨平台开发，提供了更多的便捷性和优化空间。
+
+
+
+
+
+## React 15 的Reconciliation（栈调和）
+
+React 15的Reconciliation（调和）是一个**将虚拟DOM映射到真实DOM的过程**，旨在在用户无感知的情况下将数据的更新体现到UI上。
+
+这个过程主要发生在React组件的状态（State）改变时，React会首先进入调和阶段，然后进入提交阶段，最终展示新状态对应的页面。
+
+具体过程包括以下几个步骤：
+
+1. 当React组件的状态发生改变时，React会触发调和阶段。
+2. 在调和阶段，React首先会计算出目标状态对应的虚拟DOM结构。这个计算过程可以称为Render过程，可以通过多种方式触发，如forceUpdate、State更新、父组件Render触发子组件Render过程等。
+3. React通过如ReactDOM等类库，将计算出的虚拟DOM与“真实的”DOM进行同步，即把虚拟DOM映射到真实DOM上。
+
+**注意**
+
+虽然调和过程包含Diff算法，但二者并不完全等同：
+
+* 调和是“使虚拟 DOM 到真实DOM一致”的过程，Diff 是“新旧虚拟 DOM 找不同”的过程。
+* **Diff算法是调和过程中最具代表性的一环**
+
+根据实现形式的不同，调和过程被划分为
+
+1. **React 15 的 “栈调和”**。
+2. **React 16 的 “Fiber调和”**。
+
+
+
+
+
+##  **Diff 算法**
+
+传统的要想找出两个树结构之间的不同传统的计算方法是通过循环递归进行树节点的一一对比，该算法的复杂度为 O(n^3)。
+
+为了解决比较性能， Diff 算法进行了树对比的算法。
+
+### 设计思想
+
+#### **分层比较**
+
+React 会将虚拟 DOM 树按层级（即深度优先遍历的顺序）进行比较进行分层递归，而不是对整个树进行一次性比较。
+
+该方法是降低时间复杂度的最重要因素。
+
+<img src="../../images/image-20240420095428262.png" alt="image-20240420095428262" style="zoom:33%;" />
+
+#### **同类型 Diff**
+
+若两个组件属于同一个类型，它们将拥有相同的 DOM 树形结构。
+
+**类型一致的节点才有继续 Diff 递归的必要性**。
+
+<img src="../../images/image-20240420095837286.png" alt="image-20240420095837286" style="zoom: 50%;" />
+
+#### **同层节点比较**
+
+React 会对新旧两个虚拟 DOM 树的同层节点进行比较。如果节点顺序或数量有变化，React 会采用特定的算法来找出最小的操作集合，使得旧的 DOM 树能够转变为新的 DOM 树。
+
+#### **设置 key 唯一标识**
+
+ 处于同一层级的一组子节点，可用通过设置 key作为唯一标识从而维持各个节点在不同渲染过程中的稳定性。
+
+key 值设置关键：**唯一且稳定**
+
+* 唯一表示能唯一表示一个节点
+* 稳定表示不会随意变化
+
+**key 属性作用：**
+
+1. key 帮助 React 识别哪些内容被更改、添加或者删除。
+
+2. key 使 React 尽可能**重用同一层级内的节点**。
+
+key 需要写在用数组渲染出来的元素内部，并且需要赋予其个稳定的值。稳定在这里很重要，因为如果 key值发生了变更，React则会触发U的重渲染。
+
+**示例：**
+
+如下图，在 B 和 D 节点之间插入了 C 节点
+
+<img src="../../images/image-20240420101351907.png" alt="image-20240420101351907" style="zoom:50%;" />
+
+* 在没有设置 key 时：
+  1. React 会逐一对比 `B : B`, `D : C`，`E : D`,  `null : E` ；
+  2.  React 操作为：删除 D 并新增C，删除 E 并新增 D, 新增 E。
+
+ 以上操作实际只要新增一个 C 节点即可。
+
+* 设置 Key 时：React 记住每一个节点，在后续更新时追踪每一个节点。
+
+  如下图，React 重用 key 相同的节点，并插入一个新 Key 的节点：
+
+  <img src="../../images/image-20240420101941306.png" alt="image-20240420101941306" style="zoom:50%;" />
+
+  
+
+### 实现流程
+
+1. **生成新的虚拟 DOM**：当组件的状态或属性发生变化时，React 会重新调用组件的渲染方法，生成一个新的虚拟 DOM 树。
+2. **分层比较**：React 会将虚拟 DOM 树按层级（即深度优先遍历的顺序）进行比较，而不是对整个树进行一次性比较。
+3. **同层节点比较**：React 会对新旧两个虚拟 DOM 树的同层节点进行比较。如果节点顺序或数量有变化，React 会采用特定的算法来找出最小的操作集合，使得旧的 DOM 树能够转变为新的 DOM 树。
+4. **节点类型与属性比较**：对于每个变化的节点，React 会比较其类型和属性。如果节点类型不同，React 会直接删除旧的 DOM 节点并创建新的 DOM 节点。如果节点类型相同但属性有变化，React 会仅更新变化的属性。
+5. **子节点比较**：对于节点的子节点，React 会采用一种称为“key”的机制来优化比较过程。如果子节点有唯一的 `key` 属性，React 可以更高效地识别出哪些子节点是新增的、哪些子节点是删除的、哪些子节点是移动的。这样，即使子节点的顺序发生了变化，React 也可以只进行必要的 DOM 操作，而不是重新渲染整个子节点列表。
+6. **应用 DOM 操作**：一旦找出了虚拟 DOM 树之间的差异，React 就会将这些差异应用到实际的 DOM 上。这通常包括添加、更新或删除 DOM 节点，以及修改节点的属性。
+7. **更新完成**：一旦 DOM 更新完成，React 会触发相应的生命周期方法或钩子（如 `componentDidUpdate` 或 `useEffect`），以便开发者可以执行更新后的逻辑。
