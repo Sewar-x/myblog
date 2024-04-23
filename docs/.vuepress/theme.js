@@ -30,7 +30,7 @@ export default hopeTheme({
             sup: false,
             tasklist: true,
             // 启用 figure
-            figure: false,
+            figure: true,
             // 启用图片懒加载
             imgLazyload: true,
             // 启用图片标记
@@ -42,7 +42,7 @@ export default hopeTheme({
             // 启用 幻灯片：https://theme-hope.vuejs.press/zh/guide/markdown/content/revealjs.html
             revealJs: false,
             //脚注: https://theme-hope.vuejs.press/zh/guide/markdown/content/footnote.html
-            footnote: false,
+            footnote: true,
             //选项卡：https://theme-hope.vuejs.press/zh/guide/markdown/content/tabs.html
             tabs: true,
             // 启用 GFM 警告：https://theme-hope.vuejs.press/zh/guide/markdown/stylize/alert.html#%E6%BC%94%E7%A4%BA

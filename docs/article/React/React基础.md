@@ -1705,27 +1705,29 @@ export default MyButton;
 
 ### **合成事件**
 
-**React 的事件系统**：
+`React`基于浏览器的事件机制自身实现了一套事件机制，包括事件注册、事件的合成、事件冒泡、事件派发等；
 
-当事件在具体的 DOM 节点上被触发后最终都会冒泡到 document 上，document 上所绑定的统一事件处理程序会将事件分发到具体的组件实例。
+在`React`中这套事件机制被称之为合成事件；
 
-在将统一事件处理程序会将事件分发到具体的组件实例之前，React 会将原生 DOM 事件进行包装成 合成事件。
+在将统一事件处理程序会将事件分发到具体的组件实例之前，React 会将原生 DOM 事件进行包装成 合成事件，可以通过 `e.nativeEvent` 属性获取DOM事件。
 
-**什么是合成事件？**
+```tsx
+//如果想要获得原生DOM事件，可以通过e.nativeEvent属性获取
+const handleClick = (e) => console.log(e.nativeEvent);;
+const button = <button onClick={handleClick}>按钮</button>
+```
+
+
+
+#### **为什么要用合成事件？**
 
 合成事件在底层抹平了不同浏览器的差异，在上层面向开发者暴露统一的、稳定的、与 DOM 原生事件相同的事件接口。
 
-* React的合成事件（SyntheticEvent）是React提供的一种统一的事件系统，它可以在不同浏览器中使用同一套API以及一致的行为。React根据W3C规范来定义合成事件，兼容所有浏览器，拥有与浏览器原生事件相同的接口。
+在不同浏览器中使用同一套API以及一致的行为。
 
-* **React把所有事件都封装为合成事件，不是原生DOM事件**，但可以通过 `e.nativeEvent` 属性获取DOM事件。比如，在React中，当我们在JSX中直接绑定事件时，我们实际上绑定的是合成事件。这些合成事件是对原生事件的封装，React会根据原生事件类型来使用不同的合成事件对象。
+React根据W3C规范来定义合成事件，兼容所有浏览器，拥有与浏览器原生事件相同的接口。
 
-**为什么要用合成事件？**
-
-* React合成事件解决了浏览器兼容性问题，使得开发者可以更方便、更统一地处理各种事件。
-
-* 同时，由于React合成事件对原生事件的封装，开发者可以更容易地操作文本输入框以及其他使用文本输入的组件，如复制、剪切和粘贴等事件。
-
-### **React 事件工作流**
+#### **React 事件工作流**
 
 React事件工作流是一个从事件绑定开始，经过事件传播和处理，最终利用合成事件对象完成事件响应的完整过程：
 
@@ -1735,6 +1737,213 @@ React事件工作流是一个从事件绑定开始，经过事件传播和处理
 4. **合成事件对象**：React的合成事件对象提供了一致性接口，使开发者不需要关心不同浏览器之间的事件差异。这个对象包含了与事件相关的信息，并提供了方法来阻止事件的默认行为（event.preventDefault()）和停止事件冒泡（event.stopPropagation()）。
 
 React通过事件代理来处理实际的DOM事件。这意味着React维护一个事件监听器，而不是在每个DOM元素上都添加监听器，以提高性能。
+
+#### **合成事件和普通事件对比**
+
+`React`事件和原生事件也非常的相似，但也有一定的区别：
+
+- 事件名称命名方式不同
+
+```jsx
+// 原生事件绑定方式
+<button onclick="handleClick()">按钮命名</button>
+      
+// React 合成事件绑定方式
+const button = <button onClick={handleClick}>按钮命名</button>
+```
+
+- 事件处理函数书写不同
+
+```jsx
+// 原生事件 事件处理函数写法
+<button onclick="handleClick()">按钮命名</button>
+      
+// React 合成事件 事件处理函数写法
+const button = <button onClick={handleClick}>按钮命名</button>
+```
+
+#### **合成事件原理**
+
+虽然`onclick`看似绑定到`DOM`元素上，但实际并不会把事件代理函数直接绑定到真实的节点上，而是把所有的事件绑定到结构的最外层 document 上，使用一个统一的事件去监听。
+
+当事件在具体的 DOM 节点上被触发后最终都会冒泡到 **document 上**，document 上所绑定的统一事件处理程序会将事件分发到具体的组件实例。
+
+这个事件监听器上维持了一个映射来保存所有组件内部的事件监听和处理函数。当组件挂载或卸载时，只是在这个统一的事件监听器上插入或删除一些对象；
+
+当事件发生时，首先被这个统一的事件监听器处理，然后在映射里找到真正的事件处理函数并调用。这样做简化了事件处理和回收机制，效率也有很大提升
+
+
+
+#### **执行顺序**
+
+**React 会先执行原生事件，然后处理 React 合成事件，最后执行document 上挂载的事件**:
+
+当你在 React 组件中绑定一个事件处理函数时，这个处理函数实际上是在 React 的合成事件系统中注册的。
+
+当原生事件被触发时，React 会捕获这个事件，并在内部创建一个合成事件对象。
+
+然后，React 会调用你在组件中定义的事件处理函数，并将这个合成事件对象作为参数传递给它。
+
+因此，**原生事件首先被触发**，然后 React 捕获这个事件并创建合成事件对象，最后调用你在组件中定义的事件处理函数。在这个处理函数中，你可以访问到合成事件对象，但也可以通过 `nativeEvent` 属性访问到原生的浏览器事件对象。
+
+React 所有事件都挂载在 document 对象上，当真实 DOM 元素触发事件，会冒泡到 document 对象，先执行原生事件，再处理 React 事件，最后真正执行 document 上挂载的事件
+
+对应过程如图所示：
+
+![img](../images/08e22ff0-d870-11eb-ab90-d9ae814b240d.png)
+
+```tsx
+import  React  from 'react';
+class App extends React.Component{
+
+  constructor(props) {
+    super(props);
+    this.parentRef = React.createRef();
+    this.childRef = React.createRef();
+  }
+  componentDidMount() {
+    console.log("React componentDidMount！");
+    this.parentRef.current?.addEventListener("click", () => {
+      console.log("原生事件：父元素 DOM 事件监听！");
+    });
+    this.childRef.current?.addEventListener("click", () => {
+      console.log("原生事件：子元素 DOM 事件监听！");
+    });
+    document.addEventListener("click", (e) => {
+      console.log("原生事件：document DOM 事件监听！");
+    });
+  }
+  parentClickFun = () => {
+    console.log("React 事件：父元素事件监听！");
+  };
+  childClickFun = () => {
+    console.log("React 事件：子元素事件监听！");
+  };
+  render() {
+    return (
+      <div ref={this.parentRef} onClick={this.parentClickFun}>
+        <div ref={this.childRef} onClick={this.childClickFun}>
+          分析事件执行顺序
+        </div>
+      </div>
+    );
+  }
+}
+export default App;
+```
+
+输出顺序为：
+
+```js
+原生事件：子元素 DOM 事件监听！ 
+原生事件：父元素 DOM 事件监听！ 
+React 事件：子元素事件监听！ 
+React 事件：父元素事件监听！ 
+原生事件：document DOM 事件监听！ 
+```
+
+### **事件绑定**
+
+在类组件中，事件中 `this` 的值将取决于调用上下文，而不是 事件定义的组件实例。
+
+由于事件处理函数通常是由浏览器事件系统调用的，而不是由 React 或组件实例调用的，因此在 React 类组件中 `this` 通常将会是 `undefined`。
+
+```tsx
+class ShowAlert extends React.Component {
+  showAlert() {
+    //点击按钮，则会发现控制台输出undefined
+    console.log("this ==",this);
+  }
+
+  render() {
+    return <button onClick={this.showAlert}>show</button>;
+  }
+}
+```
+
+为解决 React 类组件 `this` 绑定问题，可以使用以下绑定方式：
+
+- render 方法中使用 bind
+- render 方法中使用箭头函数
+- constructor 中 bind
+- 定义阶段使用箭头函数绑定
+
+#### render方法中使用 bind
+
+如果使用一个类组件，在其中给某个组件/元素一个`onClick`属性，它现在并会自定绑定其`this`到当前组件，解决这个问题的方法是在事件函数后使用`.bind(this)`将`this`绑定到当前组件中
+
+```jsx
+class App extends React.Component {
+  handleClick() {
+    console.log('this > ', this);
+  }
+  render() {
+    return (
+      <div onClick={this.handleClick.bind(this)}>test</div>
+    )
+  }
+}
+```
+
+这种方式在组件每次`render`渲染的时候，都会重新进行`bind`的操作，影响性能
+
+#### render方法中使用箭头函数
+
+通过`ES6`的上下文来将`this`的指向绑定给当前组件，同样再每一次`render`的时候都会生成新的方法，影响性能
+
+```jsx
+class App extends React.Component {
+  handleClick() {
+    console.log('this > ', this);
+  }
+  render() {
+    return (
+      <div onClick={e => this.handleClick(e)}>test</div>
+    )
+  }
+}
+```
+
+#### constructor中bind
+
+在`constructor`中预先`bind`当前组件，可以避免在`render`操作中重复绑定
+
+```jsx
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+    this.handleClick = this.handleClick.bind(this);
+  }
+  handleClick() {
+    console.log('this > ', this);
+  }
+  render() {
+    return (
+      <div onClick={this.handleClick}>test</div>
+    )
+  }
+}
+```
+
+#### 定义阶段使用箭头函数绑定
+
+跟上述方式三一样，能够避免在`render`操作中重复绑定，实现也非常的简单，如下：
+
+```jsx
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+  handleClick = () => {
+    console.log('this > ', this);
+  }
+  render() {
+    return (
+      <div onClick={this.handleClick}>test</div>
+    )
+  }
+}
+```
 
 
 

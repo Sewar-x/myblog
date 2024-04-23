@@ -333,6 +333,9 @@ key 值设置关键：**唯一且稳定**
 
 * 唯一表示能唯一表示一个节点
 * 稳定表示不会随意变化
+  * key不要使用随机值（随机数在下一次 render 时，会重新生成一个数字）
+  * 使用 index 作为 key值，对性能没有优化
+
 
 **key 属性作用：**
 
@@ -360,7 +363,60 @@ key 需要写在用数组渲染出来的元素内部，并且需要赋予其个�
 
   <img src="../../images/image-20240420101941306.png" alt="image-20240420101941306" style="zoom:50%;" />
 
-  
+
+
+**key 值判断过程**
+
+![img](../../images/3b9afe10-dd69-11eb-ab90-d9ae814b240d.png)
+
+
+
+**使用`key`与不使用`key`的区别**
+
+`react`组件中进行列表渲染的一个示例：
+
+```jsx
+const data = [
+  { id: 0, name: 'abc' },
+  { id: 1, name: 'def' },
+  { id: 2, name: 'ghi' },
+  { id: 3, name: 'jkl' }
+];
+
+const ListItem = (props) => {
+  return <li>{props.name}</li>;
+};
+
+const List = () => {
+  return (
+    <ul>
+      {data.map((item) => (
+        <ListItem name={item.name}></ListItem>
+      ))}
+    </ul>
+  );
+};
+```
+
+```js
+insertMovie() {
+  const newMovies = [000 ,...this.state.numbers];
+  this.setState({
+    movies: newMovies
+  })
+}
+```
+
+当拥有`key`的时候，`react`根据`key`属性匹配原有树上的子元素以及最新树上的子元素，像上述情况只需要将 000 元素插入到最前面位置：
+
+* 当没有`key`的时候，所有的`li`标签都需要进行修改
+* 而写`key`则涉及到了节点的增和删，发现旧`key`不存在了，则将其删除，新`key`在之前没有，则插入，这就增加性能的开销。
+
+并不是拥有`key`值代表性能越高，如果说只是文本内容改变了，不写`key`反而性能和效率更高，主要是因为不写`key`是将所有的文本内容替换一下，节点不会发生变化
+
+
+
+
 
 ### 实现流程
 
