@@ -49,7 +49,7 @@ tag:
 
 ---
 
-## 
+
 
 ## 特点
 
@@ -231,7 +231,9 @@ React 组件为函数，每次渲染组件时，就是重新调用一次函数�
 
 **示例**
 
-在受控组件中，我们将使用React的state来管理表单元素的值。在函数组件中，我们可以使用React的`useState` Hook来创建和管理状态。
+在受控组件中，我们将使用React的state来管理表单元素的值。
+
+在函数组件中，我们可以使用React的`useState` Hook来创建和管理状态。
 
 ```jsx
 import React, { useState } from 'react';  
@@ -309,6 +311,223 @@ export default UncontrolledComponent;
 |    **性能**    | 可能需要更多的计算和渲染，因为每次值改变都会触发状态更新和组件重渲染 | 性能可能稍好，因为不涉及到React状态的更新和组件重渲染 |
 |  **适用场景**  | 复杂表单、需要验证和处理表单数据                             | 简单表单、无需额外处理表单数据、与第三方库集成        |
 |  **推荐程度**  | 推荐用于复杂表单和需要精确控制表单元素值的情况               | 在简单表单或特定场景下使用，通常不是首选              |
+
+## 高阶组件
+
+### 概念
+
+高阶函数（Higher-order function），至少满足下列一个条件的函数：
+
+- 接受一个或多个函数作为输入
+- 输出一个函数
+
+在`React`中，高阶组件即接受一个或多个组件作为参数并且返回一个组件，本质也就是一个函数，并不是一个组件
+
+```jsx
+const EnhancedComponent = highOrderComponent(WrappedComponent);
+```
+
+上述代码中，该函数接受一个组件`WrappedComponent`作为参数，返回加工过的新组件`EnhancedComponent`
+
+高阶组件的这种实现方式，本质上是一个装饰者设计模式。
+
+### 编写高阶组件
+
+最基本的高阶组件的编写模板如下：
+
+```jsx
+import React from 'react';  
+  
+// 高阶组件  
+const withExample = (WrappedComponent) => {  
+  return class extends React.Component {  
+    render() {  
+      // 在这里可以添加一些额外的逻辑，比如 props 的处理、状态的管理等  
+      // 然后将处理后的 props 传递给被包装的组件  
+      return <WrappedComponent {...this.props} />;  
+    }  
+  };  
+};  
+  
+// 使用高阶组件  
+const MyComponent = (props) => {  
+  return <div>{props.text}</div>;  
+};  
+  
+const MyComponentWithExample = withExample(MyComponent);  
+  
+// 在父组件中使用  
+function App() {  
+  return (  
+    <div className="App">  
+      <MyComponentWithExample text="Hello, World!" />  
+    </div>  
+  );  
+}  
+  
+export default App;
+```
+
+在这个例子中，`withExample` 是一个高阶组件。它接收一个组件 `WrappedComponent` 作为参数，并返回一个新的组件。这个新的组件在渲染时会将 `WrappedComponent` 作为其子组件，并可以将一些额外的逻辑或属性传递给 `WrappedComponent`。
+
+### 思想
+
+把通用的逻辑放在高阶组件中，对组件实现一致的处理，从而实现代码的复用；
+
+所以，高阶组件的主要功能是**封装并分离组件的通用逻辑**，让通用逻辑在组件间更好地被复用。
+
+### 编写高阶组件约定
+
+- **纯函数**：高阶组件应该是一个纯函数，即对于相同的输入，它应该总是返回相同的输出，并且不直接修改其参数。这有助于避免在组件树中引入不可预测的状态和行为。
+- **传递 props**：高阶组件应该透明地传递其接收到的 props 到被包装的组件。这通常通过扩展（spread）`this.props` 或使用其他适当的属性传递机制来实现。
+- **不要修改组件**：高阶组件不应该修改传入的组件；它们应该返回一个新的组件，该组件在渲染时使用或包装传入的组件。
+- **命名约定**：高阶组件通常以 `with` 开头来命名，例如 `withRouter`、`withStyles` 等。这种命名约定有助于识别哪些组件是高阶组件。
+- **组合多个 HOC**：高阶组件可以组合使用，即一个高阶组件可以包装另一个高阶组件。这有助于构建具有多个功能的强大组件。但是，要注意不要创建过深的组件树，这可能会导致性能问题和调试困难。
+- **静态方法**：高阶组件应该保留被包装组件的静态方法。这可以通过使用 `hoist-non-react-statics` 这样的库来自动实现，或者手动复制静态方法。
+- **Ref 转发**：如果需要访问被包装组件的 ref，则应该使用 React 16.3+ 引入的 `React.forwardRef` API 来转发 ref。这允许父组件通过 ref 访问被包装组件的实例。
+- **避免无限循环**：确保高阶组件不会导致渲染循环。例如，如果一个高阶组件在渲染时又包装了自身，这会导致无限循环。
+
+
+
+### 高阶组件的ref
+
+高阶组件可以传递所有的`props`，但是不能传递`ref`;
+
+如果向一个高阶组件添加`refe`引用，那么`ref` 指向的是最外层容器组件实例的，而不是被包裹的组件;
+
+如果需要传递`refs`的话，则使用`React.forwardRef`，将高阶组件的 ref 转发到被包裹的组件中，如下：
+
+```jsx
+// 高阶组件
+function withLogging(WrappedComponent) {
+    // 被包裹的组件
+    class Enhance extends WrappedComponent {
+        // 在挂载时，给组件添加打印日志
+        componentWillReceiveProps() {
+            console.log('Current props', this.props);
+            console.log('Next props', nextProps);
+        }
+        render() {
+            // 获取组件的属性
+            const {forwardedRef, ...rest} = this.props;
+            // 把 forwardedRef 赋值给被包裹组件的 ref，达到对高级组件的引用实际为被包裹组件的引
+            return <WrappedComponent {...rest} ref={forwardedRef} />;
+        }
+    };
+
+    // React.forwardRef 方法会传入 props 和 ref 两个参数给其回调函数
+    // 所以这边的 ref 是由 React.forwardRef 提供的
+    function forwardRef(props, ref) {
+        // 传入高阶组件的属性和引用
+        return <Enhance {...props} forwardRef={ref} />
+    }
+
+    return React.forwardRef(forwardRef);
+}
+const EnhancedComponent = withLogging(SomeComponent);
+```
+
+### 应用
+
+高阶组件能够提高代码的复用性和灵活性，在实际应用中，常常用于与核心业务无关但又在多个模块使用的功能，如权限控制、日志记录、数据校验、异常处理、统计上报等。
+
+#### 获取异步数据
+
+存在一个组件，需要从缓存中获取数据，然后渲染。一般情况，我们会如下编写：
+
+```jsx
+import React, { Component } from 'react'
+
+class MyComponent extends Component {
+
+  componentWillMount() {
+      let data = localStorage.getItem('data');
+      this.setState({data});
+  }
+  
+  render() {
+    return <div>{this.state.data}</div>
+  }
+}
+```
+
+上述代码当然可以实现该功能，但是如果还有其他组件也有类似功能的时候，每个组件都需要重复写`componentWillMount`中的代码，这明显是冗杂的
+
+下面就可以通过高价组件来进行改写，如下：
+
+```jsx
+import React, { Component } from 'react'
+// 高阶组件接收需要接收数据的组件，并在挂载时获取数据
+function withPersistentData(WrappedComponent) {
+  return class extends Component {
+    // 高阶组件在挂载时获取数据
+    componentWillMount() {
+      let data = localStorage.getItem('data');
+        this.setState({data});
+    }
+    
+    render() {
+      // 通过{...this.props} 把传递给当前组件的属性继续传递给被包装的组件WrappedComponent
+      return <WrappedComponent data={this.state.data} {...this.props} />
+    }
+  }
+}
+
+// 被包裹的组件
+class MyComponent2 extends Component {  
+  render() {
+    return <div>{this.props.data}</div>
+  }
+}
+// 通过高阶组件包裹后，MyComponentWithPersistentData 将在组件挂载时获取异步数据，然后渲染
+const MyComponentWithPersistentData = withPersistentData(MyComponent2)
+```
+
+
+
+#### 组件渲染性能监控
+
+```jsx
+// 被包裹测试的渲染组件
+class Home extends React.Component {
+    render() {
+        return (<h1>Hello World.</h1>);
+    }
+}
+
+// 高阶组件-获取组件渲染时间
+function withTiming(WrappedComponent) {
+    return class extends WrappedComponent {
+        constructor(props) {
+            super(props);
+            this.start = 0; // 开始渲染时间
+            this.end = 0; // 渲染完成时间
+        }
+        // 组件挂载时渲染时，获取开始渲染时间
+        componentWillMount() {
+            super.componentWillMount && super.componentWillMount();
+            this.start = Date.now();
+        }
+        // 组件挂载完成计算渲染时间
+        componentDidMount() {
+            super.componentDidMount && super.componentDidMount();
+            this.end = Date.now();
+            console.log(`${WrappedComponent.name} 组件渲染时间为 ${this.end - this.start} ms`);
+        }
+        render() {
+            return super.render();
+        }
+    };
+}
+// 计算 Home 组件的渲染时间
+export default withTiming(Home)
+```
+
+
+
+---
+
+
 
 
 
@@ -2079,7 +2298,11 @@ function Counter() {
 
 ## **Ref**
 
-**摘要**
+`React` 中的 `Refs`提供了一种方式：允许我们访问 `DOM`节点或在 `render`方法中创建的 `React`元素。
+
+本质为`ReactDOM.render()` 返回的组件实例，如果是渲染组件则返回的是组件实例，如果渲染`dom`则返回的是具体的`dom`节点
+
+### **摘要**
 
 - ref 是一种脱围机制，用于**保留不用于渲染的值**。 你不会经常需要它们。
 - ref 是一个普通的 JavaScript 对象，具有一个名为 `current` 的属性，你可以对其进行读取或设置。
@@ -2091,6 +2314,74 @@ function Counter() {
 > ref详细解释参考官网：[使用 ref 引用值 – React 中文文档 (docschina.org)](https://react.docschina.org/learn/referencing-values-with-refs#)
 
 ### **使用**
+
+#### 传入字符串
+
+在对应元素或组件中 `ref` 属性
+
+```jsx
+class MyComponent extends React.Component {
+  constructor(props) {
+    super(props);
+    this.myRef = React.createRef();
+  }
+  render() {
+    return <div ref="myRef" />;
+  }
+}
+```
+
+访问当前节点的方式如下：
+
+```js
+this.refs.myref.innerHTML = "hello";
+```
+
+#### 传入对象
+
+`refs` 通过 `React.createRef()` 创建，然后将 `ref` 属性添加到`React`元素中，如下：
+
+```jsx
+class MyComponent extends React.Component {
+  constructor(props) {
+    super(props);
+    this.myRef = React.createRef();
+  }
+  render() {
+    return <div ref={this.myRef} />;
+  }
+}
+```
+
+当 `ref` 被传递给 `render` 中的元素时，对该节点的引用可以在 `ref` 的 `current` 属性中访问
+
+```js
+const node = this.myRef.current;
+```
+
+#### 传入函数
+
+当`ref`传入为一个函数的时候，在渲染过程中，回调函数参数会传入一个元素对象，然后通过实例将对象进行保存
+
+```jsx
+class MyComponent extends React.Component {
+  constructor(props) {
+    super(props);
+    this.myRef = React.createRef();
+  }
+  render() {
+    return <div ref={element => this.myRef = element} />;
+  }
+}
+```
+
+获取`ref`对象只需要通过先前存储的对象即可
+
+```js
+const node = this.myRef 
+```
+
+#### 传入 HOOK
 
 通过从 React 导入 `useRef` Hook 来为你的组件添加一个 ref：
 
@@ -2154,15 +2445,13 @@ const myRef = useRef(null);
 在 React 中，每次更新都分为 [两个阶段](https://react.docschina.org/learn/render-and-commit#step-3-react-commits-changes-to-the-dom)：
 
 - 在 **渲染** 阶段， React 调用你的组件来确定屏幕上应该显示什么。
-- 在 **提交** 阶段， React 把变更应用于 DOM。
+- 在 **提交** 阶段， **React 把变更应用于 DOM**。
 
 在第一次渲染期间，DOM 节点尚未创建，因此 `ref.current` 将为 `null`。在渲染更新的过程中，DOM 节点还没有更新。所以读取它们还为时过早。
 
 React 在提交阶段设置 `ref.current`。在更新 DOM 之前，React 将受影响的 `ref.current` 值设置为 `null`。更新 DOM 后，React 立即将它们设置到相应的 DOM 节点。
 
 
-
-**摘要**
 
 - Refs 是一个通用概念，但大多数情况下你会使用它们来保存 DOM 元素。
 - 你通过传递 `<div ref={myRef}>` 指示 React 将 DOM 节点放入 `myRef.current`。
