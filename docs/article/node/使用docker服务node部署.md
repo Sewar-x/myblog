@@ -3,7 +3,9 @@ star: true
 category:
   - Node.js
 tag:
-  - docker 部署 Node 服务
+  - Node.js
+  - Docker
+  - 部署
 ---
 # 使用 docker 部署 Node 服务
 

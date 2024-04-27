@@ -1,15 +1,10 @@
 ---
-
 star: true
 order: 3
 category:
-
   - React
-
 tag:
-
   - Fiber
-
 ---
 
 # React Fiber
