@@ -22,14 +22,28 @@ React 组件 `render`的触发时机：
 
 父组件渲染导致子组件渲染，但子组件并没有发生任何改变，此时可以从避免多余的渲染。
 
+例如：当我们想要更新一个子组件的时候，如下图绿色部分：
+
+![img](../images/b41f6f30-f270-11eb-ab90-d9ae814b240d.png)
+
+理想状态只调用该路径下的组件`render`：
+
+![img](../images/bc0f2460-f270-11eb-85f6-6fac77c0c9b3.png)
+
+但是`react`的默认做法是调用所有组件的`render`（父组件发生 render，子组件一定也会 render），再对生成的虚拟`DOM`进行对比（黄色部分），如不变则不进行更新
+
+![img](../images/c2f0c4f0-f270-11eb-85f6-6fac77c0c9b3.png)
+
 ### 实现
 
 在 React 中提高组件渲染效率方法有：通过判断属性和状态变化避免重复渲染、缓存组件避免重新渲染、使用key 复用组件避免不必要渲染、懒加载组件。
 
-- **使用 [shouldComponentUpdate](https://zh-hans.react.dev/reference/react/Component#shouldcomponentupdate)；**
-- **使用 [PureComponent](https://zh-hans.react.dev/reference/react/PureComponent)；**
-- **使用 [React.memo](https://zh-hans.react.dev/reference/react/memo) 缓存组件；**
-- **使用 [useMemo](https://zh-hans.react.dev/reference/react/useMemo) 缓存组件**；
+- **使用 [shouldComponentUpdate](https://zh-hans.react.dev/reference/react/Component#shouldcomponentupdate)**：确定是否可以跳过重新渲染；
+- **使用 [PureComponent](https://zh-hans.react.dev/reference/react/PureComponent)**：当 props 和 state 与之前保持一致时会跳过重新渲染；
+- **组件缓存**：
+  - **使用 [React.memo](https://zh-hans.react.dev/reference/react/memo) 缓存组件；**
+  - **使用 [useMemo](https://zh-hans.react.dev/reference/react/useMemo) 缓存组件**；
+
 - **优化state和props**：
   - 尽量减少组件的state和props，只保留必要的部分。
   - 对于大型对象或数组，尽量使用不可变数据结构，或者提供一个新的对象或数组，而不是直接修改原对象或数组。这样可以避免不必要的渲染，因为React会使用浅比较来检查props和state是否发生了变化。
@@ -46,8 +60,12 @@ React 组件 `render`的触发时机：
 - **使用context和hooks管理状态**
   - 避免在组件树中通过props逐层传递状态，而是使用React的context和hooks来管理状态。
   - 这样，你可以将状态存储在更高级别的组件中，并通过context和hooks在需要的地方访问它，从而减少了不必要的props传递和渲染。
-  
 
+- **避免使用内联函数**：
+  - 使用内联函数，则每次调用`render`函数时都会创建一个新的函数实例。
+
+- **使用 React Fragments 避免额外标记**：
+  - 
 
 
 
@@ -185,3 +203,68 @@ const MarkdownPreview = lazy(() => import('./MarkdownPreview.js'));
 ```
 
 在这个例子中，`MarkdownPreview` 的代码只有在你尝试渲染它时才会被加载。如果 `MarkdownPreview` 还没有加载完成，将显示 `Loading`。
+
+
+
+### 避免使用内联函数
+
+如果我们使用内联函数，则每次调用`render`函数时都会创建一个新的函数实例，如下：
+
+```jsx
+import React from "react";
+
+export default class InlineFunctionComponent extends React.Component {
+  render() {
+    return (
+      <div>
+        <h1>Welcome Guest</h1>
+        <input type="button" onClick={(e) => { this.setState({inputValue: e.target.value}) }} value="Click For Inline Function" />
+      </div>
+    )
+  }
+}
+```
+
+应该在组件内部创建一个函数，并将事件绑定到该函数本身。这样每次调用 `render` 时就不会创建单独的函数实例，如下：
+
+```jsx
+import React from "react";
+export default class InlineFunctionComponent extends React.Component {
+  //组件内部创建一个函数 
+  setNewStateData = (event) => {
+    this.setState({
+      inputValue: e.target.value
+    })
+  }
+  
+  render() {
+    return (
+      <div>
+        <h1>Welcome Guest</h1>
+        <input type="button" onClick={this.setNewStateData} value="Click For Inline Function" />
+      </div>
+    )
+  }
+}
+```
+
+
+
+### 使用 React Fragments 避免额外标记
+
+用户创建新组件时，每个组件应具有单个父标签。父级不能有两个标签，所以顶部要有一个公共标签，所以我们经常在组件顶部添加额外标签`div`
+
+这个额外标签除了充当父标签之外，并没有其他作用，这时候则可以使用`fragement`，其不会向组件引入任何额外标记，但它可以作为父级标签的作用，如下所示：
+
+```jsx
+export default class NestedRoutingComponent extends React.Component {
+    render() {
+        return (
+            <>
+                <h1>This is the Header Component</h1>
+                <h2>Welcome To Demo Page</h2>
+            </>
+        )
+    }
+}
+```

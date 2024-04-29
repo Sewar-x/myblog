@@ -31,7 +31,7 @@ export default [ // 导航栏配置
             { text: 'Vue Vs React', link: '/article/React/VueVsReact.md' },
             { text: 'webpack 专题', link: '/article/webpack/webpack构建原理.md' },
             { text: 'vite 专题', link: '/article/vite/' },
-            { text: 'Axios 专题', link: '/article/axios/' },
+            { text: 'Axios 专题', link: '/article/axios/axios源码分析' },
         ]
     },
     {
