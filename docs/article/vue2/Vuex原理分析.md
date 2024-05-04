@@ -166,7 +166,7 @@ tag:
 
   * 在组件的计算属性中，通过 getters 来动态获取 state 中的值。
 
-    ![](../flow-graph/vuex流程.png)
+    ![](../images/vuex流程.png)
 
   * Vuex 缺点：
 
@@ -181,7 +181,7 @@ tag:
   * `new Vue()` 创建 Vue 实例时在 init() 方法中调用  `beforeCreate` 钩子；
   * `beforeCreate` 钩子中执行 `vuexInit()` ：把 `options.store` （`Store` 实例）保存在所有组件的 `this.$store` 中。
 
-* ![](../flow-graph/vuex初始化过程.jpg)
+* ![](../images/vuex初始化过程.jpg)
 
   
 
@@ -235,7 +235,7 @@ tag:
 
       
 
-![](../flow-graph/vuex实例化过程.png)
+![](../images/vuex实例化过程.png)
 
 ## 相关问题
 

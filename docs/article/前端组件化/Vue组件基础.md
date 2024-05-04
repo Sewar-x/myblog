@@ -193,7 +193,7 @@ tag:
 
   * 整体执行顺序:
 
-  ![](../flow-graph/父子组件生命周期.png)
+  ![](../images/父子组件生命周期.png)
 
   * 加载渲染过程: 父 beforeCreate -> 父 created -> 父 beforeMount -> 子 beforeCreate -> 子 created -> 子 beforeMount -> 子 mounted -> 父 mounted
   * 组件更新过程:  父 beforeUpdate -> 子 beforeUpdate -> 子 updated -> 父 updated
@@ -500,7 +500,7 @@ tag:
 
 * 缓存流程分析
 
-  ![](../flow-graph/keep-alive渲染流程.png)
+  ![](../images/keep-alive渲染流程.png)
 
 * 相关问题
 

@@ -548,7 +548,7 @@ app.listen(port, () => {
 
 
 
-![](../flow-graph/ssr过程.png)
+![](../images/ssr过程.png)
 
 > 渲染流程：服务端渲染的主要流程是在服务器端生成完整的HTML页面，并将其发送给浏览器展示。
 >

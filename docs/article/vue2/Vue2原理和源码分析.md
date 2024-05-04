@@ -46,7 +46,7 @@ tag:
 
 * vue 构建流程：
 
-  ![](../flow-graph/vue构建流程.png)
+  ![](../images/vue构建流程.png)
 
 * Vue.js 源码是基于 [Rollup](https://github.com/rollup/rollup) 构建的，它的构建相关配置都在 scripts 目录下
 
@@ -218,9 +218,9 @@ tag:
 
 
 
-![vue生命周期](../flow-graph/vue生命周期.png)
+![vue生命周期](../images/vue生命周期.png)
 
-![vue生命周期](../flow-graph/响应式原理流程图.jpeg)
+![vue生命周期](../images/响应式原理流程图.jpeg)
 
 > 总体流程：初始化 ->挂载组件 -> 模板编译 ->  依赖收集 -> 数据更新 -> 实例销毁
 
@@ -255,7 +255,7 @@ tag:
 
 * 总流程图：
 
-  ![](../flow-graph/vue创建流程.png)
+  ![](../images/vue创建流程.png)
 
   简化流程：
 
@@ -683,7 +683,7 @@ Vue 一共有 8 个生命阶段，分别是创建前、创建后、加载前、�
 
 初始化总体流程
 
-![](../flow-graph/初始化过程.png)
+![](../images/初始化过程.png)
 
 **源码分析**
 
@@ -814,7 +814,7 @@ Vue 一共有 8 个生命阶段，分别是创建前、创建后、加载前、�
     * vue 内部通过重写函数解决了这个问题：在 Vue3.0 中已经不使用这种方式了，而是 通过使用 Proxy 对对象进行代理，从而实现数据劫持。
     * 使用 Proxy 的好处是它可以完美的监 听到任何方式的数据改变，唯一的缺点是兼容性的问题，因为这是 ES6 的语法。
 
-  ![](../flow-graph/响应式流程.png)
+  ![](../images/响应式流程.png)
 
 
 #### **响应式系统流程**
@@ -961,7 +961,7 @@ Dep.target = null
 
 **源码分析：**
 
-* 总体流程图：![](../flow-graph/响应式初始化流程.png)
+* 总体流程图：![](../images/响应式初始化流程.png)
 
   * **`initState`**： 在 Vue 的初始化阶段，`_init` 方法执行的时候，会执行 `initState(vm)` 方法: 主要是对 `props`、`methods`、`data`、`computed` 和 `wathcer` 等属性做了初始化操作。它的定义在 `src/core/instance/state.js` 
 
@@ -1399,7 +1399,7 @@ new Vue({
   
 * 总体流程图：
 
-  ![](../flow-graph/mount过程.png)
+  ![](../images/mount过程.png)
 
 * 原型上的 `$mount` 方法： 在 [src/platform/web/runtime/index.js](https://github.com/vuejs/vue/blob/v2.3.0/src/platforms/web/runtime/index.js) 中定义，它是可以被 `runtime only` 版本的 Vue 直接使用的。
 
@@ -1880,7 +1880,7 @@ new Vue({
 
 * 模板编译总体流程
 
-  ![](../flow-graph/模板编译过程.png)
+  ![](../images/模板编译过程.png)
 
 
 
@@ -2402,7 +2402,7 @@ new Vue({
   * 渲染阶段：将 render function 渲染成 Virtual Dom Node; 对应以下 render -> patch 阶段；
   * 挂载阶段：将  Virtual Dom Node 调用 DOM API 创建页面；对应以下 render -> patch  阶段;
   
-  ![](../flow-graph/首次渲染总流程.png)
+  ![](../images/首次渲染总流程.png)
 
 ### Virtual DOM
 
@@ -2572,7 +2572,7 @@ tag:'div',	/*说明这是一个div标签*/
 * Virtual DOM 源码中定义：定义在 [src/core/vdom/vnode.js](https://github.com/vuejs/vue/blob/v2.3.0/src/core/vdom/vnode.js) 中。
 
   ```js
-  ![render方法](../flow-graph/render方法.png)export default class VNode {
+  ![render方法](../images/render方法.png)export default class VNode {
     tag: string | void;
     data: VNodeData | void;
     children: ?Array<VNode>;
@@ -2655,7 +2655,7 @@ tag:'div',	/*说明这是一个div标签*/
 
 * render 流程图：
 
-  ![](../flow-graph/render方法.png)
+  ![](../images/render方法.png)
 
 * Vue 的 `_render` 方法：定义在 [src/core/instance/render.js](https://github.com/vuejs/vue/blob/v2.3.0/src/core/instance/render.js) 文件中：
 
@@ -3083,7 +3083,7 @@ tag:'div',	/*说明这是一个div标签*/
   * patch 由 update 方法根据参数判断首次渲染还是数据更新，给 patch 传入不同参数。
 * 总体流程：
 
-![](../flow-graph/组件更新.png)
+![](../images/组件更新.png)
 
 * `vm.__patch__` 方法：
 
@@ -3212,7 +3212,7 @@ tag:'div',	/*说明这是一个div标签*/
 
 * createElem 流程：
 
-  ![](../flow-graph/createElem流程.png)
+  ![](../images/createElem流程.png)
 
   ```js
     /**
@@ -3516,13 +3516,13 @@ tag:'div',	/*说明这是一个div标签*/
 
 * 组件创建总体流程图：
 
-  ![](../flow-graph/createComponent.png)
+  ![](../images/createComponent.png)
 
 * render 方法调用的 _createElement() 中的 `createComponent` 方法：
 
   * 流程图
 
-    ![](../flow-graph/第二次createComponent流程.png)
+    ![](../images/第二次createComponent流程.png)
 
   * 源码：定义在 [src/core/vdom/create-component.js](https://github.com/vuejs/vue/blob/v2.3.0/src/core/vdom/create-component.js) 文件中。
 
@@ -3984,7 +3984,7 @@ tag:'div',	/*说明这是一个div标签*/
 
 * 总体更新流程
 
-  ![](../flow-graph/派发更新.png)
+  ![](../images/派发更新.png)
 
 #### 异步更新 
 
@@ -4858,7 +4858,7 @@ tag:'div',	/*说明这是一个div标签*/
 
 * 选项合并流程：
 
-  ![](../flow-graph/选项合并流程.png)
+  ![](../images/选项合并流程.png)
 
   
 
@@ -5582,7 +5582,7 @@ tag:'div',	/*说明这是一个div标签*/
 
 * watcher 初始化流程：
 
-  ![](../flow-graph/watcher初始化.png)
+  ![](../images/watcher初始化.png)
 
 * 源码分析：
 

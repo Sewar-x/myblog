@@ -141,7 +141,7 @@ tag:
 
 ## 总体流程 
 
-![](../flow-graph/路由原理.png)
+![](../images/路由原理.png)
 
 ## 路由对象
 
@@ -369,7 +369,7 @@ export default class VueRouter {
       * 要在服务端增加一个覆盖所有情况的候选资源：如果 URL 匹配不到任何静态资源，则应该返回同一个 `index.html` 页面，这个页面就是你 app 依赖的页面。
   * **Abstract 模式：** 支持所有javascript运行模式。如果发现没有浏览器的API，路由会自动强制进入这个模式。
 
-* 三种模式中类继承关系![](../flow-graph/路由模式类关系.png)
+* 三种模式中类继承关系![](../images/路由模式类关系.png)
 
 * 三种模式的路由初始化： 在 VueRouter 构造函数中根据配置项创建路由模式。
 
@@ -381,7 +381,7 @@ export default class VueRouter {
 
 ## 路由安装
 
-![](../flow-graph/路由安装.png)
+![](../images/路由安装.png)
 
 * Vue-Router 的入口文件是 `src/index.js`，其中定义了 `VueRouter` 类，也实现了 `install` 的静态方法：`VueRouter.install = install`，它的定义在 `src/install.js` 中：
 

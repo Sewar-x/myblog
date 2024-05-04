@@ -94,6 +94,7 @@ export default [ // 导航栏配置
         text: '项目搭建',
         ariaLabel: '项目搭建到原理分析',
         children: [
+            { text: '项目总结', link: '/article/项目总结/项目总结.md' },
             { text: '从零到一搭建SSR项目', link: '/article/项目总结/从零到一搭建SSR项目.md' },
             { text: '从零到一搭建移动端SSG项目', link: '/article/项目总结/从零到一搭建移动端SSG项目.md' },
             { text: '移动端SSG项目实践', link: '/article/项目总结/移动端SSG项目实践.md' },

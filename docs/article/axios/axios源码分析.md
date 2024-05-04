@@ -33,7 +33,7 @@ tag:
 
 ### 执行流程
 
-![](../flow-graph/axios流程.png)
+![](../images/axios流程.png)
 
 * axios 执行流程：
   1. 在实例化 axios 时，通过创建 axios 实例添加实例配置或修改默认配置
