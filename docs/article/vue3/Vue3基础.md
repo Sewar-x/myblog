@@ -62,11 +62,53 @@ Vue 3 的生命周期钩子名称前都加上了 `on` 前缀，这是为了与�
 4. **属性变化通知**：当响应式属性被修改时（即setter被调用），Vue会触发一个更新流程。在这个流程中，Vue会通知所有依赖于这个属性的Watcher对象进行更新。**对于与`watch`侦听器关联的Watcher对象，Vue会执行侦听器的回调函数。**
 5. **执行回调函数**：在Watcher对象被通知更新后，它会执行与之关联的回调函数（即`watch`侦听器的回调函数）。这个回调函数可以接受新旧值作为参数，并可以根据需要执行任何逻辑。
 
+### watch 回调的触发时机
+
+> 引入自官方文档解释：[侦听器 | Vue.js (vuejs.org)](https://cn.vuejs.org/guide/essentials/watchers.html#watcheffect)
+
+当你更改了响应式状态，它可能会同时触发 Vue 组件更新和侦听器回调。
+
+**默认情况下，侦听器回调会在父组件更新 (如有) 之后、所属组件的 DOM 更新之前被调用。**
+
+意味着侦听器回调在组件更新 updated 生命周期之后，在组件被挂载到 DOM 之前调用，此时访问组件 DOM 是无法访问到的。
+
+如果你尝试在侦听器回调中访问所属组件的 DOM，那么 DOM 将处于更新前的状态。
+
+
+
 
 
 ### `watchEffect()`
 
 > 官方文档：[侦听器 | Vue.js (vuejs.org)](https://cn.vuejs.org/guide/essentials/watchers.html#watcheffect)
+
+`watchEffect()` 允许我们自动跟踪回调的响应式依赖：
+
+```vue
+watchEffect(async () => {
+  const response = await fetch(
+    `https://jsonplaceholder.typicode.com/todos/${todoId.value}`
+  )
+  data.value = await response.json()
+})
+```
+
+这个例子中，回调会立即执行，不需要指定 `immediate: true`。在执行期间，它会自动追踪 `todoId.value` 作为依赖（和计算属性类似）。每当 `todoId.value` 变化时，回调会再次执行。有了 `watchEffect()`，我们不再需要明确传递 `todoId` 作为源值。
+
+### `watch` vs. `watchEffect`
+
+> 官方文档：[侦听器 | Vue.js (vuejs.org)](https://cn.vuejs.org/guide/essentials/watchers.html#watch-vs-watcheffect)
+
+`watch` 和 `watchEffect` 都能响应式地执行有副作用的回调。它们之间的主要区别是追踪响应式依赖的方式：
+
+- `watch` 只追踪明确侦听的数据源。它不会追踪任何在回调中访问到的东西。另外，仅在数据源确实改变时才会触发回调。`watch` 会避免在发生副作用时追踪依赖，因此，我们能更加精确地控制回调函数的触发时机。
+- `watchEffect`，则会在副作用发生期间追踪依赖。它会在同步执行过程中，自动追踪所有能访问到的响应式属性。这更方便，而且代码往往更简洁，但有时其响应性依赖关系会不那么明确。
+
+
+
+
+
+
 
 
 

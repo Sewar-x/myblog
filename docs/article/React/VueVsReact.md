@@ -26,6 +26,106 @@ tag:
 |            **模板引用**            | Vue2中：模板中的元素或组件上使用`ref`属性，在Vue实例的方法或生命周期钩子中通过`this.$refs`来访问。<br />Vue3中：模板中使用`ref`函数来创建引用，在 `setup` 函数中通过 `import { ref } from 'vue'; ` 创建 ref 模板同名 ref 变量引用模板。 | `useRef`钩子来创建引用，通用 JSX 使用 `ref = ref变量名 ` 进行引用 |
 |             **传送门**             | [Teleport](https://cn.vuejs.org/guide/built-ins/teleport.html)：引入了 `<Teleport>` 组件，将子组件渲染到 DOM 树中不同于其父组件位置的能力 | [Portals](https://react.docschina.org/reference/react-dom/createPortal#createportal)：通过`createPortal` 允许你将 JSX 作为 children 渲染至 DOM 的不同部分 |
 |            **生命周期**            | Vue 2.x有`beforeCreate`、`created`、`beforeMount`、`mounted`、`beforeUpdate`、`updated`、`beforeDestroy`和`destroyed`等生命周期钩子。<br />Vue 3.x引入了Composition API，提供了`onMounted`、`onUpdated`、`onUnmounted`等函数式API来替代部分生命周期钩子。 | React有`constructor`、`componentDidMount`、`componentDidUpdate`、`componentWillUnmount`等生命周期方法。<br />在React 16.8及以后的版本中，引入了Hooks API（如`useEffect`、`useState`等），使得在没有类的情况下使用状态以及其他React特性成为可能。 |
+|            **逻辑复用**            |              Vue3中采用组合式 API 逻辑组织能力               |                   React 中采用 React Hooks                   |
+|                                    |                                                              |                                                              |
+
+
+
+## 组合式 API 与 React Hooks
+
+> 以下对比来自Vue3官方文档：[组合式 API 常见问答 | Vue.js (vuejs.org)](https://cn.vuejs.org/guide/extras/composition-api-faq.html#comparison-with-react-hooks)
+
+组合式 API 提供了和 React Hooks 相同级别的逻辑组织能力，但它们之间有着一些重要的区别。
+
+React Hooks 在组件每次更新时都会重新调用。这就产生了一些即使是经验丰富的 React 开发者也会感到困惑的问题。这也带来了一些性能问题，并且相当影响开发体验。例如：
+
+- Hooks 有严格的调用顺序，并不可以写在条件分支中。
+
+- React 组件中定义的变量会被一个钩子函数闭包捕获，若开发者传递了错误的依赖数组，它会变得“过期”。这导致了 React 开发者非常依赖 ESLint 规则以确保传递了正确的依赖，然而，这些规则往往不够智能，保持正确的代价过高，在一些边缘情况时会遇到令人头疼的、不必要的报错信息。
+
+  > 在Vue 3的组合式API和React Hooks中，闭包变量处理的差异主要体现在以下方面：
+  >
+  > **Vue 3 组合式API**
+  >
+  > 在Vue 3中，由于`setup()`或`<script setup>`只被调用一次，并且Vue的响应式系统运行时会自动收集依赖，因此开发者不需要担心闭包变量的问题。这意味着你可以在`setup()`函数中定义响应式状态和方法，然后在组件的其他部分（如模板或计算属性）中直接使用它们，而无需担心闭包或作用域的问题。
+  >
+  > **React Hooks**
+  >
+  > 在React中，由于Hooks在每次组件更新时都会重新调用，因此React组件中定义的变量会被钩子函数闭包捕获。这可能导致所谓的“过期闭包”问题，即闭包在创建时捕获的外部变量的值可能在后续组件更新时已经不再准确。为了解决这个问题，React开发者需要依赖ESLint规则来确保传递了正确的依赖数组。然而，这些规则往往不够智能，而且在一些边缘情况下可能会引发不必要的报错信息。
+  >
+  > **具体例子**
+  >
+  > 假设我们有一个计数器组件，它使用了一个状态变量`count`和一个更新该变量的函数`setCount`。
+  >
+  > **Vue 3 组合式API**
+  >
+  > ```javascript
+  > <script setup>  
+  > import { ref } from 'vue'  
+  >   
+  > const count = ref(0)  
+  > const setCount = (newValue) => {  
+  >   count.value = newValue  
+  > }  
+  > </script>  
+  >   
+  > <template>  
+  >   <button @click="setCount(count + 1)">Count: {{ count }}</button>  
+  > </template>
+  > ```
+  >
+  > 在上面的Vue代码中，我们直接在`setup()`或`<script setup>`中定义了`count`和`setCount`，并在模板中直接使用了它们。由于`setup()`只被调用一次，并且Vue的响应式系统会自动处理依赖，因此这里不存在闭包变量的问题。
+  >
+  > **React Hooks**
+  >
+  > ```javascript
+  > import React, { useState } from 'react';  
+  >   
+  > function Counter() {  
+  >   const [count, setCount] = useState(0);  
+  >   
+  >   const handleClick = () => {  
+  >     setCount(count + 1);  
+  >   };  
+  >   
+  >   return (  
+  >     <button onClick={handleClick}>Count: {count}</button>  
+  >   );  
+  > }
+  > ```
+  >
+  > 在上面的React代码中，我们使用了`useState`Hook来定义`count`和`setCount`。然而，由于`handleClick`是一个闭包函数，它捕获了外部作用域中的`count`变量。如果我们在后续组件更新中修改了`count`的值，但`handleClick`中的闭包仍然保存着旧值，这就可能导致“过期闭包”问题，(React Hooks 在组件每次更新时都会重新调用)。为了避免这个问题，我们需要确保传递给`useState`的依赖数组是正确的。然而，这往往需要依赖ESLint规则，并且可能引发不必要的报错信息。
+
+- 昂贵的计算需要使用 `useMemo`，这也需要传入正确的依赖数组。
+
+- 在默认情况下，传递给子组件的事件处理函数会导致子组件进行不必要的更新。子组件默认更新，并需要显式的调用 `useCallback` 作优化。这个优化同样需要正确的依赖数组，并且几乎在任何时候都需要。忽视这一点会导致默认情况下对应用进行过度渲染，并可能在不知不觉中导致性能问题。
+
+- 要解决变量闭包导致的问题，再结合并发功能，使得很难推理出一段钩子代码是什么时候运行的，并且很不好处理需要在多次渲染间保持引用 (通过 `useRef`) 的可变状态。
+
+相比起来，Vue 的组合式 API：
+
+- 仅调用 `setup()` 或 `<script setup>` 的代码一次。这使得代码更符合日常 JavaScript 的直觉，不需要担心闭包变量的问题。组合式 API 也并不限制调用顺序，还可以有条件地进行调用。
+- Vue 的响应性系统运行时会自动收集计算属性和侦听器的依赖，因此无需手动声明依赖。
+- 无需手动缓存回调函数来避免不必要的组件更新。Vue 细粒度的响应性系统能够确保在绝大部分情况下组件仅执行必要的更新。对 Vue 开发者来说几乎不怎么需要对子组件更新进行手动优化。
+
+**总结：**
+
+| 特性/差异点  | Vue 3 组合式 API                               | React Hooks                                                  |
+| :----------- | :--------------------------------------------- | ------------------------------------------------------------ |
+| 调用频率     | `setup()` 或 `<script setup>` 只调用一次       | 每个组件更新时都会重新调用                                   |
+| 调用顺序     | 不限制调用顺序，可以条件调用                   | 严格的调用顺序，不可在条件分支中调用                         |
+| 依赖管理     | 运行时自动收集计算属性和侦听器的依赖           | 需要手动声明依赖数组                                         |
+| 闭包变量     | 不需要担心闭包变量的问题                       | 变量会被钩子函数闭包捕获，可能“过期”                         |
+| 回调函数缓存 | 无需手动缓存回调函数                           | 需要手动使用 `useCallback` 缓存回调以避免不必要的更新        |
+| 昂贵的计算   | Vue 的响应性系统会自动处理                     | 需要手动使用 `useMemo` 缓存昂贵的计算                        |
+| 依赖数组问题 | 不存在依赖数组问题                             | 依赖数组不正确可能导致性能问题和错误                         |
+| ESLint 依赖  | 不需要依赖ESLint确保正确的依赖                 | 需要ESLint规则以确保传递了正确的依赖数组                     |
+| 引用保持     | 可通过 `ref()` 保持引用                        | 也可通过 `useRef()` 保持引用，但React中引用主要用于DOM引用或可变状态 |
+| 并发与推理   | 易于推理代码何时运行，`ref()` 用于保持可变状态 | 并发功能结合闭包变量使得代码运行时机难以推理                 |
+| 更新优化     | Vue细粒度的响应性系统确保仅执行必要更新        | 开发者需要显式优化子组件更新                                 |
+| 开发体验     | 符合日常JavaScript直觉，代码更易读和维护       | 可能因严格的调用顺序和依赖管理而影响开发体验                 |
+
+
 
 ## **模板引用**
 
