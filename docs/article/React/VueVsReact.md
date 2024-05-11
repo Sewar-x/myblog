@@ -8,26 +8,30 @@ tag:
 ---
 # Vue Vs React
 
+## 总览
+
 
 
 ![](../images/Vue-vs-React.png)
 
 
 
-|                                    |                             Vue                              |                            React                             |
-| :--------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
-|              **组件**              | **单文件组件**：使用template、script和style来分别定义组件的结构、逻辑和样式。 |    在React中，组件可以通过**函数式组件或类组件**来定义。     |
-|              **思想**              |  **数据的响应式**：当数据发生变化时，Vue会自动更新相关的DOM  | React 的核心思想是每次对于变更 `props` 或 `state`，触发新旧 Virtual DOM 进行 diff（协调算法），对比出变化的地方，然后通过 `render` 重新渲染界面。 |
+|                                    | Vue                                                          | React                                                        |
+| :--------------------------------: | :----------------------------------------------------------- | :----------------------------------------------------------- |
+|              **组件**              | **单文件组件**：使用template、script和style来分别定义组件的结构、逻辑和样式。 | 在React中，组件可以通过**函数式组件或类组件**来定义。        |
+|              **思想**              | **数据的响应式**：当数据发生变化时，Vue会自动更新相关的DOM   | React 的核心思想是每次对于变更 `props` 或 `state`，触发新旧 Virtual DOM 进行 diff（协调算法），对比出变化的地方，然后通过 `render` 重新渲染界面。 |
 |      **状态或变量响应式渲染**      | Vue使用**响应式系统来实现状态或变量**的响应式渲染。<br />当数据发生变化时，Vue会自动更新DOM。<br />这是通过Vue的响应式原理实现的，即Vue在初始化时将数据转换为getter/setter形式的对象，当数据变化时，setter会触发组件的重新渲染。 | React通过**setState方法来更新组件的状态**，并触发组件的重新渲染。<br />React使用一种名为“调和”（Reconciliation）的过程来比较新旧虚拟DOM树，并计算出最小的DOM更新。<br />当组件的状态或属性发生变化时，React会重新渲染该组件及其子组件。 |
-|             **数据流**             |                          单向数据流                          |                          单向数据流                          |
+|             **数据流**             | 单向数据流                                                   | 单向数据流                                                   |
 |    **组件通信**（父子组件通信）    | **通过*props*和*emit*进行**：父组件通过*props*向子组件传递数据或回调，子组件则通过emit触发事件来向父组件发送消息。 | **通过props和回调函数实现**：父组件通过props将数据或函数传递给子组件，子组件则可以通过这些props来接收数据和触发回调函数 |
 | **Prop逐级透传问题**（跨组件通信） | Vue**通过`provide`和`inject`机制**解决Prop逐级透传问题。<br />父组件使用`provide`提供数据或方法，子组件通过`inject`接收。 | React没有内置的Prop逐级透传机制，通常通过高阶组件或**Context API来实现**。<br />高阶组件是一种函数，它接收一个组件并返回一个新组件，新组件可以访问传递的props。<br />Context API提供了一种在组件树中共享值的方式，无需显式地通过每一层组件。 |
 |           **子组件渲染**           | **Vue插槽**是一种组件间内容分发机制，允许父组件将内容传递给子组件的指定位置。<br />通过`<slot>`标签定义插槽的位置，父组件使用`<template>`标签包裹内容，并通过具名插槽或作用域插槽将内容传递给子组件。 | **React通过 JSX children 属性**直接将组件标签内的内容作为prop传递给子组件。<br />组件标签内的内容会自动成为`children` prop，父组件可以将内容直接传递给子组件，并在子组件内部通过`props.children`或函数组件的props参数访问。 |
 |            **模板引用**            | Vue2中：模板中的元素或组件上使用`ref`属性，在Vue实例的方法或生命周期钩子中通过`this.$refs`来访问。<br />Vue3中：模板中使用`ref`函数来创建引用，在 `setup` 函数中通过 `import { ref } from 'vue'; ` 创建 ref 模板同名 ref 变量引用模板。 | `useRef`钩子来创建引用，通用 JSX 使用 `ref = ref变量名 ` 进行引用 |
 |             **传送门**             | [Teleport](https://cn.vuejs.org/guide/built-ins/teleport.html)：引入了 `<Teleport>` 组件，将子组件渲染到 DOM 树中不同于其父组件位置的能力 | [Portals](https://react.docschina.org/reference/react-dom/createPortal#createportal)：通过`createPortal` 允许你将 JSX 作为 children 渲染至 DOM 的不同部分 |
 |            **生命周期**            | Vue 2.x有`beforeCreate`、`created`、`beforeMount`、`mounted`、`beforeUpdate`、`updated`、`beforeDestroy`和`destroyed`等生命周期钩子。<br />Vue 3.x引入了Composition API，提供了`onMounted`、`onUpdated`、`onUnmounted`等函数式API来替代部分生命周期钩子。 | React有`constructor`、`componentDidMount`、`componentDidUpdate`、`componentWillUnmount`等生命周期方法。<br />在React 16.8及以后的版本中，引入了Hooks API（如`useEffect`、`useState`等），使得在没有类的情况下使用状态以及其他React特性成为可能。 |
-|            **逻辑复用**            |              Vue3中采用组合式 API 逻辑组织能力               |                   React 中采用 React Hooks                   |
-|                                    |                                                              |                                                              |
+|            **逻辑复用**            | Vue3中采用组合式 API 逻辑组织能力                            | React 中采用 React Hooks                                     |
+|            **虚拟DOM**             | **带编译时信息的虚拟 DOM**                                   | **纯运行时虚拟 DOM**                                         |
+|            **JSX 语法**            | 通过 `@vue/babel-plugin-jsx` 插件支持，语法与React JSX 不同，参考以下比较 | 默认支持                                                     |
+|           **函数式组件**           |                                                              |                                                              |
 
 
 
@@ -39,9 +43,11 @@ tag:
 
 React Hooks 在组件每次更新时都会重新调用。这就产生了一些即使是经验丰富的 React 开发者也会感到困惑的问题。这也带来了一些性能问题，并且相当影响开发体验。例如：
 
-- Hooks 有严格的调用顺序，并不可以写在条件分支中。
+- **Hooks 有严格的调用顺序，并不可以写在条件分支中**。
 
-- React 组件中定义的变量会被一个钩子函数闭包捕获，若开发者传递了错误的依赖数组，它会变得“过期”。这导致了 React 开发者非常依赖 ESLint 规则以确保传递了正确的依赖，然而，这些规则往往不够智能，保持正确的代价过高，在一些边缘情况时会遇到令人头疼的、不必要的报错信息。
+  > 具体解释可以参考：[React | Sewen 博客 (sewar-x.github.io)](https://sewar-x.github.io/myblog/article/React/React基础.html#hooks)
+
+- **React 组件中定义的变量会被一个钩子函数闭包捕获，若开发者传递了错误的依赖数组，它会变得“过期”**。这导致了 React 开发者非常依赖 ESLint 规则以确保传递了正确的依赖，然而，这些规则往往不够智能，保持正确的代价过高，在一些边缘情况时会遇到令人头疼的、不必要的报错信息。
 
   > 在Vue 3的组合式API和React Hooks中，闭包变量处理的差异主要体现在以下方面：
   >
@@ -96,9 +102,56 @@ React Hooks 在组件每次更新时都会重新调用。这就产生了一些�
   >
   > 在上面的React代码中，我们使用了`useState`Hook来定义`count`和`setCount`。然而，由于`handleClick`是一个闭包函数，它捕获了外部作用域中的`count`变量。如果我们在后续组件更新中修改了`count`的值，但`handleClick`中的闭包仍然保存着旧值，这就可能导致“过期闭包”问题，(React Hooks 在组件每次更新时都会重新调用)。为了避免这个问题，我们需要确保传递给`useState`的依赖数组是正确的。然而，这往往需要依赖ESLint规则，并且可能引发不必要的报错信息。
 
-- 昂贵的计算需要使用 `useMemo`，这也需要传入正确的依赖数组。
+- **昂贵的计算需要使用 `useMemo`，这也需要传入正确的依赖数组**。
 
-- 在默认情况下，传递给子组件的事件处理函数会导致子组件进行不必要的更新。子组件默认更新，并需要显式的调用 `useCallback` 作优化。这个优化同样需要正确的依赖数组，并且几乎在任何时候都需要。忽视这一点会导致默认情况下对应用进行过度渲染，并可能在不知不觉中导致性能问题。
+- **在默认情况下，传递给子组件的事件处理函数会导致子组件进行不必要的更新。**子组件默认更新，并需要显式的调用 `useCallback` 作优化。这个优化同样需要正确的依赖数组，并且几乎在任何时候都需要。忽视这一点会导致默认情况下对应用进行过度渲染，并可能在不知不觉中导致性能问题。
+
+  > 在React中，当父组件重新渲染时，默认情况下，它传递给子组件的所有props（包括函数，如事件处理函数）都会创建一个新的引用。如果子组件的`props`发生变化（即使是引用变化而函数内容没有变化），并且该子组件的`shouldComponentUpdate`（类组件）或`React.memo`（函数组件）逻辑没有适当处理这种情况，那么子组件将会重新渲染，即使它的实际输出没有改变。
+  >
+  > `useCallback`是一个React Hook，它允许你“记住”一个函数，并在组件重新渲染时返回相同的引用，只要它的依赖项数组保持不变。这有助于减少不必要的渲染，特别是在与`React.memo`结合使用时，因为`React.memo`会进行浅比较来检查props是否发生变化。
+  >
+  > ### 示例
+  >
+  > 假设我们有一个`Counter`组件，它有一个`increment`函数，该函数被传递给一个`Button`子组件：
+  >
+  > ```jsx
+  > import React, { useState, useCallback } from 'react';  
+  >   
+  > const Button = React.memo(({ onClick }) => {  
+  >   console.log('Button rendered');  
+  >   return <button onClick={onClick}>Increment</button>;  
+  > });  
+  >   
+  > const Counter = () => {  
+  >   const [count, setCount] = useState(0);  
+  >   
+  >   // 使用 useCallback 来“记住”increment函数  
+  >   const increment = useCallback(() => {  
+  >     setCount(count + 1);  
+  >   }, [count]); // 注意：这里依赖项是错误的，因为increment函数不应该依赖于count  
+  >   
+  >   return (  
+  >     <div>  
+  >       <p>Count: {count}</p>  
+  >       <Button onClick={increment} />  
+  >     </div>  
+  >   );  
+  > };  
+  >   
+  > export default Counter;
+  > ```
+  >
+  > 上面的示例中，`increment`函数被错误地标记为依赖于`count`，但实际上它不应该这样做。每次`count`状态改变时，都会创建一个新的`increment`函数引用，这会导致`Button`组件重新渲染，即使它的渲染输出没有变化。
+  >
+  > 正确的做法是确保`increment`函数不依赖于任何外部变量（除非它确实需要这些变量来执行其功能），所以依赖项数组应该是空的：
+  >
+  > ```jsx
+  > const increment = useCallback(() => {  
+  >   setCount(prevCount => prevCount + 1); // 使用函数式更新来避免依赖count  
+  > }, []); // 依赖项数组为空，因为increment函数不依赖于任何外部变量
+  > ```
+  >
+  > 这样，只有当父组件`Counter`重新渲染时，并且`increment`函数本身或其依赖项发生变化时，`Button`组件才会重新渲染。如果`increment`函数没有变化（即它的引用保持不变），那么`Button`组件将不会重新渲染，因为它接收到的props没有变化。这有助于提高性能并减少不必要的渲染。
 
 - 要解决变量闭包导致的问题，再结合并发功能，使得很难推理出一段钩子代码是什么时候运行的，并且很不好处理需要在多次渲染间保持引用 (通过 `useRef`) 的可变状态。
 
@@ -301,7 +354,72 @@ const App = () => (
 
 ## **虚拟DOM**
 
-Vue和React的虚拟DOM（VDOM）在核心原理上是相似的，都是通过JavaScript对象模拟DOM结构，并在需要时与真实DOM进行同步，以提高性能。然而，Vue和React在VDOM的实现和使用上确实存在一些差异。
+> 虚拟DOM基础：
+>
+> * React VDOM：[Virtual DOM | Sewen 博客 (sewar-x.github.io)](https://sewar-x.github.io/myblog/article/React/React组件渲染原理/虚拟DOM和DomDiff.html)
+> * Vue2 VDOM: [Vue2.x 原理源码分析 | Sewen 博客 (sewar-x.github.io)](https://sewar-x.github.io/myblog/article/vue2/Vue2原理和源码分析.html#virtual-dom)
+
+
+
+### **Vue 和 React 虚拟DOM区别**
+
+* React 为**纯运行时虚拟 DOM**；
+* Vue 采用**带编译时信息的虚拟 DOM**
+
+React主要侧重于运行时的性能优化，而Vue则通过结合编译时和运行时的信息来进一步提高性能。
+
+### React 纯运行时虚拟 DOM
+
+React的虚拟DOM系统主要**侧重于运行时性能**。
+
+React使用 JSX（JavaScript XML）语法来描述用户界面，这些JSX代码在运行时被转换为React元素（即虚拟DOM节点）。这些元素是轻量级的JavaScript对象，它们描述了UI的状态和结构。
+
+
+
+**React 运行时创建虚拟DOM：**
+
+1. 当React 组件的状态或属性发生变化时，React 会重新渲染组件，并生成一个新的虚拟DOM 树。
+2. 然后，React 使用一种称为 “diffing” 或 “reconciliation” 的过程来比较新旧两个虚拟 DOM 树，找出它们之间的差异。这些差异随后被用来更新真实的 DOM，从而最小化对 DOM 的直接操作，提高性能。
+
+由于 React 的虚拟 DOM 构建和 diffing 过程主要在运行时进行，因此被称为“纯运行时虚拟 DOM ”。
+
+
+
+#### **运行时虚拟 DOM 缺点** 
+
+运行时虚拟 DOM 在更新过程通过**牺牲效率来换取声明式的写法**和最终的正确性：
+
+1. 更新算法无法预知新的虚拟 DOM 树会是怎样，因此它总是需要遍历整棵树、比较每个 vnode 上 props 的区别来确保正确性。
+2. 另外，即使一棵树的某个部分从未改变，还是会在每次重渲染时创建新的 vnode，带来了大量不必要的内存压力。
+
+
+
+### Vue 带编译时信息的虚拟 DOM
+
+**Vue3 在虚拟 DOM 的使用结合了编译时和运行时的信息来优化性能**。
+
+在 Vue 中，模板（template）是在组件中定义用户界面的方式。这些模板在组件被创建时会被Vue的编译器转换为渲染函数（render function）。这个渲染函数是一个JavaScript函数，它返回一个虚拟DOM树（在Vue中通常被称为VNode树）。
+
+Vue 的编译器在编译模板时会对模板进行优化，例如通过静态标记（patchFlags）来识别不会动态改变的节点，以便在后续渲染中直接复用这些节点，减少不必要的diff计算。这些优化是在编译时完成的，因此它们可以利用更多的信息来生成更高效的代码。
+
+此外，Vue3 还引入了对 Proxy 的使用，以改进其响应式系统。这使得 Vue 可以更精确地跟踪数据的变化，并只在必要时更新虚拟 DOM 树。
+
+由于 Vue 在编译模板时就进行了优化，并使用了编译时和运行时相结合的策略来构建和更新虚拟 DOM 树，因此可以说 Vue 使用了“带编译时信息的虚拟 DOM ”。
+
+#### 带编译时信息的虚拟DOM 优点
+
+> 详细解释参考官方文档：[渲染机制 | Vue.js (vuejs.org)](https://cn.vuejs.org/guide/extras/rendering-mechanism.html#compiler-informed-virtual-dom)
+
+* 静态提升
+* 更新类型标记
+* 树结构打平
+* 对 SSR 激活的影响
+
+
+
+
+
+### Vue和React在VDOM实现和使用差异
 
 1. **模板渲染方式和过程**：
    * Vue通常使用基于HTML的模板语法来定义组件，这些模板随后被编译成渲染函数，生成VDOM。
@@ -314,6 +432,8 @@ Vue和React的虚拟DOM（VDOM）在核心原理上是相似的，都是通过Ja
    * Vue的diff算法针对同一节点进行优化，可以复用已有的DOM元素，从而提高性能。
    * 而React的diff算法则基于组件的类型进行更细致的比较和优化。
 
+
+
 ### **Vue DOM Diff 算法**
 
 > 详细过程可以参考我的博客：[Vue2.x 原理源码分析 | Sewen 博客 (sewar-x.github.io)](https://sewar-x.github.io/myblog/vue/Vue2原理和源码分析/#diff-算法)
@@ -325,6 +445,73 @@ Vue和React的虚拟DOM（VDOM）在核心原理上是相似的，都是通过Ja
 **参考资料**
 
 [Virtual DOM - React Guidebook (tsejx.github.io)](https://tsejx.github.io/react-guidebook/infrastructure/old/virtual-dom)
+
+
+
+
+
+## JSX 语法
+
+> 详细解释参考Vue 官网：[渲染函数 & JSX | Vue.js (vuejs.org)](https://cn.vuejs.org/guide/extras/render-function.html#basic-usage)
+
+**Vue 3 JSX 与 React JSX 特点比较：**
+
+| 特点/差异点      | Vue 3 JSX                                                | React JSX                                           |
+| ---------------- | -------------------------------------------------------- | --------------------------------------------------- |
+| **语法支持**     | 需要通过 `@vue/babel-plugin-jsx` 插件支持                | 默认支持                                            |
+| 全局命名空间     | 从 Vue 3.4 开始，不再隐式注册全局 JSX 命名空间           | 隐式注册全局 JSX 命名空间                           |
+| **类与样式绑定** | 使用数组或对象的形式书写，类似于模板语法                 | 类似于模板语法，但需要使用 `className` 代替 `class` |
+| 事件监听器       | 以 `onXxx` 的形式书写                                    | 以 `onXxx` 的形式书写                               |
+| **子元素传递**   | 使用插槽（slots）机制                                    | 使用 `children` 属性                                |
+| **动态组件**     | 直接使用导入的组件                                       | 需要使用 `<>...</>` 语法                            |
+| 函数组件         | 使用普通的函数作为组件                                   | 使用普通函数或箭头函数                              |
+| **插槽传递**     | 传递一个插槽函数或者是一个包含插槽函数的对象             | 传递一个数组或者一个子元素                          |
+| **作用域插槽**   | 需要给子组件传递一个插槽，并且子组件中的数据将向上传递   | 使用函数组件和 `useContext` 钩子                    |
+| 内置组件         | 如 `KeepAlive`、`Transition` 等需要导入使用              | 通常不需要导入，直接使用                            |
+| `v-model`        | 需要自己提供 `modelValue` 和 `onUpdate:modelValue` props | 作为内置指令使用                                    |
+| **自定义指令**   | 使用 `withDirectives` 函数                               | 使用 `useImperativeHandle` 或 `forwardRef`          |
+| 模板引用         | 使用 `ref()` 作为属性传递给 vnode                        | 使用 `ref` 属性                                     |
+| **类型注解**     | 需要在 `tsconfig.json` 中配置 `"jsx": "preserve"`        | 默认支持                                            |
+| 函数组件类型注解 | 可以使用 `FunctionalComponent` 类型                      | 使用 `React.FC` 或 `React.FunctionalComponent`      |
+
+
+
+
+
+## 函数式组件
+
+**Vue 3 函数式组件与 React 函数式组件特点比较:**
+
+| 特点/差异点    | Vue 3 函数式组件                                   | React 函数式组件                                   |
+| -------------- | -------------------------------------------------- | -------------------------------------------------- |
+| 定义方式       | 使用普通函数定义                                   | 使用普通函数或箭头函数定义                         |
+| 组件实例       | 没有 `this` 上下文                                 | 没有 `this` 上下文                                 |
+| 状态与逻辑     | 通过 `props` 和 `context` 参数传递                 | 通过 `props` 参数传递                              |
+| 生命周期       | 不支持生命周期钩子                                 | 不支持生命周期钩子                                 |
+| **插槽**       | 使用 `slots` 函数                                  | 不使用插槽，使用 `children` 属性                   |
+| **动态组件**   | 可以直接使用组件                                   | 需要使用 `<>...</>` 语法                           |
+| 内置组件       | 如 `KeepAlive` 等需要导入使用                      | 内置组件如 `Fragment` 可以直接使用                 |
+| `v-model`      | 不适用，使用 `modelValue` 和 `onUpdate:modelValue` | 使用 `value` 和 `onChange`                         |
+| 自定义指令     | 不适用，使用 `directives`                          | 使用 `useImperativeHandle` 或 `forwardRef`         |
+| 模板引用       | 使用 `ref` 函数                                    | 使用 `useRef` 或 `useImperativeHandle`             |
+| 类型注解       | 使用 `FunctionalComponent` 类型注解                | 使用 `React.FC` 或 `React.FunctionalComponent`     |
+| Props 类型注解 | 可以为 `props` 参数指定类型                        | 可以为 `props` 参数指定类型                        |
+| Emits 类型注解 | 使用 `emits` 属性声明                              | 使用 `React.ComponentProps` 的 `onChange` 进行声明 |
+| 性能           | 轻量级，没有额外的生命周期开销                     | 轻量级，没有额外的生命周期开销                     |
+| 插槽传递       | 传递一个插槽函数或者是一个包含插槽函数的对象       | 传递一个数组或者一个子元素                         |
+| 函数组件类型   | 具名函数式组件和匿名函数式组件                     | 具名函数组件和匿名函数组件                         |
+| 作用域插槽     | 支持，使用 `slots` 传递                            | 支持，使用 `useContext` 或者组件的上下文 API       |
+
+**注意事项:**
+
+- Vue 3 和 React 都支持函数式组件，但它们在一些细节上有所不同，如插槽、动态组件的使用方式。
+- Vue 3 的函数式组件不支持生命周期钩子，而 React 的函数式组件也不支持生命周期方法。
+- Vue 3 的函数式组件可以使用 `slots` 和 `emits` 进行声明，而 React 使用不同的 API 来达到类似的效果。
+- 在 TypeScript 支持方面，Vue 3 和 React 都提供了类型注解，但具体的实现方式和类型有所不同。
+
+
+
+
 
 ## **参考资料**
 
