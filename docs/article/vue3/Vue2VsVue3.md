@@ -24,6 +24,9 @@ tag:
 |          |             **生命周期钩子**             | Vue 2 提供了 beforeCreate、created、beforeMount、mounted、beforeUpdate、updated、beforeDestroy、destroyed 等生命周期钩子。 | Vue 3 对生命周期钩子进行了重新设计，提供了 setup、onMounted、onUpdated、onUnmounted 等新的生命周期钩子，并移除了 beforeDestroy 和 destroyed。 |
 |          |             **创建实例方式**             | 使用 `new Vue()` 创建实例<br />同一个 Vue 构造函数**创建的每个根实例共享相同的全局配置**，因此全局 API 影响所有 vue 实例。 | 使用 `createApp()`工厂函数创建实例<br />可以返回一个提供应用上下文的应用实例，不同的实例注册的组件无法在不同的实例下使用 |
 |          |               **内置组件**               |                                                              | Vue3 支持模板下可以有多个根节点<br />引入了 `<suspense>` 组件和`<teleport>` 组件 |
+|          |               **模板语法**               |                  vue3 组件可以有多个根节点                   |                   Vue2组件只能有一个根节点                   |
+|          |      **`v-if` 与 `v-for` 的优先级**      |                vue3 中 v-if 优先级大于 v-for                 |                vue2 中 v-for 优先级大于 v-if                 |
+|          |                                          |                                                              |                                                              |
 
 ## **源码管理**
 
@@ -907,3 +910,99 @@ Vue2和Vue3在内置组件上主要有以下差异：
 3. 悬浮（Suspense）：Vue3 引入了 `<suspense>` 组件，用于异步组件加载时的等待状态处理。它允许你在组件加载完成之前显示一个占位符或加载指示器，提供更好的用户体验。Vue2 没有内置的 `<suspense>` 组件，需要开发者自行处理异步组件的加载状态。
 4. 插槽（Slots）：Vue3 对插槽进行了改进，引入了更具表达力的插槽语法和新的 `<slot>` 组件用法。Vue3 中的插槽可以具有默认内容，也可以通过作用域插槽传递数据给子组件。相比之下，Vue2 的插槽功能相对简单，语法也较为有限。
 5. 指令（Directives）：Vue3 在指令方面进行了一些改进和扩展。例如，Vue3 中的 `v-model` 指令支持自定义事件和多个模型绑定，而 Vue2 中的 `v-model` 仅支持表单元素的双向绑定。此外，Vue3 还引入了一些新的内置指令，如 `v-memo` 用于性能优化。
+
+
+
+## v-if 与 v-for 优先级不同
+
+- **vue2 中 v-for 优先级大于 v-if**
+- **vue3 中 v-if 优先级大于 v-for**
+
+在 Vue 2 中，`v-for` 的优先级高于 `v-if`，这意味着在解析元素或组件时，Vue 首先处理 `v-for` 指令，然后才是 `v-if`。这可能会导致一些不太直观的行为，尤其是在你想要根据某个条件来过滤列表项时。
+
+然而，在 Vue 3 中，这个优先级被颠倒了，`v-if` 的优先级高于 `v-for`。这一变化的原因主要有以下几点：
+
+1. **性能优化**：
+   - 在 Vue 2 中，由于 `v-for` 的优先级更高，如果在一个被 `v-for` 渲染的元素上使用了 `v-if`，那么即使 `v-if` 的条件为假，Vue 也会首先渲染所有列表项，然后才去判断每个项是否需要显示。这可能会产生不必要的渲染开销。
+   - 而在 Vue 3 中，由于 `v-if` 的优先级更高，如果 `v-if` 的条件为假，Vue 将不会执行 `v-for`，从而避免了不必要的渲染。
+2. **代码清晰度和可维护性**：
+   - 在 Vue 2 中，由于 `v-for` 的优先级更高，开发者可能会写出一些难以理解的代码，尤其是在同时使用 `v-for` 和 `v-if` 时。
+
+需要注意的是，虽然 Vue 3 修改了 `v-for` 和 `v-if` 的优先级，但这并不意味着你不能在 Vue 3 中同时使用这两个指令。只是你需要更加注意它们的组合使用方式，以确保你的模板代码是清晰、高效和易于维护的。
+
+
+
+扩展：
+
+### **在 vue 中v-for 和 v-if 可以共存吗？**
+
+在 Vue 中，`v-for` 和 `v-if` 可以在同一个元素上共存，但是通常不推荐这样做，因为这样做可能会导致一些不可预期的行为和性能问题。
+
+当 `v-for` 和 `v-if` 同时出现在同一个元素上时，Vue 2 和 Vue 3 的处理方式是不同的：
+
+**Vue 2**
+
+在 Vue 2 中，由于 `v-for` 的优先级高于 `v-if`，所以 `v-for` 会先被处理，然后才是 `v-if`。这可能会导致一些问题，因为即使 `v-if` 的条件为假，Vue 也会首先渲染所有由 `v-for` 生成的元素，然后再根据 `v-if` 的条件来决定是否显示这些元素。这可能会浪费一些渲染性能。
+
+**Vue 3**
+
+在 Vue 3 中，`v-if` 的优先级高于 `v-for`。这意味着如果 `v-if` 的条件为假，Vue 将不会执行 `v-for`，从而避免了不必要的渲染。然而，即使 `v-if` 的条件为真，在同一个元素上使用 `v-for` 和 `v-if` 仍然不是最佳实践，因为这可能会使模板变得难以阅读和维护。
+
+**推荐做法**
+
+1. **使用计算属性**：如果需要根据条件过滤列表项，最好使用计算属性（computed property）来创建一个新的数组，然后在模板中只使用 `v-for` 来渲染这个过滤后的数组。
+
+```vue
+<template>  
+  <div v-for="item in filteredItems" :key="item.id">  
+    {{ item.name }}  
+  </div>  
+</template>  
+  
+<script>  
+export default {  
+  data() {  
+    return {  
+      items: [/* ... */],  
+      // 其他数据  
+    };  
+  },  
+  computed: {  
+    filteredItems() {  
+      //在计算属性中进行条件过滤
+      return this.items.filter(item => /* 过滤条件 */);  
+    },  
+  },  
+};  
+</script>
+```
+
+1. **使用 `<template>` 元素**：如果你需要在渲染列表项的同时进行条件判断，可以将 `v-if` 放在一个 `<template>` 元素上，然后在这个 `<template>` 元素内部使用 `v-for`。由于 `<template>` 元素不会被渲染为实际的 DOM 元素，所以这样做不会影响 DOM 结构。
+
+```vue
+<template>  
+  <template v-if="someCondition">  
+    <div v-for="item in items" :key="item.id">  
+      {{ item.name }}  
+    </div>  
+  </template>  
+</template>  
+  
+<script>  
+// ...  
+</script>
+```
+
+总之，虽然 `v-for` 和 `v-if` 可以在同一个元素上共存，但为了避免潜在的问题和提高代码的可读性和可维护性，最好将它们分开使用，或者使用计算属性或 `<template>` 元素来组合它们。
+
+
+
+## Tmeplate 和 JSX 的性能
+
+- 编译时：JSX 编译比 Template 快
+- 运行时：Template 性能比 JSX 好
+
+因为 Template 编译解析时有 `静态节点提升` 步骤会降低编译速度，而 JSX 没有，所以编译肯定是 JSX 更快；
+
+但是在运行时的时候， Template 的性能会更好，因为它进行了 `静态节点提升` ，使更新效率更高。
+
