@@ -7,26 +7,32 @@ tag:
 ---
 # Vue3基础
 
+---
+
 
 
 ## **ref 原理**
 
-> 参考官方文档：[响应式基础 | Vue.js (vuejs.org)](https://cn.vuejs.org/guide/essentials/reactivity-fundamentals.html#why-refs)
+> 参考官方文档：
+>
+> - [响应式基础 | Vue.js (vuejs.org)](https://cn.vuejs.org/guide/essentials/reactivity-fundamentals.html#why-refs)
+> - [深入响应式系统 | Vue.js (vuejs.org)](https://cn.vuejs.org/guide/extras/reactivity-in-depth.html)
 
 实现伪代码：
 
 ```javascript
-// 伪代码，不是真正的实现
-const myRef = {
-  _value: 0,
-  get value() {
-    track()
-    return this._value
-  },
-  set value(newValue) {
-    this._value = newValue
-    trigger()
+function ref(value) {
+  const refObject = {
+    get value() {
+      track(refObject, 'value')
+      return value
+    },
+    set value(newValue) {
+      value = newValue
+      trigger(refObject, 'value')
+    }
   }
+  return refObject
 }
 ```
 
@@ -74,17 +80,125 @@ const myRef = {
 
 
 
+----
+
 
 
 ## **reactive 原理**
 
+> 详细参考：[深入响应式系统 | Vue.js (vuejs.org)](https://cn.vuejs.org/guide/extras/reactivity-in-depth.html)
+
 与将内部值包装在特殊对象中的 ref 不同，`reactive()` 将使对象本身具有响应性：
 
 ```js
-import { reactive } from 'vue'
-
-const state = reactive({ count: 0 })
+function reactive(obj) {
+  return new Proxy(obj, {
+    get(target, key) {
+      track(target, key)
+      return target[key]
+    },
+    set(target, key, value) {
+      target[key] = value
+      trigger(target, key)
+    }
+  })
+}
 ```
+
+ [`reactive()` 的局限性](https://cn.vuejs.org/guide/essentials/reactivity-fundamentals.html#limitations-of-reactive)：
+
+- 当你将一个响应式对象的属性赋值或解构到一个本地变量时，访问或赋值该变量是非响应式的，因为它将不再触发源对象上的 get / set 代理。注意这种“断开”只影响变量绑定——如果变量指向一个对象之类的非原始值，那么对该对象的修改仍然是响应式的。
+- 从 `reactive()` 返回的代理尽管行为上表现得像原始对象，但我们通过使用 `===` 运算符还是能够比较出它们的不同。
+
+
+
+----
+
+
+
+## Props
+
+> 详细解释参考官方文档：[Props | Vue.js (vuejs.org)](https://cn.vuejs.org/guide/components/props.html#props-declaration)
+
+### props 解构
+
+**直接解构会丢失响应式**
+
+```vue
+<script setup>
+ const props = defineProps({count:Number});
+ let { count }= props;
+ count++;
+ console.log(props.count);//0，并不会发生变化
+</script>
+```
+
+**解构 props 需要使用 toRefs 或 toRef**
+
+```vue
+<script setup>
+	import {toRef, toRefs }from "vue";
+    const props = defineProps({msg: String.count: Number});
+	//_msg 也是响应式的，会随着 props.msg 改变
+    const msg = toRef(props,“msg");
+	// msg，count也是响应式的，会随着 props 改变
+    const{ msg,count } = toRefs(props);
+</script>
+```
+
+
+
+### useAttrs 和 props 的区别
+
+- props：只会接收类型定义的属性
+- useAttrs：只会接收非 props 类型定义的属性
+
+也就是 props 和 useAttrs 是互补的
+
+> 注意：useAttrs 并不会自动将横杆命名的属性转成驼峰命名属性，但是 props 是会的
+
+```vue
+<script setup>
+import {   useAttrs } from 'vue'
+const attrs = useAttrs()
+</script>
+```
+
+----
+
+
+
+## 插槽
+
+> 详细使用参考官方文档：[插槽 Slots | Vue.js (vuejs.org)](https://cn.vuejs.org/guide/components/slots.html)
+
+插槽（slot）是前端开发中的一个概念，特别是在使用如Vue.js这样的框架时。插槽的主要原理是在子组件中预留一个位置（即占位符），以便父组件可以在这个位置插入内容。
+
+### **插槽的使用**
+
+- **默认插槽**：在子组件的模板中，使用`<slot></slot>`标签定义一个默认插槽。父组件在引用子组件时，可以直接在子组件标签内写入要插入的内容，这些内容会被填充到默认插槽中。
+- **具名插槽**：在子组件的模板中，可以给插槽指定一个名字，如`<slot name="header"></slot>`。在父组件中，可以通过`v-slot:header`来指定要插入到哪个具名插槽中的内容。
+- **作用域插槽**：作用域插槽允许子组件向父组件传递数据，并在父组件的插槽模板中使用这些数据。在子组件中，可以使用`<slot :data="someData"></slot>`来定义作用域插槽，其中`someData`是子组件传递给父组件的数据。在父组件中，可以通过`v-slot:default="slotProps"`来接收这些数据，并在插槽模板中使用它们。
+
+### **插槽的原理**
+
+- 插槽允许你在子组件的模板中定义一个或多个占位符，这些占位符可以在父组件中被填充。
+- 父组件在引用子组件时，可以通过插槽向子组件传递内容，这些内容可以是HTML代码、其他组件等。
+- 子组件通过插槽接收父组件传递的内容，并在适当的位置进行渲染。
+
+### **源码解析**
+
+**普通插槽** 普通插槽`slot`会被当做子元素进行解析，最终会被解析成一个`_t`函数，他接收的第一个参数为插槽的名称，默认是`default`，也就是`_t('default')`，执行此函数进行最终元素的渲染
+
+具名插槽，则传对应的插槽名 **作用域插槽** 插槽会被封装成一个函数放置在`scopeSlotes`对象中，解析时`_t`第二个参数接收子组件的数据，并进行渲染。
+
+
+
+
+
+
+
+---
 
 
 

@@ -824,7 +824,7 @@ Vue 一共有 8 个生命阶段，分别是创建前、创建后、加载前、�
 * **依赖收集：**runder funtion 读取数据时，触发数据的 getter()，在属性的 getter 中往依赖收集对象中添加属性的 watcher对象；
 * **派发更新：**修改数据时，触发数据的 setter()，在 setter 中调用依赖收集对象的 notify 方法，notify 方法再调用对应的 watcher 对象的update 方法更新视图。
 
-简单实现：
+#### 简单实现响应式系统
 
 ```javascript
 /**
