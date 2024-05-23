@@ -812,6 +812,8 @@ export default {
 
 ## **语法差异**
 
+>  [Component Party](https://component-party.dev/#reactivity) 详细对比了不同前端框架语法差异
+
 [vue3.x 文档-vue2迁移](https://vue3js.cn/docs/zh/guide/migration/introduction.html#%E4%BB%8B%E7%BB%8D)章节中介绍了 vue3.x 新增特性和 vue2 差异。
 
 **补充说明**

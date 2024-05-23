@@ -33,6 +33,76 @@ tag:
 |            **JSX 语法**            | 通过 `@vue/babel-plugin-jsx` 插件支持，语法与React JSX 不同，参考以下比较 | 默认支持                                                     |
 |           **函数式组件**           |                                                              |                                                              |
 
+## 语法差异
+
+>  [Component Party](https://component-party.dev/#reactivity) 详细对比了不同前端框架语法差异
+
+### 双向绑定
+
+* Vue 中提供了 `v-model ` 语法糖支持 数据和视图的双向绑定;
+* React 中不支持数据的双向绑定，需要手动实现：数据改变将数据传入 value 显示，手动改变触发 change 事件； 
+
+**Vue2:**
+
+```vue
+<script>
+export default {
+  data() {
+    return {
+      text: "Hello World",
+    };
+  },
+};
+</script>
+
+<template>
+  <div>
+    <p>{{ text }}</p>
+    <input v-model="text">
+  </div>
+</template>
+
+```
+
+**Vue3:**
+
+```vue
+<script setup>
+import { ref } from "vue";
+const text = ref("Hello World");
+</script>
+
+<template>
+  <p>{{ text }}</p>
+  <input v-model="text">
+</template>
+
+```
+
+**React:**
+
+```react
+import { useState } from "react";
+
+export default function InputHello() {
+  const [text, setText] = useState("Hello world");
+  // 手动实现数据更改操作
+  function handleChange(event) {
+    setText(event.target.value);
+  }
+
+  return (
+    <>
+      <p>{text}</p>
+      <input value={text} onChange={handleChange} />
+    </>
+  );
+}
+
+```
+
+
+
 
 
 ## 组合式 API 与 React Hooks
