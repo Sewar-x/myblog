@@ -530,7 +530,77 @@ Object.prototype.toString.call(/regex-literal/i);  //"[objectRegExp]"
 * JavaScript提供了许多字符串处理方法来执行这些操作，例如 `concat()`、`slice()`、`replace()` 等等。
 * 总结起来，**JavaScript中的字符串是不可变的，一旦创建就无法直接修改，但你可以通过创建新的字符串来实现对字符串的操作和变换**。
 
+### **字符串比较**
 
+在JavaScript中，字符串比较可以使用多种方法，但最常见的是使用关系运算符（`==`, `===`, `>`, `<`, `>=`, `<=`）以及`String`对象的`localeCompare()`方法。
+
+**使用关系运算符**：
+
+- `==`（等于）：比较两个值是否相等，但在比较之前会进行类型转换。
+- `===`（严格等于）：比较两个值是否相等，且不会进行类型转换。
+
+```javascript
+let str1 = "hello";  
+let str2 = "hello";  
+let str3 = "Hello"; // 注意大小写  
+  
+console.log(str1 == str2); // true  
+console.log(str1 === str2); // true  
+console.log(str1 === str3); // false，因为大小写不同  
+  
+let numStr = "123";  
+let num = 123;  
+  
+console.log(numStr == num); // true，因为"123"会被转换为数字123进行比较  
+console.log(numStr === num); // false，因为类型不同
+```
+
+`>`, `<`, `>=`, `<=`：
+
+这些运算符用于比较字符串在字典序（基于Unicode码点）上的大小。
+
+```javascript
+let strA = "apple";  
+let strB = "banana";  
+console.log(strA < strB); // true，因为"a"在字典序上小于"b"
+```
+
+`>`, `<`, `>=`, `<=` **比较原理**：
+
+当使用 `>`, `<`, `>=`, `<=` 运算符来比较字符串时，这些运算符实际上是基于字符串的 Unicode 码点值（也称为字符编码）来进行比较的。这意味着它们**会比较字符串中每个字符的 Unicode 码点值，直到找到不同的字符或者比较完整个字符串**。
+
+**比较过程：**
+
+1. **Unicode 码点**：每个字符在 Unicode 中都有一个唯一的码点值。例如，'A' 的 Unicode 码点是 65，'a' 的 Unicode 码点是 97。
+2. **逐字符比较**：当使用 `>`, `<`, `>=`, `<=` 运算符比较两个字符串时，JavaScript 会从字符串的第一个字符开始，逐个比较每个字符的 Unicode 码点值。
+3. **比较结果**：
+   - 如果第一个不同的字符的 Unicode 码点值在第一个字符串中小于第二个字符串中相应字符的 Unicode 码点值，那么第一个字符串就被认为是“较小”的（即 `str1 < str2`）。
+   - 如果第一个不同的字符的 Unicode 码点值在第一个字符串中大于第二个字符串中相应字符的 Unicode 码点值，那么第一个字符串就被认为是“较大”的（即 `str1 > str2`）。
+   - 如果两个字符串的所有字符都相同（即没有不同的字符），那么这两个字符串就被认为是相等的（即 `str1 == str2` 或 `str1 === str2`，注意 `===` 还比较类型）。
+4. **长度差异**：如果第一个字符串的所有字符都与第二个字符串的相应字符相同，但第一个字符串更短，那么较短的字符串就被认为是“较小”的（因为 Unicode 码点值比较在较短的字符串结束后就停止了）。
+5. **大小写敏感**：JavaScript 中的字符串比较是大小写敏感的，因为大写字母和小写字母有不同的 Unicode 码点值。例如，`'A' < 'a'` 的结果是 `true`，因为 'A' 的 Unicode 码点值（65）小于 'a' 的 Unicode 码点值（97）。
+6. **非字母数字字符**：非字母数字字符（如空格、标点符号、特殊字符等）也有自己的 Unicode 码点值，并且这些值也会被用于比较。
+7. **性能考虑**：由于字符串比较可能需要遍历整个字符串（直到找到不同的字符或到达字符串末尾），因此对于非常长的字符串，这种比较可能会相对较慢。在性能关键的场景中，可能需要考虑使用其他方法来优化字符串比较。
+
+
+
+**使用`localeCompare()`方法比较**：
+
+> MDN 文档：[String.prototype.localeCompare() - JavaScript | MDN (mozilla.org)](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/String/localeCompare)
+
+这个方法用于比较两个字符串，并根据本地特定的排序规则返回一个小于、等于或大于零的值。
+
+```javascript
+let strA = "apple";  
+let strB = "banana";  
+  
+console.log(strA.localeCompare(strB)); // 一个负数，因为"apple"在字典序上小于"banana"  
+  
+let strC = "Apple"; // 注意大小写  
+console.log(strA.localeCompare(strC, undefined, { sensitivity: 'base' })); // 0，因为忽略了大小写
+```
+
+在这个例子中，我们使用了`localeCompare()`的第三个参数来指定一个选项对象，其中`sensitivity`属性设置为`'base'`以忽略大小写。如果不提供这个选项，默认会考虑大小写。
 
 
 
