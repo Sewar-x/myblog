@@ -560,6 +560,7 @@ Object.prototype.toString.call(/regex-literal/i);  //"[objectRegExp]"
 | --- | --- | --- |
 | `charAt(index)` | 返回指定索引处的字符 | `let str = 'Hello'; console.log(str.charAt(1)); // 输出 'e'` |
 | `charCodeAt(index)` | 返回指定索引处字符的Unicode编码 | `let str = 'Hello'; console.log(str.charCodeAt(0)); // 输出 72` |
+| `fromCharCode(index)` | 返回由指定的 UTF-16 码元序列创建的字符串 | `String.fromCharCode(65, 66, 67); // 返回 "ABC"` |
 | `concat(string1, ..., stringX)` | 连接两个或多个字符串，并返回新的字符串 | `let str1 = 'Hello, '; let str2 = 'World!'; console.log(str1.concat(str2)); // 输出 'Hello, World!'` |
 | `indexOf(searchValue, [fromIndex])` | 返回指定值在字符串中首次出现的位置，如果未找到则返回-1 | `let str = 'Hello, World!'; console.log(str.indexOf('o')); // 输出 4` |
 | `lastIndexOf(searchValue, [fromIndex])` | 返回指定值在字符串中最后一次出现的位置，如果未找到则返回-1 | `let str = 'Hello, World!'; console.log(str.lastIndexOf('o')); // 输出 7` |
@@ -577,6 +578,10 @@ Object.prototype.toString.call(/regex-literal/i);  //"[objectRegExp]"
 | `endsWith(searchString, [position])` | 判断字符串是否以指定的子字符串结束 | `let str = 'Hello, World!'; console.log(str.endsWith('World!')); // 输出 true` |
 | `repeat(count)` | 返回一个新字符串，表示将原字符串重复指定的次数 | `let str = 'Hello'; console.log(str.repeat(3)); // 输出 'HelloHelloHello'` |
 | `includes(searchString, [position])` | 判断字符串是否包含指定的子字符串 | `let str = 'Hello, World!'; console.log(str.includes('World')); // 输出 true` |
+
+
+
+
 
 ### **字符串比较**
 
@@ -636,7 +641,7 @@ console.log(strA < strB); // true，因为"a"在字典序上小于"b"
 
 > MDN 文档：[String.prototype.localeCompare() - JavaScript | MDN (mozilla.org)](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/String/localeCompare)
 
-这个方法用于比较两个字符串，并根据本地特定的排序规则返回一个小于、等于或大于零的值。
+这个方法用于比较两个字符串，并根据本地特定的排序规则**返回一个小于、等于或大于零的值**。
 
 ```javascript
 let strA = "apple";  
@@ -649,6 +654,85 @@ console.log(strA.localeCompare(strC, undefined, { sensitivity: 'base' })); // 0�
 ```
 
 在这个例子中，我们使用了`localeCompare()`的第三个参数来指定一个选项对象，其中`sensitivity`属性设置为`'base'`以忽略大小写。如果不提供这个选项，默认会考虑大小写。
+
+
+
+
+
+###  字符串字母排序
+
+在JavaScript中，对字符串中的字母进行排序通常意味着你需要将字符串转换为字符数组，对数组进行排序，然后再将数组转回字符串。
+
+但是，因为JavaScript的`sort()`方法默认会将数组元素转换为字符串，并使用Unicode值进行排序（这可能会导致大写字母排在小写字母之前），所以你可能需要提供一个自定义的比较函数来确保正确的字母顺序。
+
+以下是一个示例，展示了如何对字符串中的字母进行排序（包括大小写，并且大写字母在小写字母之前）：
+
+```javascript
+function sortString(str) {  
+    // 将字符串转换为字符数组  
+    let arr = str.split('');  
+  
+    // 使用自定义比较函数进行排序  
+    // 比较函数确保大写字母在小写字母之前  
+    arr.sort((a, b) => {  
+        // 首先比较字符的Unicode值  
+        if (a.localeCompare(b) !== 0) {  
+            return a.localeCompare(b);  
+        }  
+        // 如果Unicode值相同（例如'a'和'A'），则根据字符是否为大写字母进行排序  
+        return a.toLowerCase() === a ? 1 : -1;  
+    });  
+  
+    // 将字符数组转回字符串  
+    return arr.join('');  
+}  
+  
+// 示例  
+let str = "Hello World!";  
+console.log(sortString(str)); // 输出: "!HWdellloor"
+```
+
+但是，如果你想要忽略大小写并按字母顺序排序（即小写字母在大写字母之前），你可以稍微修改比较函数：
+
+```javascript
+function sortStringIgnoreCase(str) {  
+    // 将字符串转换为字符数组  
+    let arr = str.split('');  
+  
+    // 使用自定义比较函数进行排序  
+    // 比较函数确保小写字母在大写字母之前  
+    arr.sort((a, b) => {  
+        // 转换为小写进行比较  
+        let lowerA = a.toLowerCase();  
+        let lowerB = b.toLowerCase();  
+        if (lowerA !== lowerB) {  
+            return lowerA.localeCompare(lowerB);  
+        }  
+        // 如果两个字符的小写形式相同，则按原始字符的Unicode值排序  
+        // 这会确保大写字母在小写字母之后  
+        return a.localeCompare(b);  
+    });  
+    // 或者直接使用以下排序方法
+    arr.sort((a, b) => {
+        if (a < b) {
+            return -1
+        } else if (a > b) {
+            return 1
+        } else {
+            return 0
+        }
+    })
+  
+    // 将字符数组转回字符串  
+    return arr.join('');  
+}  
+  
+// 示例  
+let str = "Hello World!";  
+console.log(sortStringIgnoreCase(str)); // 输出: "!HWdellloor" （注意：这里的输出与上一个示例相同，但排序逻辑不同）
+```
+
+请注意，尽管第二个示例中的排序逻辑与第一个示例不同，但由于字符串"Hello World!"中不包含重复的字母（无论大小写），所以两个示例的输出是相同的。如果你有一个包含重复字母（无论大小写）的字符串，那么两个示例的输出将会有所不同。
 
 
 
@@ -914,6 +998,89 @@ console.log(`name is ${person1.name}, age is ${person1.age}`)
 ### Map 集合
 
 ![map](../images/map.png)
+
+
+
+#### **遍历Map**
+
+在 JavaScript 中，`Map` 数据结构提供了几种方法来遍历 Map 内容：
+
+**使用 `for...of` 循环**：
+
+`for...of` 循环可以直接在 Map 对象上迭代，每次迭代都会返回一个 `[key, value]` 数组。
+
+```javascript
+const map = new Map();  
+map.set('key1', 'value1');  
+map.set('key2', 'value2');  
+  
+for (let [key, value] of map) {  
+  console.log(key, value);  
+}
+```
+
+**使用 `Map.prototype.forEach()` 方法**：
+
+`forEach()` 方法接受一个回调函数作为参数，该回调函数将在每个键值对上被调用，并且接收三个参数：键、值和 Map 对象本身。
+
+```javascript
+map.forEach((value, key, mapObj) => {  
+  console.log(key, value);  
+});
+```
+
+**使用 `Map.prototype.keys()`、`Map.prototype.values()` 和 `Map.prototype.entries()` 方法**：
+
+这些方法分别返回一个新的迭代器对象，它包含 Map 对象中每个元素的键、值或 `[key, value]` 对。然后，你可以使用 `for...of` 循环来迭代这些迭代器。
+
+```javascript
+// 遍历键  
+for (let key of map.keys()) {  
+  console.log(key);  
+}  
+  
+// 遍历值  
+for (let value of map.values()) {  
+  console.log(value);  
+}  
+  
+// 遍历键值对（与直接使用 for...of 循环相同）  
+for (let [key, value] of map.entries()) {  
+  console.log(key, value);  
+}
+```
+
+**使用 `Array.from()` 方法**：
+
+虽然这不是直接遍历 Map 的方法，但你可以使用 `Array.from()` 方法将 Map 的键、值或键值对转换为数组，然后遍历这个数组。
+
+```javascript
+// 将键转换为数组并遍历  
+Array.from(map.keys()).forEach(key => console.log(key));  
+  
+// 将值转换为数组并遍历  
+Array.from(map.values()).forEach(value => console.log(value));  
+  
+// 将键值对转换为数组并遍历  
+Array.from(map.entries()).forEach(([key, value]) => console.log(key, value));
+```
+
+**使用扩展运算符 (`...`)**：
+
+你也可以使用扩展运算符来将 Map 的内容展开为数组的一部分，然后遍历这个数组。但请注意，这通常用于将 Map 的内容与其他数组或可迭代对象合并，而不是直接遍历 Map。
+
+```javascript
+// 示例：将 Map 的键值对与另一个数组合并，并遍历结果数组  
+const entries = [...map.entries()];  
+const otherArray = [['key3', 'value3']];  
+for (let [key, value] of [...entries, ...otherArray]) {  
+  console.log(key, value);  
+}
+```
+
+
+
+
 
 ### Set、Map、Object 比较
 
