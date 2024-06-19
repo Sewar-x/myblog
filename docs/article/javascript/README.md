@@ -162,7 +162,21 @@ tag:
 
 ​	Math.pow(2, 53) ，53 为有效数字，会发生截断，等于 JS 能支持的最大数字
 
+## 进制转换
 
+在JavaScript中，没有直接针对所有进制转换的内置函数（除了十进制到二进制、八进制、十六进制的`toString()`方法），但我们可以使用`parseInt()`函数和`toString()`方法进行常见的进制转换：
+
+* 十进制数字转（二进制、八进制、十六进制）字符串：**`parseInt()`函数**
+* （二进制、八进制、十六进制）字符串转十进制数字： **`toString()`**
+
+| 转换类型         | 方法                        | 示例                                                         |
+| ---------------- | --------------------------- | ------------------------------------------------------------ |
+| 十进制转二进制   | `toString(2)`               | `let decimal = 255; let binary = decimal.toString(2); // "11111111"` |
+| 十进制转八进制   | `toString(8)`               | `let decimal = 255; let octal = decimal.toString(8); // "377"` |
+| 十进制转十六进制 | `toString(16)`              | `let decimal = 255; let hex = decimal.toString(16); // "ff"` |
+| 二进制转十进制   | `parseInt(binaryString, 2)` | `let binary = "11111111"; let decimal = parseInt(binary, 2); // 255` |
+| 八进制转十进制   | `parseInt(octalString, 8)`  | `let octal = "377"; let decimal = parseInt(octal, 8); // 255` |
+| 十六进制转十进制 | `parseInt(hexString, 16)`   | `let hex = "ff"; let decimal = parseInt(hex, 16); // 255`    |
 
 ## 显示转换&隐式转换
 
@@ -515,6 +529,14 @@ Object.prototype.toString.call(/regex-literal/i);  //"[objectRegExp]"
 * Array.prototype.splice.call(arrayLike,0)
 * Array.prototype.concat.apply([],arrayLike)
 
+
+
+**参考资料：**
+
+[JavaScript深入之类数组对象与arguments](https://github.com/mqyqingfeng/Blog/issues/14)
+
+
+
 ## 字符串
 
 ### 字符串的不可变性
@@ -529,6 +551,32 @@ Object.prototype.toString.call(/regex-literal/i);  //"[objectRegExp]"
 * 尽管字符串是不可变的，但你可以通过创建新的字符串来进行字符串的拼接、替换、截取等操作。
 * JavaScript提供了许多字符串处理方法来执行这些操作，例如 `concat()`、`slice()`、`replace()` 等等。
 * 总结起来，**JavaScript中的字符串是不可变的，一旦创建就无法直接修改，但你可以通过创建新的字符串来实现对字符串的操作和变换**。
+
+
+
+### **字符串方法**
+
+| 方法名称 | 描述 | 示例 |
+| --- | --- | --- |
+| `charAt(index)` | 返回指定索引处的字符 | `let str = 'Hello'; console.log(str.charAt(1)); // 输出 'e'` |
+| `charCodeAt(index)` | 返回指定索引处字符的Unicode编码 | `let str = 'Hello'; console.log(str.charCodeAt(0)); // 输出 72` |
+| `concat(string1, ..., stringX)` | 连接两个或多个字符串，并返回新的字符串 | `let str1 = 'Hello, '; let str2 = 'World!'; console.log(str1.concat(str2)); // 输出 'Hello, World!'` |
+| `indexOf(searchValue, [fromIndex])` | 返回指定值在字符串中首次出现的位置，如果未找到则返回-1 | `let str = 'Hello, World!'; console.log(str.indexOf('o')); // 输出 4` |
+| `lastIndexOf(searchValue, [fromIndex])` | 返回指定值在字符串中最后一次出现的位置，如果未找到则返回-1 | `let str = 'Hello, World!'; console.log(str.lastIndexOf('o')); // 输出 7` |
+| `slice(startIndex, [endIndex])` | 提取字符串的某个部分，并返回一个新的字符串（不包含结束索引的字符） | `let str = 'Hello, World!'; console.log(str.slice(0, 5)); // 输出 'Hello'` |
+| **`substring(indexStart, [indexEnd])`** | 提取字符串中两个指定的索引号之间的字符，并返回一个新的字符串（不包含结束索引的字符） | `let str = 'Hello, World!'; console.log(str.substring(0, 5)); // 输出 'Hello'` |
+| **`substr(start, [length])`** | 从字符串中提取从指定位置开始指定长度的字符 | `let str = 'Hello, World!'; console.log(str.substr(7, 5)); // 输出 'World'` |
+| `toUpperCase()` | 将字符串转换为大写 | `let str = 'hello'; console.log(str.toUpperCase()); // 输出 'HELLO'` |
+| `toLowerCase()` | 将字符串转换为小写 | `let str = 'HELLO'; console.log(str.toLowerCase()); // 输出 'hello'` |
+| `trim()` | 去除字符串两端的空白字符 | `let str = '   Hello, World!   '; console.log(str.trim()); // 输出 'Hello, World!'` |
+| `split(separator, [limit])` | 通过指定的分隔符将字符串分割为数组 | `let str = 'apple,banana,orange'; console.log(str.split(',')); // 输出 ['apple', 'banana', 'orange']` |
+| `search(regexp)` | 检索与正则表达式相匹配的子字符串的**位置** | `let str = 'Hello, World!'; console.log(str.search('o')); // 输出 4` |
+| `match(regexp)` | 找到一个或多个正则表达式的匹配项 | `let str = 'Hello, World!'; console.log(str.match(/o/g)); // 输出 ['o', 'o']` |
+| `replace(regexp/substr, replacement)` | 替换与正则表达式或子字符串匹配的字符串 | `let str = 'Hello, World!'; console.log(str.replace('World', 'JavaScript')); // 输出 'Hello, JavaScript!'` |
+| `startsWith(searchString, [position])` | 判断字符串是否以指定的子字符串开始 | `let str = 'Hello, World!'; console.log(str.startsWith('Hello')); // 输出 true` |
+| `endsWith(searchString, [position])` | 判断字符串是否以指定的子字符串结束 | `let str = 'Hello, World!'; console.log(str.endsWith('World!')); // 输出 true` |
+| `repeat(count)` | 返回一个新字符串，表示将原字符串重复指定的次数 | `let str = 'Hello'; console.log(str.repeat(3)); // 输出 'HelloHelloHello'` |
+| `includes(searchString, [position])` | 判断字符串是否包含指定的子字符串 | `let str = 'Hello, World!'; console.log(str.includes('World')); // 输出 true` |
 
 ### **字符串比较**
 
@@ -604,9 +652,67 @@ console.log(strA.localeCompare(strC, undefined, { sensitivity: 'base' })); // 0�
 
 
 
-**参考资料：**
+### 字符串转数字
 
-[JavaScript深入之类数组对象与arguments](https://github.com/mqyqingfeng/Blog/issues/14)
+在JavaScript中，你可以使用几种不同的方法将一个字符串转换为数字，并判断转换是否成功。以下是一些常用的方法：
+
+1. **使用 `parseInt()` 或 `parseFloat()` 函数**
+
+这两个函数尝试将字符串解析为整数或浮点数。如果字符串不能表示为一个数字，它们会返回 `NaN`（表示“不是一个数字”）。
+
+```javascript
+let str = "123";  
+let num = parseInt(str);  
+  
+if (!isNaN(num)) {  
+    console.log("转换成功，数字是:", num);  
+} else {  
+    console.log("转换失败，不是有效的数字");  
+}
+```
+
+注意：
+
+* `parseInt()` 会忽略字符串开头的非数字字符，直到找到第一个数字字符或字符串结束。例如，`parseInt("123abc")` 会返回 `123`。
+* 不能只有 typeof 操作符号判断 使用 parseInt 转换的是否为合法数字，因为 ` typeof parseInt()  ` 总是返回 number。
+
+2. **使用 `Number()` 构造函数或一元加号运算符**
+
+这两个方法都会尝试将字符串转换为数字。如果字符串不能表示为一个数字，它们会返回 `NaN`。
+
+```javascript
+let str = "123";  
+let num = Number(str);  
+// 或者  
+let num2 = +str; // 一元加号运算符也会尝试将字符串转换为数字  
+  
+if (!isNaN(num)) {  
+    console.log("转换成功，数字是:", num);  
+} else {  
+    console.log("转换失败，不是有效的数字");  
+}
+```
+
+3. **使用 `isFinite()` 函数**
+
+虽然 `isFinite()` 函数的主要用途是检查一个值是否是一个有限数字，但它也可以与 `parseFloat()` 或 `Number()` 一起使用来检查字符串是否可以转换为有效的数字。
+
+```javascript
+let str = "123";  
+let num = parseFloat(str);  
+  
+if (isFinite(num)) {  
+    console.log("转换成功，数字是:", num);  
+} else {  
+    console.log("转换失败，不是有效的数字");  
+}
+```
+
+注意：`isFinite()` 会将非数字值（如 `undefined` 或空字符串）视为无效的数字，并返回 `false`。因此，在使用 `isFinite()` 之前，你可能需要确保你的值是一个字符串。
+
+
+
+
 
 ## **Object 对象**
 
@@ -710,6 +816,45 @@ console.log(strA.localeCompare(strC, undefined, { sensitivity: 'base' })); // 0�
 ![](../images/new-demo.png)
 
 
+
+```javascript
+/**
+
+ \* @param {Function} construct 构造函数
+
+ \* @param {any} args  其余参数
+
+ \* @return obj 绑定了构造函数上下文的空对象
+
+ */
+
+function myNew(construct, ...args) {
+
+  let obj = {} //创建空对象
+
+  obj.__proto__ = construct.prototype //将空对象的[prototype]原型指向构造函数的原型对象
+
+  construct.apply(obj, args) //将构造函数的执行上下文this绑定到空对象
+
+  return obj
+
+}
+
+//-----------------------------------------使用-------------------------------------------------------
+
+function Person(name, age) {
+
+  this.name = name
+
+  this.age = age
+
+}
+
+let person1 = myNew(Person, 'joker', 20)
+
+console.log(`name is ${person1.name}, age is ${person1.age}`)
+
+```
 
 
 
