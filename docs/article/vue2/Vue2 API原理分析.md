@@ -1951,16 +1951,18 @@ class Vue {
 
 ### [数组和对象的检测缺陷](https://vue3js.cn/docs/zh/guide/change-detection.html#%E5%A3%B0%E6%98%8E%E5%93%8D%E5%BA%94%E5%BC%8F-property)
 
-* 缺陷原因：
+#### 缺陷原因
 
-  * vue2.x使用 `Object.defineProperty() `实现数据响应式
-  * `Object.defineProperty()`存在以下缺陷
-    * **不能监听数组的变化**
-    * **无法检测到对象属性的新增或删除**
+vue2.x使用 `Object.defineProperty() `实现数据响应式`Object.defineProperty()`存在以下缺陷
 
-* 缺陷检测
+* **不能监听数组的变化**
+* **无法检测到对象属性的新增或删除**
 
-  ![](../images/quexian.png)
+  > 原因：在 Vue 依赖收集阶段，已经 Vue 响应式过程中已经通过 `Object.defineProperty() ` 深度遍历完成对数据对象属性的依赖收集。当在更新阶段中对数据对象新增或者删除属性时，此时新增的数据属性是没有被依赖收集的，所以无法触发视图的更新。
+
+#### 缺陷检测
+
+![](../images/quexian.png)
 
 ### 为什么 Vue2 无法检测到 data 对象属性的新增或删除？
 

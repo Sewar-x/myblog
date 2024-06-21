@@ -824,38 +824,46 @@ Vue 一共有 8 个生命阶段，分别是创建前、创建后、加载前、�
 
 * 响应式系统核心使用 ES5的 [Object.defineProperty()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty) API 实现 ： 
 
+  ```javascript
+  const object1 = {};
+  
+  Object.defineProperty(object1, 'property1', {
+    value: 42,
+    writable: false,
+  });
+  ```
+  
   * 参数：第一个参数是需要定义属性的对象，第二个 参数是需要定义的属性，第三个是该属性描述符。
   * 属性的描述符有四个属性：value 属性的值，writable 属性是否可写， enumerable 属性是否可枚举，configurable 属性是否可配置修改。
-  * 缺陷：有一些对属性的操作，使用这种方法无法拦截：比如说通过下标方式修改数组数据或者给对象新 增属性
+  * 缺陷：有一些对属性的操作，使用这种方法无法拦截：比如说通过下标方式修改数组数据或者给对象新 增属性（详细解释参考[Vue2 API原理分析 | Sewen 博客 (sewar-x.github.io)](https://sewar-x.github.io/myblog/article/vue2/Vue2 API原理分析.html#数组和对象的检测缺陷)）
     * vue 内部通过重写函数解决了这个问题：在 Vue3.0 中已经不使用这种方式了，而是 通过使用 Proxy 对对象进行代理，从而实现数据劫持。
     * 使用 Proxy 的好处是它可以完美的监 听到任何方式的数据改变，唯一的缺点是兼容性的问题，因为这是 ES6 的语法。
-
-  ![](../images/响应式流程.png)
+  
+  
 
 
 #### **响应式系统流程**
 
-* **创建实例：**新建一个vue实例，在构造函数中调用 oserver() 传入 data 数据并创建一个观察者对象;
-* **定义响应式数据：**observer 函数遍历 data 的属性，调用 defineReactive，在方法内创建一个依赖收集对象并使用 Object.defineProperty 修改data 的属性
-* **依赖收集：**runder funtion 读取数据时，触发数据的 getter()，在属性的 getter 中往依赖收集对象中添加属性的 watcher对象；
-* **派发更新：**修改数据时，触发数据的 setter()，在 setter 中调用依赖收集对象的 notify 方法，notify 方法再调用对应的 watcher 对象的update 方法更新视图。
-
-#### 手写响应式原理
-
-![image-20231106204309110](../images/vue响应式原理.png)
+![](../images/vue响应式原理.png)
 
 > Vue的响应式过程可以分为三个阶段：初始化阶段、依赖收集阶段和响应阶段。
 >
 > 1. **初始化阶段**：
 >
 >    * 在 `new Vue()` 后，Vue会调用 `_init ` 函数进行初始化。
->    * 在这个阶段，Vue的 `data `属性会被 `reactive `化，也就是加上 `setter/getter` 函数。这个过程会将Data通过Observer 转换成 `getter/setter` 的形式，以对数据追踪变化。这一步会遍历数据对象的属性，并使用`Object.defineProperty()`为每个属性定义`getter`和`setter`，从而实现对属性的劫持。对于数组和嵌套对象，会遍历递归调用`Object.defineProperty()`为每个属性定义`getter`和`setter`；
+>    * 在这个阶段，Vue的 `data `属性会被 `reactive `化，也就是加上 `setter/getter` 函数。
+>      * 这个过程会将Data通过Observer 转换成 `getter/setter` 的形式，以对数据追踪变化。
+>
+>      * 这一步会**遍历数据对象的属性**，并使用`Object.defineProperty()`为每个属性定义`getter`和`setter`，从而实现**对属性的劫持**。
+>
+>      * **对于数组和嵌套对象，会遍历递归调用**`Object.defineProperty()`为每个属性定义`getter`和`setter`；
 >
 >    * 当被设置的对象被读取的时候，会执行getter函数；当被赋值的时候，会执行setter函数。
 >
 > 2. **依赖收集阶段：**
->
->    * 在这个阶段，Dep 类会进行依赖收集。当编译模板时访问响应式数据时，通过 Watcher 读取数据，会触发 getter ，从而将 Watcher 添加到依赖中。这意味着每一个 data 的属性都会有一个 dep 对象，用于存储依赖的 Watcher。
+>    * 在这个阶段，Dep 类会进行依赖收集。
+>    * 当编译模板时访问响应式数据时，通过 Watcher 读取数据，会触发 getter ，从而将 Watcher 添加到依赖中。
+>    * 这意味着每一个 data 的属性都会有一个 dep 对象，用于存储依赖的 Watcher。
 >
 > 3. **响应阶段**：
 >
@@ -863,6 +871,13 @@ Vue 一共有 8 个生命阶段，分别是创建前、创建后、加载前、�
 >    * 这时候，这些Watcher就会开始调用update来更新视图。
 >
 > 这个过程涉及到三个核心对象：`Observer`、`Dep`（依赖管理器）和`Watcher`。`Observer`用于将数据对象转换为响应式数据，`Dep`用于管理依赖和触发更新，`Watcher`用于与Vue实例和视图关联，并在数据变化时更新视图。
+
+#### 手写响应式原理
+
+* **创建实例： ** 新建一个vue实例，在构造函数中调用 oserver() 传入 data 数据并创建一个观察者对象;
+* **定义响应式数据：** observer 函数遍历 data 的属性，调用 defineReactive，在方法内创建一个依赖收集对象并使用 Object.defineProperty 修改data 的属性；
+* **依赖收集：** runder funtion 读取数据时，触发数据的 getter()，在属性的 getter 中往依赖收集对象中添加属性的 watcher对象；
+* **派发更新：** 修改数据时，触发数据的 setter()，在 setter 中调用依赖收集对象的 notify 方法，notify 方法再调用对应的 watcher 对象的update 方法更新视图。
 
 
 
@@ -879,6 +894,12 @@ Vue 一共有 8 个生命阶段，分别是创建前、创建后、加载前、�
        }
      }
    }
+   
+   ```
+
+2. 定义响应式：
+
+   ```javascript
    
    /**
    * 对数据定义响应式
@@ -908,7 +929,9 @@ Vue 一共有 8 个生命阶段，分别是创建前、创建后、加载前、�
    }
    ```
 
-2. 创建一个`Watcher`对象，用于更新视图：
+   
+
+3. 创建一个`Watcher`对象，用于更新视图：
 
    ```js
    /**
@@ -937,7 +960,7 @@ Vue 一共有 8 个生命阶段，分别是创建前、创建后、加载前、�
    };
    ```
 
-3. 创建一个`Dep`对象，用于管理`Watcher`对象：
+4. 创建一个`Dep`对象，用于管理`Watcher`对象：
 
    ```js
    /**
@@ -959,7 +982,7 @@ Vue 一共有 8 个生命阶段，分别是创建前、创建后、加载前、�
    };
    ```
 
-4. 创建一个`Vue`对象，用于绑定数据和视图：
+5. 创建一个`Vue`对象，用于绑定数据和视图：
 
    ```js
    /**
@@ -990,7 +1013,7 @@ Vue 一共有 8 个生命阶段，分别是创建前、创建后、加载前、�
    };
    ```
 
-5. 代码进行测试：
+6. 代码进行测试：
 
    ```js
    let vm = new Vue({
@@ -1145,388 +1168,388 @@ Dep.target = null
 
 
 
-**源码分析：**
+#### **源码分析**
 
-* 总体流程图：![](../images/响应式初始化流程.png)
+##### 总体流程图![](../images/响应式初始化流程.png)
 
-  * **`initState`**： 在 Vue 的初始化阶段，`_init` 方法执行的时候，会执行 `initState(vm)` 方法: 主要是对 `props`、`methods`、`data`、`computed` 和 `wathcer` 等属性做了初始化操作。它的定义在 `src/core/instance/state.js` 
+* **`initState`**： 在 Vue 的初始化阶段，`_init` 方法执行的时候，会执行 `initState(vm)` 方法: 主要是对 `props`、`methods`、`data`、`computed` 和 `wathcer` 等属性做了初始化操作。它的定义在 `src/core/instance/state.js` 
+
+  ```javascript
+  /*初始化props、methods、data、computed与watch*/
+  export function initState (vm: Component) {
+    vm._watchers = []
+    const opts = vm.$options //获取创建vue实例时传入的options参数
+    /*初始化props*/
+    if (opts.props) initProps(vm, opts.props)
+    /*初始化方法*/
+    if (opts.methods) initMethods(vm, opts.methods)
+    /*初始化data*/
+    if (opts.data) {
+      initData(vm)
+    } else {
+      /*该组件没有data的时候绑定一个空对象*/
+      observe(vm._data = {}, true /* asRootData */)
+    }
+    /*初始化computed*/
+    if (opts.computed) initComputed(vm, opts.computed)
+    /*初始化watchers*/
+    if (opts.watch) initWatch(vm, opts.watch)
+  }
+  ```
+
+* **initProps 方法**：遍历定义的 `props` 配置。遍历的过程主要做两件事情：
+
+  * 一个是调用 `defineReactive` 方法把每个 `prop` 对应的值变成响应式，可以通过 `vm._props.xxx` 访问到定义 `props` 中对应的属性。
+
+  * 另一个是通过 `proxy` 把 `vm._props.xxx` 的访问代理到 `vm.xxx` 上
 
     ```javascript
-    /*初始化props、methods、data、computed与watch*/
-    export function initState (vm: Component) {
-      vm._watchers = []
-      const opts = vm.$options //获取创建vue实例时传入的options参数
-      /*初始化props*/
-      if (opts.props) initProps(vm, opts.props)
-      /*初始化方法*/
-      if (opts.methods) initMethods(vm, opts.methods)
-      /*初始化data*/
-      if (opts.data) {
-        initData(vm)
-      } else {
-        /*该组件没有data的时候绑定一个空对象*/
-        observe(vm._data = {}, true /* asRootData */)
-      }
-      /*初始化computed*/
-      if (opts.computed) initComputed(vm, opts.computed)
-      /*初始化watchers*/
-      if (opts.watch) initWatch(vm, opts.watch)
-    }
-    ```
-
-  * **initProps 方法**：遍历定义的 `props` 配置。遍历的过程主要做两件事情：
-
-    * 一个是调用 `defineReactive` 方法把每个 `prop` 对应的值变成响应式，可以通过 `vm._props.xxx` 访问到定义 `props` 中对应的属性。
-
-    * 另一个是通过 `proxy` 把 `vm._props.xxx` 的访问代理到 `vm.xxx` 上
-
-      ```javascript
-      /*初始化props*/
-      function initProps (vm: Component, propsOptions: Object) {
-        const propsData = vm.$options.propsData || {} //获取组件实例的props
-        const props = vm._props = {}
-        // cache prop keys so that future props updates can iterate using Array
-        // instead of dynamic object key enumeration.
-        /*缓存属性的key，使得将来能直接使用数组的索引值来更新props来替代动态地枚举对象*/
-        const keys = vm.$options._propKeys = []
-        /*根据$parent是否存在来判断当前是否是根结点*/
-        const isRoot = !vm.$parent
-        // root instance props should be converted
-        /*根结点会给shouldConvert赋true，根结点的props应该被转换*/
-        observerState.shouldConvert = isRoot
-        for (const key in propsOptions) {
-          /*props的key值存入keys（_propKeys）中*/
-          keys.push(key)
-          /*验证prop,不存在用默认值替换，类型为bool则声称true或false，当使用default中的默认值的时候会将默认值的副本进行observe*/
-          const value = validateProp(key, propsOptions, propsData, vm)
-          /* istanbul ignore else */
-          if (process.env.NODE_ENV !== 'production') {
-            /*判断是否是保留字段，如果是则发出warning*/
-            if (isReservedProp[key] || config.isReservedAttr(key)) {
+    /*初始化props*/
+    function initProps (vm: Component, propsOptions: Object) {
+      const propsData = vm.$options.propsData || {} //获取组件实例的props
+      const props = vm._props = {}
+      // cache prop keys so that future props updates can iterate using Array
+      // instead of dynamic object key enumeration.
+      /*缓存属性的key，使得将来能直接使用数组的索引值来更新props来替代动态地枚举对象*/
+      const keys = vm.$options._propKeys = []
+      /*根据$parent是否存在来判断当前是否是根结点*/
+      const isRoot = !vm.$parent
+      // root instance props should be converted
+      /*根结点会给shouldConvert赋true，根结点的props应该被转换*/
+      observerState.shouldConvert = isRoot
+      for (const key in propsOptions) {
+        /*props的key值存入keys（_propKeys）中*/
+        keys.push(key)
+        /*验证prop,不存在用默认值替换，类型为bool则声称true或false，当使用default中的默认值的时候会将默认值的副本进行observe*/
+        const value = validateProp(key, propsOptions, propsData, vm)
+        /* istanbul ignore else */
+        if (process.env.NODE_ENV !== 'production') {
+          /*判断是否是保留字段，如果是则发出warning*/
+          if (isReservedProp[key] || config.isReservedAttr(key)) {
+            warn(
+              `"${key}" is a reserved attribute and cannot be used as component prop.`,
+              vm
+            )
+          }
+          defineReactive(props, key, value, () => {
+            /*
+              由于父组件重新渲染的时候会重写prop的值，所以应该直接使用prop来作为一个data或者计算属性的依赖
+              https://cn.vuejs.org/v2/guide/components.html#字面量语法-vs-动态语法
+            */
+            if (vm.$parent && !observerState.isSettingProps) {
               warn(
-                `"${key}" is a reserved attribute and cannot be used as component prop.`,
+                `Avoid mutating a prop directly since the value will be ` +
+                `overwritten whenever the parent component re-renders. ` +
+                `Instead, use a data or computed property based on the prop's ` +
+                `value. Prop being mutated: "${key}"`,
                 vm
               )
             }
-            defineReactive(props, key, value, () => {
-              /*
-                由于父组件重新渲染的时候会重写prop的值，所以应该直接使用prop来作为一个data或者计算属性的依赖
-                https://cn.vuejs.org/v2/guide/components.html#字面量语法-vs-动态语法
-              */
-              if (vm.$parent && !observerState.isSettingProps) {
-                warn(
-                  `Avoid mutating a prop directly since the value will be ` +
-                  `overwritten whenever the parent component re-renders. ` +
-                  `Instead, use a data or computed property based on the prop's ` +
-                  `value. Prop being mutated: "${key}"`,
-                  vm
-                )
-              }
-            })
-          } else {
-            //对属性进行定义响应式
-            defineReactive(props, key, value)
-          }
-          // static props are already proxied on the component's prototype
-          // during Vue.extend(). We only need to proxy props defined at
-          // instantiation here.
-          /*Vue.extend()期间，静态prop已经在组件原型上代理了，我们只需要在这里进行代理prop
-          通过 proxy 把 vm._props.xxx 的访问代理到 vm.xxx 上*/
-          if (!(key in vm)) {
-            proxy(vm, `_props`, key)
-          }
+          })
+        } else {
+          //对属性进行定义响应式
+          defineReactive(props, key, value)
         }
-        observerState.shouldConvert = true
+        // static props are already proxied on the component's prototype
+        // during Vue.extend(). We only need to proxy props defined at
+        // instantiation here.
+        /*Vue.extend()期间，静态prop已经在组件原型上代理了，我们只需要在这里进行代理prop
+        通过 proxy 把 vm._props.xxx 的访问代理到 vm.xxx 上*/
+        if (!(key in vm)) {
+          proxy(vm, `_props`, key)
+        }
       }
-      ```
+      observerState.shouldConvert = true
+    }
+    ```
 
-  * **initData 方法**： 初始化 data ，主要过程也是做两件事：
+* **initData 方法**： 初始化 data ，主要过程也是做两件事：
 
-    * 一个是对定义 data 函数返回对象的遍历，通过 proxy 把每一个值 vm._data.xxx 都代理到 vm.xxx 上；
+  * 一个是对定义 data 函数返回对象的遍历，通过 proxy 把每一个值 vm._data.xxx 都代理到 vm.xxx 上；
 
-    * 另一个是调用 observe 方法观测整个 data 的变化，把 data 也变成响应式，可以通过 vm._data.xxx 访问到定义 data 返回函数中对应的属性并检查data对象中是否与props对象中存在同名key
+  * 另一个是调用 observe 方法观测整个 data 的变化，把 data 也变成响应式，可以通过 vm._data.xxx 访问到定义 data 返回函数中对应的属性并检查data对象中是否与props对象中存在同名key
 
-      ```javascript
-      function initData (vm: Component) {
-      
-        /*得到data数据*/
-        let data = vm.$options.data //获取vue实例对象中设置的data对象
-        data = vm._data = typeof data === 'function' //判断data对象是否为funtion,不是直接设置data
-          ? getData(data, vm)
-          : data || {}
-      
-        /*对对象类型进行严格检查，只有当对象是纯javascript对象的时候返回true*/
-        if (!isPlainObject(data)) {
-          data = {}
+    ```javascript
+    function initData (vm: Component) {
+    
+      /*得到data数据*/
+      let data = vm.$options.data //获取vue实例对象中设置的data对象
+      data = vm._data = typeof data === 'function' //判断data对象是否为funtion,不是直接设置data
+        ? getData(data, vm)
+        : data || {}
+    
+      /*对对象类型进行严格检查，只有当对象是纯javascript对象的时候返回true*/
+      if (!isPlainObject(data)) {
+        data = {}
+        process.env.NODE_ENV !== 'production' && warn(
+          'data functions should return an object:\n' +
+          'https://vuejs.org/v2/guide/components.html#data-Must-Be-a-Function',
+          vm
+        )
+      }
+      // proxy data on instance
+      /*遍历data对象*/
+      const keys = Object.keys(data)
+      const props = vm.$options.props
+      let i = keys.length
+    
+      //遍历data中的数据
+      while (i--) {
+    
+        /*保证data中的key不与props中的key重复，props优先，如果有冲突会产生warning*/
+        if (props && hasOwn(props, keys[i])) { //props对象存在并且props中存在与data同名Key
           process.env.NODE_ENV !== 'production' && warn(
-            'data functions should return an object:\n' +
-            'https://vuejs.org/v2/guide/components.html#data-Must-Be-a-Function',
+            `The data property "${keys[i]}" is already declared as a prop. ` +
+            `Use prop default value instead.`,
             vm
           )
+        } else if (!isReserved(keys[i])) { //data对象的key不为保存关键字
+          /*判断是否是保留字段*/
+    
+          /*将data上面的属性代理到了vm实例上（_data保存了vue实例传入的data对象：132行）
+          通过 proxy 把 vm._data.xxx 的访问代理到 vm.xxx 上
+          */
+          proxy(vm, `_data`, keys[i])
         }
-        // proxy data on instance
-        /*遍历data对象*/
-        const keys = Object.keys(data)
-        const props = vm.$options.props
-        let i = keys.length
-      
-        //遍历data中的数据
-        while (i--) {
-      
-          /*保证data中的key不与props中的key重复，props优先，如果有冲突会产生warning*/
-          if (props && hasOwn(props, keys[i])) { //props对象存在并且props中存在与data同名Key
-            process.env.NODE_ENV !== 'production' && warn(
-              `The data property "${keys[i]}" is already declared as a prop. ` +
-              `Use prop default value instead.`,
-              vm
-            )
-          } else if (!isReserved(keys[i])) { //data对象的key不为保存关键字
-            /*判断是否是保留字段*/
-      
-            /*将data上面的属性代理到了vm实例上（_data保存了vue实例传入的data对象：132行）
-            通过 proxy 把 vm._data.xxx 的访问代理到 vm.xxx 上
-            */
-            proxy(vm, `_data`, keys[i])
-          }
-        }
-        // observe data
-        /*从这里开始我们要observe了，开始对数据进行绑定，这里有尤大大的注释asRootData，这步作为根数据，下面会进行递归observe进行对深层对象的绑定。*/
-        observe(data, true /* asRootData */)
       }
-      ```
+      // observe data
+      /*从这里开始我们要observe了，开始对数据进行绑定，这里有尤大大的注释asRootData，这步作为根数据，下面会进行递归observe进行对深层对象的绑定。*/
+      observe(data, true /* asRootData */)
+    }
+    ```
 
-  * **proxy 方法**：把 `props` 和 `data` 上的属性代理到 `vm` 实例上。
+* **proxy 方法**：把 `props` 和 `data` 上的属性代理到 `vm` 实例上。
 
-    * 通过 proxy 当定义了如下 props，却可以通过 vm 实例访问到它。
-
-      ```javascript
-      let comP = {
-        props: {
-          msg: 'hello'
-        },
-        methods: {
-          say() {
-            console.log(this.msg)
-          }
-        }
-      }j
-      ```
-
-    * 实现：通过 `Object.defineProperty` 把 `target[sourceKey][key]` 的读写变成了对 `target[key]` 的读写。所以对于 `props` 而言，对 `vm._props.xxx` 的读写变成了 `vm.xxx` 的读写，而对于 `vm._props.xxx` 我们可以访问到定义在 `props` 中的属性，所以我们就可以通过 `vm.xxx` 访问到定义在 `props` 中的 `xxx` 属性了。同理，对于 `data` 而言，对 `vm._data.xxxx` 的读写变成了对 `vm.xxxx` 的读写，而对于 `vm._data.xxxx` 我们可以访问到定义在 `data` 函数返回对象中的属性，所以我们就可以通过 `vm.xxxx` 访问到定义在 `data` 函数返回对象中的 `xxxx` 属性了。
-
-      ```javascript
-      /*通过proxy函数将_data（或者_props等）上面的数据代理到vm上，这样就可以用app.text代替app._data.text了。*/
-      export function proxy (target: Object, sourceKey: string, key: string) {
-        sharedPropertyDefinition.get = function proxyGetter () { //定义getter
-          return this[sourceKey][key]
-        }
-        sharedPropertyDefinition.set = function proxySetter (val) { //定义setter
-          this[sourceKey][key] = val
-        }
-        //对vm对象的key属性定义setter和getter方法，当访问vm.key时，既触发getter方法，返回vm.sourceKey.key
-        Object.defineProperty(target, key, sharedPropertyDefinition)
-      }
-      ```
-
-  * **`Observer` 类**：它的作用是给对象的属性添加 getter 和 setter，用于依赖收集和派发更新：
+  * 通过 proxy 当定义了如下 props，却可以通过 vm 实例访问到它。
 
     ```javascript
-    /*
-      每个被观察到对象被附加上观察者实例，一旦被添加，观察者将为目标对象加上getter\setter属性，
-      进行依赖收集以及调度更新。
-    */
-    export class Observer {
-      value: any;
-      dep: Dep;
-      vmCount: number; // number of vms that has this object as root $data
-    
-      constructor(value: any) {
-        this.value = value
-        this.dep = new Dep()
-        this.vmCount = 0
-        /* 将Observer实例绑定到data的__ob__属性上面去，data的__ob__属性保存数据对应的观察者对象
-        observe的时候会先检测是否已经有__ob__对象存放Observer实例了*/
-        def(value, '__ob__', this)
-        if (Array.isArray(value)) {
-     /*如果是数组，将修改后可以截获响应的数组方法替换掉该数组的原型中的原生方法，达到监听数组数据变化响应的效果。
-     这里如果当前浏览器支持__proto__属性，则直接覆盖当前数组对象原型上的原生数组方法，如果不支持该属性，则直接覆盖数组对象的原型*/
-          const augment = hasProto
-            ? protoAugment  /*直接覆盖原型的方法来修改目标对象*/
-            : copyAugment   /*定义（覆盖）目标对象或数组的某一个方法*/
-          augment(value, arrayMethods, arrayKeys)
-     
-          /*如果是数组则需要遍历数组的每一个成员进行observe*/
-          this.observeArray(value)
+    let comP = {
+      props: {
+        msg: 'hello'
+      },
+      methods: {
+        say() {
+          console.log(this.msg)
+        }
+      }
+    }j
+    ```
+
+  * 实现：通过 `Object.defineProperty` 把 `target[sourceKey][key]` 的读写变成了对 `target[key]` 的读写。所以对于 `props` 而言，对 `vm._props.xxx` 的读写变成了 `vm.xxx` 的读写，而对于 `vm._props.xxx` 我们可以访问到定义在 `props` 中的属性，所以我们就可以通过 `vm.xxx` 访问到定义在 `props` 中的 `xxx` 属性了。同理，对于 `data` 而言，对 `vm._data.xxxx` 的读写变成了对 `vm.xxxx` 的读写，而对于 `vm._data.xxxx` 我们可以访问到定义在 `data` 函数返回对象中的属性，所以我们就可以通过 `vm.xxxx` 访问到定义在 `data` 函数返回对象中的 `xxxx` 属性了。
+
+    ```javascript
+    /*通过proxy函数将_data（或者_props等）上面的数据代理到vm上，这样就可以用app.text代替app._data.text了。*/
+    export function proxy (target: Object, sourceKey: string, key: string) {
+      sharedPropertyDefinition.get = function proxyGetter () { //定义getter
+        return this[sourceKey][key]
+      }
+      sharedPropertyDefinition.set = function proxySetter (val) { //定义setter
+        this[sourceKey][key] = val
+      }
+      //对vm对象的key属性定义setter和getter方法，当访问vm.key时，既触发getter方法，返回vm.sourceKey.key
+      Object.defineProperty(target, key, sharedPropertyDefinition)
+    }
+    ```
+
+* **`Observer` 类**：它的作用是给对象的属性添加 getter 和 setter，用于依赖收集和派发更新：
+
+  ```javascript
+  /*
+    每个被观察到对象被附加上观察者实例，一旦被添加，观察者将为目标对象加上getter\setter属性，
+    进行依赖收集以及调度更新。
+  */
+  export class Observer {
+    value: any;
+    dep: Dep;
+    vmCount: number; // number of vms that has this object as root $data
+  
+    constructor(value: any) {
+      this.value = value
+      this.dep = new Dep()
+      this.vmCount = 0
+      /* 将Observer实例绑定到data的__ob__属性上面去，data的__ob__属性保存数据对应的观察者对象
+      observe的时候会先检测是否已经有__ob__对象存放Observer实例了*/
+      def(value, '__ob__', this)
+      if (Array.isArray(value)) {
+   /*如果是数组，将修改后可以截获响应的数组方法替换掉该数组的原型中的原生方法，达到监听数组数据变化响应的效果。
+   这里如果当前浏览器支持__proto__属性，则直接覆盖当前数组对象原型上的原生数组方法，如果不支持该属性，则直接覆盖数组对象的原型*/
+        const augment = hasProto
+          ? protoAugment  /*直接覆盖原型的方法来修改目标对象*/
+          : copyAugment   /*定义（覆盖）目标对象或数组的某一个方法*/
+        augment(value, arrayMethods, arrayKeys)
+   
+        /*如果是数组则需要遍历数组的每一个成员进行observe*/
+        this.observeArray(value)
+      } else {
+        /*如果是对象则直接walk进行绑定*/
+        this.walk(value)
+      }
+    }
+  
+    /**
+     * Walk through each property and convert them into
+     * getter/setters. This method should only be called when
+     * value type is Object.
+     */
+    /* 遍历每一个对象并且在它们上面绑定getter与setter,这个方法只有在value的类型是对象的时候才能被调用 */
+    walk(obj: Object) {
+      const keys = Object.keys(obj)
+      /*walk方法会遍历对象的每一个属性进行defineReactive绑定*/
+      for (let i = 0; i < keys.length; i++) {
+        defineReactive(obj, keys[i], obj[keys[i]])
+      }
+    }
+  
+    /**
+     * Observe a list of Array items.
+     */
+    /*对一个数组的每一个成员进行observe*/
+    observeArray(items: Array<any>) {
+      for (let i = 0, l = items.length; i < l; i++) {
+        /*数组需要遍历每一个成员进行observe*/
+        observe(items[i])
+      }
+    }
+  }
+  ```
+
+  * `Observer` 的构造函数逻辑:
+  *  首先实例化 `Dep` 对象，接着通过执行 `def` 函数把自身实例添加到数据对象 `value` 的 `__ob__` 属性上; `def` 方法就是对 ` Object.defineProperty` 的简单封装。
+    * 接着进行判断：
+    * 如果是数组则需要遍历数组的每一个成员进行observe。observe 会对对象/数组的子对象递归进行observe。
+      * 如果是对象则直接walk进行绑定：遍历对象 key 给每个属性定义响应式，同样会调用observe 会对对象/数组的子对象递归进行observe。
+  * 由于`Observer`中需要对数组和对象的遍历观测，因此 Vue2.x 中响应式过程存在性能损耗。 
+
+* `observe` 函数：给非 VNode 的对象类型数据添加一个 `Observer`，如果已经添加过则直接返回，否则在满足一定条件下去实例化一个 `Observer` 对象实例，它的定义在 `src/core/observer/index.js` 中：
+
+  ```javascript
+    /*对象的子对象递归进行observe并返回子节点的Observer对象*/
+    let childOb = observe(val)
+    Object.defineProperty(obj, key, {
+      enumerable: true,
+      configurable: true,
+      get: function reactiveGetter() {
+        /*如果原本对象拥有getter方法则执行*/
+        const value = getter ? getter.call(obj) : val
+        if (Dep.target) {
+          /*进行依赖收集*/
+          dep.depend()
+          if (childOb) {
+            /*子对象进行依赖收集，其实就是将同一个watcher观察者实例放进了两个depend中，
+            一个是正在本身闭包中的depend，另一个是子元素的depend*/
+            childOb.dep.depend()
+          }
+          if (Array.isArray(value)) {
+            /*是数组则需要对每一个成员都进行依赖收集，如果数组的成员还是数组，则递归。*/
+            dependArray(value)
+          }
+        }
+        return value
+      },
+      set: function reactiveSetter(newVal) {
+        /*通过getter方法获取当前值，与新值进行比较，一致则不需要执行下面的操作*/
+        const value = getter ? getter.call(obj) : val
+        /* eslint-disable no-self-compare */
+        if (newVal === value || (newVal !== newVal && value !== value)) {
+          return
+        }
+        /* eslint-enable no-self-compare */
+        if (process.env.NODE_ENV !== 'production' && customSetter) {
+          customSetter()
+        }
+        if (setter) {
+          /*如果原本对象拥有setter方法则执行setter*/
+          setter.call(obj, newVal)
         } else {
-          /*如果是对象则直接walk进行绑定*/
-          this.walk(value)
+          val = newVal
         }
+        /*新的值需要重新进行observe，保证数据响应式*/
+        childOb = observe(newVal)
+        /*dep对象通知所有的观察者*/
+      dep.notify()
       }
-    
-      /**
-       * Walk through each property and convert them into
-       * getter/setters. This method should only be called when
-       * value type is Object.
-       */
-      /* 遍历每一个对象并且在它们上面绑定getter与setter,这个方法只有在value的类型是对象的时候才能被调用 */
-      walk(obj: Object) {
-        const keys = Object.keys(obj)
-        /*walk方法会遍历对象的每一个属性进行defineReactive绑定*/
-        for (let i = 0; i < keys.length; i++) {
-          defineReactive(obj, keys[i], obj[keys[i]])
-        }
-      }
-    
-      /**
-       * Observe a list of Array items.
-       */
-      /*对一个数组的每一个成员进行observe*/
-      observeArray(items: Array<any>) {
-        for (let i = 0, l = items.length; i < l; i++) {
-          /*数组需要遍历每一个成员进行observe*/
-          observe(items[i])
-        }
-      }
-    }
-    ```
+  })
+  }
+  ```
 
-    * `Observer` 的构造函数逻辑:
-    *  首先实例化 `Dep` 对象，接着通过执行 `def` 函数把自身实例添加到数据对象 `value` 的 `__ob__` 属性上; `def` 方法就是对 ` Object.defineProperty` 的简单封装。
-      * 接着进行判断：
-      * 如果是数组则需要遍历数组的每一个成员进行observe。observe 会对对象/数组的子对象递归进行observe。
-        * 如果是对象则直接walk进行绑定：遍历对象 key 给每个属性定义响应式，同样会调用observe 会对对象/数组的子对象递归进行observe。
-    * 由于`Observer`中需要对数组和对象的遍历观测，因此 Vue2.x 中响应式过程存在性能损耗。 
+* `defineReactive` 函数： 定义一个响应式对象，给对象动态添加 getter 和 setter。
+
+* 过程：
+    * 初始化 `Dep` 对象的实例，接着拿到 `obj` 的属性描述符；
+    * 然后对子对象递归调用 `observe` 方法，这样就保证了无论 `obj` 的结构多复杂，它的所有子属性也能变成响应式的对象，这样我们访问或修改 `obj` 中一个嵌套较深的属性，也能触发 getter 和 setter；
+    * 最后利用 `Object.defineProperty` 去给 `obj` 的属性 `key` 添加 getter 和 setter。
+  * 它的定义在 `src/core/observer/index.js` 中：
+
+  ```javascript
+  /*为对象defineProperty上在变化时通知的属性*/
+  export function defineReactive(
+    obj: Object,
+    key: string,
+    val: any,
+    customSetter?: Function
+  ) {
+    /*在闭包中定义一个dep对象*/
+    const dep = new Dep()
   
-  * `observe` 函数：给非 VNode 的对象类型数据添加一个 `Observer`，如果已经添加过则直接返回，否则在满足一定条件下去实例化一个 `Observer` 对象实例，它的定义在 `src/core/observer/index.js` 中：
+    const property = Object.getOwnPropertyDescriptor(obj, key)
+    if (property && property.configurable === false) {
+      return
+    }
   
-    ```javascript
-      /*对象的子对象递归进行observe并返回子节点的Observer对象*/
-      let childOb = observe(val)
-      Object.defineProperty(obj, key, {
-        enumerable: true,
-        configurable: true,
-        get: function reactiveGetter() {
-          /*如果原本对象拥有getter方法则执行*/
-          const value = getter ? getter.call(obj) : val
-          if (Dep.target) {
-            /*进行依赖收集*/
-            dep.depend()
-            if (childOb) {
-              /*子对象进行依赖收集，其实就是将同一个watcher观察者实例放进了两个depend中，
-              一个是正在本身闭包中的depend，另一个是子元素的depend*/
-              childOb.dep.depend()
-            }
-            if (Array.isArray(value)) {
-              /*是数组则需要对每一个成员都进行依赖收集，如果数组的成员还是数组，则递归。*/
-              dependArray(value)
-            }
+    /*如果之前该对象已经预设了getter以及setter函数则将其取出来，新定义的getter/setter中会将其执行，
+    保证不会覆盖之前已经定义的getter/setter。*/
+    // cater for pre-defined getter/setters
+    const getter = property && property.get
+    const setter = property && property.set
+  
+    /*对象的子对象递归进行observe并返回子节点的Observer对象*/
+    let childOb = observe(val)
+    Object.defineProperty(obj, key, {
+      enumerable: true,
+      configurable: true,
+      get: function reactiveGetter() {
+        /*如果原本对象拥有getter方法则执行*/
+        const value = getter ? getter.call(obj) : val
+        if (Dep.target) {
+          /*进行依赖收集*/
+          dep.depend()
+          if (childOb) {
+            /*子对象进行依赖收集，其实就是将同一个watcher观察者实例放进了两个depend中，
+            一个是正在本身闭包中的depend，另一个是子元素的depend*/
+            childOb.dep.depend()
           }
-          return value
-        },
-        set: function reactiveSetter(newVal) {
-          /*通过getter方法获取当前值，与新值进行比较，一致则不需要执行下面的操作*/
-          const value = getter ? getter.call(obj) : val
-          /* eslint-disable no-self-compare */
-          if (newVal === value || (newVal !== newVal && value !== value)) {
-            return
+          if (Array.isArray(value)) {
+            /*是数组则需要对每一个成员都进行依赖收集，如果数组的成员还是数组，则递归。*/
+            dependArray(value)
           }
-          /* eslint-enable no-self-compare */
-          if (process.env.NODE_ENV !== 'production' && customSetter) {
-            customSetter()
-          }
-          if (setter) {
-            /*如果原本对象拥有setter方法则执行setter*/
-            setter.call(obj, newVal)
-          } else {
-            val = newVal
-          }
-          /*新的值需要重新进行observe，保证数据响应式*/
-          childOb = observe(newVal)
-          /*dep对象通知所有的观察者*/
+        }
+        return value
+      },
+      set: function reactiveSetter(newVal) {
+        /*通过getter方法获取当前值，与新值进行比较，一致则不需要执行下面的操作*/
+        const value = getter ? getter.call(obj) : val
+        /* eslint-disable no-self-compare */
+        if (newVal === value || (newVal !== newVal && value !== value)) {
+          return
+        }
+        /* eslint-enable no-self-compare */
+        if (process.env.NODE_ENV !== 'production' && customSetter) {
+          customSetter()
+        }
+        if (setter) {
+          /*如果原本对象拥有setter方法则执行setter*/
+          setter.call(obj, newVal)
+        } else {
+          val = newVal
+        }
+        /*新的值需要重新进行observe，保证数据响应式*/
+        childOb = observe(newVal)
+        /*dep对象通知所有的观察者*/
         dep.notify()
-        }
-    })
-    }
-    ```
-  
-  * `defineReactive` 函数： 定义一个响应式对象，给对象动态添加 getter 和 setter。
-  
-  * 过程：
-      * 初始化 `Dep` 对象的实例，接着拿到 `obj` 的属性描述符；
-      * 然后对子对象递归调用 `observe` 方法，这样就保证了无论 `obj` 的结构多复杂，它的所有子属性也能变成响应式的对象，这样我们访问或修改 `obj` 中一个嵌套较深的属性，也能触发 getter 和 setter；
-      * 最后利用 `Object.defineProperty` 去给 `obj` 的属性 `key` 添加 getter 和 setter。
-    * 它的定义在 `src/core/observer/index.js` 中：
-  
-    ```javascript
-    /*为对象defineProperty上在变化时通知的属性*/
-    export function defineReactive(
-      obj: Object,
-      key: string,
-      val: any,
-      customSetter?: Function
-    ) {
-      /*在闭包中定义一个dep对象*/
-      const dep = new Dep()
-    
-      const property = Object.getOwnPropertyDescriptor(obj, key)
-      if (property && property.configurable === false) {
-        return
       }
-    
-      /*如果之前该对象已经预设了getter以及setter函数则将其取出来，新定义的getter/setter中会将其执行，
-      保证不会覆盖之前已经定义的getter/setter。*/
-      // cater for pre-defined getter/setters
-      const getter = property && property.get
-      const setter = property && property.set
-    
-      /*对象的子对象递归进行observe并返回子节点的Observer对象*/
-      let childOb = observe(val)
-      Object.defineProperty(obj, key, {
-        enumerable: true,
-        configurable: true,
-        get: function reactiveGetter() {
-          /*如果原本对象拥有getter方法则执行*/
-          const value = getter ? getter.call(obj) : val
-          if (Dep.target) {
-            /*进行依赖收集*/
-            dep.depend()
-            if (childOb) {
-              /*子对象进行依赖收集，其实就是将同一个watcher观察者实例放进了两个depend中，
-              一个是正在本身闭包中的depend，另一个是子元素的depend*/
-              childOb.dep.depend()
-            }
-            if (Array.isArray(value)) {
-              /*是数组则需要对每一个成员都进行依赖收集，如果数组的成员还是数组，则递归。*/
-              dependArray(value)
-            }
-          }
-          return value
-        },
-        set: function reactiveSetter(newVal) {
-          /*通过getter方法获取当前值，与新值进行比较，一致则不需要执行下面的操作*/
-          const value = getter ? getter.call(obj) : val
-          /* eslint-disable no-self-compare */
-          if (newVal === value || (newVal !== newVal && value !== value)) {
-            return
-          }
-          /* eslint-enable no-self-compare */
-          if (process.env.NODE_ENV !== 'production' && customSetter) {
-            customSetter()
-          }
-          if (setter) {
-            /*如果原本对象拥有setter方法则执行setter*/
-            setter.call(obj, newVal)
-          } else {
-            val = newVal
-          }
-          /*新的值需要重新进行observe，保证数据响应式*/
-          childOb = observe(newVal)
-          /*dep对象通知所有的观察者*/
-          dep.notify()
-        }
-      })
-    }
-    ```
+    })
+  }
+  ```
 
 
 
