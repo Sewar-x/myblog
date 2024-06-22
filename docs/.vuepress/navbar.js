@@ -65,6 +65,16 @@ export default [ // 导航栏配置
         ]
     },
     {
+        text: '微前端',
+        ariaLabel: '微前端',
+        children: [
+            { text: '微前端基础', link: '/article/微前端/微前端基础.md' },
+            { text: '微前端技术方案', link: '/article/微前端/微前端技术方案.md' },
+            { text: '微前端框架', link: '/article/微前端/微前端框架.md' },
+            { text: '使用微前端重构项目', link: '/article/微前端/使用微前端重构项目.md' },
+        ]
+    },
+    {
         text: '前端工程',
         ariaLabel: '前端工程',
         children: [

@@ -834,10 +834,21 @@ Vue 一共有 8 个生命阶段，分别是创建前、创建后、加载前、�
   ```
   
   * 参数：第一个参数是需要定义属性的对象，第二个 参数是需要定义的属性，第三个是该属性描述符。
+  
   * 属性的描述符有四个属性：value 属性的值，writable 属性是否可写， enumerable 属性是否可枚举，configurable 属性是否可配置修改。
-  * 缺陷：有一些对属性的操作，使用这种方法无法拦截：比如说通过下标方式修改数组数据或者给对象新 增属性（详细解释参考[Vue2 API原理分析 | Sewen 博客 (sewar-x.github.io)](https://sewar-x.github.io/myblog/article/vue2/Vue2 API原理分析.html#数组和对象的检测缺陷)）
-    * vue 内部通过重写函数解决了这个问题：在 Vue3.0 中已经不使用这种方式了，而是 通过使用 Proxy 对对象进行代理，从而实现数据劫持。
-    * 使用 Proxy 的好处是它可以完美的监 听到任何方式的数据改变，唯一的缺点是兼容性的问题，因为这是 ES6 的语法。
+  
+  * 缺陷：
+  
+    * **不能监听数组的变化**
+  
+    * **无法检测到对象属性的新增或删除**
+  
+      > 原因：在初始化阶段的定义响应式过程中，已经通过 `Object.defineProperty() ` 深度遍历完成对数据对象属性的响应式定义。因此在后期更新阶段中，当对数据对象新增或者删除属性时，此时新增的数据属性是没有被响应式定义的，所以无法触发视图的更新。
+      >
+    
+  * vue 内部通过重写函数解决了这个问题：在 Vue3.0 中已经不使用这种方式了，而是 通过使用 Proxy 对对象进行代理，从而实现数据劫持。
+  
+  * 使用 Proxy 的好处是它可以完美的监 听到任何方式的数据改变，唯一的缺点是兼容性的问题，因为这是 ES6 的语法。
   
   
 
@@ -861,14 +872,14 @@ Vue 一共有 8 个生命阶段，分别是创建前、创建后、加载前、�
 >    * 当被设置的对象被读取的时候，会执行getter函数；当被赋值的时候，会执行setter函数。
 >
 > 2. **依赖收集阶段：**
->    * 在这个阶段，Dep 类会进行依赖收集。
->    * 当编译模板时访问响应式数据时，通过 Watcher 读取数据，会触发 getter ，从而将 Watcher 添加到依赖中。
+>    * 在这个阶段，Dep 类会进行依赖收集：
+>      * 模板会被编译成渲染函数，当调用渲染函数时访问响应式数据，会触发数据 getter 方法进行依赖收集，并给属性创建对应的 Watcher 对象 ，并将 Watcher 添加到 Dep 依赖队列中。
 >    * 这意味着每一个 data 的属性都会有一个 dep 对象，用于存储依赖的 Watcher。
 >
 > 3. **响应阶段**：
 >
->    * 当修改对象的值时，会触发对应的setter，setter会通知之前依赖收集得到的Dep中的每一个Watcher，告诉它们自己的值改变了，需要重新渲染视图。
->    * 这时候，这些Watcher就会开始调用update来更新视图。
+>    * 当修改对象的值时，会触发对应的 setter 方法，setter 会通知之前依赖收集得到的 Dep 队列中的每一个Watcher，告诉它们自己的值改变了，需要重新渲染视图。
+>    * 这时候，这些 Watcher 就会开始调用 update 来更新视图。
 >
 > 这个过程涉及到三个核心对象：`Observer`、`Dep`（依赖管理器）和`Watcher`。`Observer`用于将数据对象转换为响应式数据，`Dep`用于管理依赖和触发更新，`Watcher`用于与Vue实例和视图关联，并在数据变化时更新视图。
 
@@ -2619,14 +2630,17 @@ new Vue({
 
 
 
-* Vue 中 定义了 Virtual DOM 的数据结构，映射到真实的 DOM 实际上要经历 VNode 的 create、patch、diff 等过程：
+#### **VDOM 创建和更新**
 
-  * 创建过程：在模板编译以后，通过 render() 渲染时，调用 createElement 创建 父Vnode 占位符；  
-* path 过程：把 VNode 渲染成真实的 DOM 的过程。
-    *  首先，通过另一个 `createElem()` ，递归方式深度遍历创建子组件 VNode，通过 `insert()` 插入到真实 dom；
+Vue 中 定义了 Virtual DOM 的数据结构，映射到真实的 DOM 实际上要经历 VNode 的 create、patch、diff 等过程：
+
+* **create 创建过程**：在模板编译以后，通过 render() 渲染时，调用 createElement **创建父 Vnode 占位符**；  
+* **path 过程**：  **把 VNode 渲染成真实的 DOM 的过程**。
+  * 首先，通过另一个 `createElem()` ，递归方式深度遍历创建子组件 VNode，通过 `insert()` 插入到真实 dom；
   * 更新父占 VNode 位节点，最后创建了一个完整的 DOM 树并插入到 Body 上
-  * 当数据更新时：path 过程会执行 diff 比较，记录下两棵树的差异，最后将记录的有差异的地方应用到真正的 DOM 树中去，完成视图就更新。
-  
+*  **diff 比较**：diff  算法可以比对出两颗树的「差异」，然后进行**差异更新过程**。
+  * 当数据更新时，path 过程会执行 diff 比较，记录下两棵树的差异。
+  * 将记录的有差异的地方应用到真正的 DOM 树中去，完成视图就更新。
 
 #### **Virtual Dom 结构**
 
@@ -2854,7 +2868,7 @@ tag:'div',	/*说明这是一个div标签*/
 
   * VNode 是对真实 DOM 的一种抽象描述，它的核心定义无非就几个关键属性，标签名、数据、子节点、键值等，其它属性都是都是用来扩展 VNode 的灵活性以及实现一些特殊 feature 的。由于 VNode 只是用来映射到真实 DOM 的渲染，不需要包含操作 DOM 的方法，因此它是非常轻量和简单的。
 
-#### render
+#### **render**
 
 * 作用： 把实例渲染成一个虚拟 Node，生成 Virtual DOM。
 
@@ -3283,7 +3297,7 @@ tag:'div',	/*说明这是一个div标签*/
 
     * _update 方法主要根据变量  _isMounted   和 _vnode  判断是首次渲染还是数据更新，然后调用 patch 传入不同参数。
 
-#### patch
+#### **patch**
 
 * 作用：深度遍历 VNode，递归创建 VNode 并把 VNode 渲染成真实的 DOM。
 * 调用的时机：
@@ -3387,7 +3401,7 @@ tag:'div',	/*说明这是一个div标签*/
 
 * `pach` 方法中关键函数分析：`sameVnode` 、`createElm`、`patchVnode`。
 
-##### sameVnode
+##### **sameVnode**
 
 * 作用 : 判断是否为相同节点。只有当 key、 tag、 isComment（是否为注释节点）、 data同时定义（或不定义），同时满足当标签类型为  input  的时候  type  相同（某些浏览器不支持动态修改`<input>`类型，所以他们被视为不同类型）即可。
 
@@ -3413,7 +3427,7 @@ tag:'div',	/*说明这是一个div标签*/
 
 
 
-##### createElem
+##### **createElem**
 
 * 作用：通过虚拟节点创建真实的 DOM 并插入到它的父节点中。
 
@@ -3493,7 +3507,7 @@ tag:'div',	/*说明这是一个div标签*/
     }
   ```
 
-##### patchVnode
+##### **patchVnode**
 
 * `patchVnode`: 把新的 VNode path 到 旧VNode。
 
@@ -3565,154 +3579,183 @@ tag:'div',	/*说明这是一个div标签*/
 
 * `updateChildren`: 使用 diff 算法，比较对比两棵树的差异。
 
-### diff 算法
+### **diff 算法**
 
-* 作用：**diff  算法可以比对出两颗树的「差异」**
+#### **作用**
 
-* 思想：
+* **diff  算法可以比对出两颗树的「差异」**
 
-  * diff  算法是通过同层的树节点进行比较而非对树进行逐层搜索遍历的方式，所以时间复杂度只有  O(n)。
-  * 比较的是新旧的虚拟dom节点，操作的是真实的dom节点，最终根据新旧虚拟dom节点的变化操作真实dom节点。
 
-  ![](../images/diff.png)
+#### 思想
 
-  假设我们现在有新老  VNode  节点两颗树，这时候到了 patch 的过程，我们需要将他们进行比对;这张图中的相同颜色的方块中的节点会进行比对，比对得到「差异」后将这些「差异」更新到视图上。因为只进行同层级的比对，所以十分高效。
+* diff  算法是通过**同层的树节点进行比较**而非对树进行逐层搜索遍历的方式，所以时间复杂度只有  O(n)。
+* **比较的是新旧的虚拟dom节点，操作的是真实的dom节点**，最终根据新旧虚拟dom节点的变化操作真实dom节点。
 
-* **算法：**
+![](../images/diff.png)
 
-  * path 时，首先会对新旧两棵树进行一个深度优先的遍历，每遍历到一个节点，我们就将这个节点和新的树中的节点进行比较；
-  * 循环遍历两个 VNode 的子节点；
-  * 分别对两个 Vnode 的子节点的第一个和最后一个两两比较，因此有四次比较；
-  * 比较结果有三种：VNode 的替换、新增、删除；
-  * 根据比较结果进行 VNode 操作:
-    * 替换/新增：在 oldVnode（老  VNode  节点）不存在的时候，相当于新的  VNode  替代原本没有的节点；
-    * 删除:   在 vnode（新  VNode  节点）不存在的时候，相当于要把老的节点删除;
-  * 四次比较匹配都不成功：根据是否设置 key 值执行不同操作。
-    * 没有设置 key 值，就会创建新 VNode;
-    * 设置 Key 值，会从旧 VNode 子节点中查找 Key 值相同 VNode 进行复用 VNode。
-  * 两个 VNode 的子节点循环遍历完成：
-    * 如果旧 VNode 子节点遍历完成：则将未匹配的新 VNode 插入到真实 DOM；
-    * 如果新 VNode 子节点遍历完成：则将未匹配的旧 VNode 从真实 DOM 中删除。
-  * 根据新的 Virtual DOM 继续下一层节点的比较。
+> 假设我们现在有新老  VNode  节点两颗树，这时候到了 patch 的过程，我们需要将他们进行比对;
+>
+> 这张图中的相同颜色的方块中的节点会进行比对，比对得到「差异」后将这些「差异」更新到视图上。因为只进行同层级的比对，所以十分高效。
 
-* ![](../images/diff1.png)
+#### **算法**
 
-* 示例：
+1. path 时，首先会对新旧两棵树进行一个**深度优先的遍历**，每遍历到一个节点，我们就将这个节点和新的树中的节点进行比较；
+2. 循环遍历两个 VNode 的子节点；
+3. 分别对两个 Vnode 的子节点的第一个和最后一个两两比较，因此有四次比较；
+4. 比较结果有三种：VNode 的替换、新增、删除；
+5. 根据比较结果进行 VNode 操作:
+  * 替换/新增：在 oldVnode（老  VNode  节点）不存在的时候，相当于新的  VNode  替代原本没有的节点；
+  * 删除:   在 vnode（新  VNode  节点）不存在的时候，相当于要把老的节点删除;
+6. 四次比较匹配都不成功：根据是否设置 key 值执行不同操作。
+  * **没有设置 key 值，就会创建新 VNode**;
+  * **设置 Key 值，会从旧 VNode 子节点中查找 Key 值相同 VNode 进行复用 VNode**。
+7. 两个 VNode 的子节点循环遍历完成：
+  * 如果旧 VNode 子节点遍历完成：则将未匹配的新 VNode 插入到真实 DOM；
+  * 如果新 VNode 子节点遍历完成：则将未匹配的旧 VNode 从真实 DOM 中删除。
+8. 根据新的 Virtual DOM 继续下一层节点的比较。
 
-  * 不设置 key 的 diff
+#### **示例**
 
-    ![](../images/diff2.png)
+![](../images/diff1.png)
 
-    ![](../images/diff5.png)
+#### **key 值作用**
 
-    ![](../images/diff4.png)
+> 在 Vue 中，`key` 是一个特殊的属性，主要用于跟踪每个节点的身份，从而复用和重新排序现有元素。
+>
+> 当使用 `v-for` 指令来渲染一个列表时，为每一项提供一个唯一的 `key` 是非常重要的。
+>
+> 以下是设置 `key` 值的主要作用：
+>
+> 1. **性能优化**：Vue **使用 `key` 来跟踪每个节点的身份**，从而能够更智能地复用和重新排序现有元素，**进行组件复用**。
+>    * 如果没有 `key`，Vue 会使用一种就地更新策略，即复用尽可能多的元素，并且只是改变它们的内容。但在某些情况下，这种就地更新可能会导致问题，比如状态/组件的意外保留或更新。
+> 2. **维护状态和避免问题**：当列表的数据变化时，Vue 会尝试通过最小量的 DOM 操作来更新视图。但是，如果没有 `key`，Vue 可能无法准确地跟踪每个节点的身份，从而可能导致以下问题：
+>    - **状态保留**：当列表重新排序或过滤时，如果没有 `key`，Vue 可能会错误地保留某些元素的状态（如输入框的值、复选框的选中状态等）。
+>    - **列表渲染错误**：在某些复杂的列表中，如果没有 `key`，Vue 可能会错误地渲染或更新元素。
+> 3. **提高可预测性**：通过为每个元素提供一个唯一的 `key`，你可以确保 Vue 总是以可预测的方式更新 DOM。这有助于提高代码的可读性和可维护性。
+> 4. **强制组件重新渲染**：在某些情况下，即使组件的 `props` 没有改变，但由于 `key` 发生了变化，Vue 也会强制该组件重新渲染。这可以用于某些需要强制刷新的场景。
 
-  * 设置 key 的 diff:![](../images/diff3.png)
+#### **不设置 key 的 diff 过程**
 
-* 源码：diff 算法 使用 updateChildren() 实现，位于[src/core/vdom/patch.js](https://github.com/vuejs/vue/blob/v2.3.0/src/core/vdom/patch.js)，该算法来源于 [snabbdom](https://github.com/snabbdom/snabbdom)。
+> 不设置 Key 值，节点不会被复用，而是被重新创建。
 
-  ```javascript
-    function updateChildren (parentElm, oldCh, newCh, insertedVnodeQueue, removeOnly) {
-      let oldStartIdx = 0
-      let newStartIdx = 0
-      let oldEndIdx = oldCh.length - 1
-      let oldStartVnode = oldCh[0]
-      let oldEndVnode = oldCh[oldEndIdx]
-      let newEndIdx = newCh.length - 1
-      let newStartVnode = newCh[0]
-      let newEndVnode = newCh[newEndIdx]
-      let oldKeyToIdx, idxInOld, elmToMove, refElm
-  
-      // removeOnly is a special flag used only by <transition-group>
-      // to ensure removed elements stay in correct relative positions
-      // during leaving transitions
-      const canMove = !removeOnly
-  
-      while (oldStartIdx <= oldEndIdx && newStartIdx <= newEndIdx) {
-        if (isUndef(oldStartVnode)) {
-          oldStartVnode = oldCh[++oldStartIdx] // Vnode has been moved left
-        } else if (isUndef(oldEndVnode)) {
-          oldEndVnode = oldCh[--oldEndIdx]
-        } else if (sameVnode(oldStartVnode, newStartVnode)) {
-          /*前四种情况其实是指定key的时候，判定为同一个VNode，则直接patchVnode即可，分别比较oldCh以及newCh的两头节点2*2=4种情况*/
-          patchVnode(oldStartVnode, newStartVnode, insertedVnodeQueue)
-          oldStartVnode = oldCh[++oldStartIdx]
-          newStartVnode = newCh[++newStartIdx]
-        } else if (sameVnode(oldEndVnode, newEndVnode)) {
-          patchVnode(oldEndVnode, newEndVnode, insertedVnodeQueue)
-          oldEndVnode = oldCh[--oldEndIdx]
-          newEndVnode = newCh[--newEndIdx]
-        } else if (sameVnode(oldStartVnode, newEndVnode)) { // Vnode moved right
-          patchVnode(oldStartVnode, newEndVnode, insertedVnodeQueue)
-          canMove && nodeOps.insertBefore(parentElm, oldStartVnode.elm, nodeOps.nextSibling(oldEndVnode.elm))
-          oldStartVnode = oldCh[++oldStartIdx]
-          newEndVnode = newCh[--newEndIdx]
-        } else if (sameVnode(oldEndVnode, newStartVnode)) { // Vnode moved left
-          patchVnode(oldEndVnode, newStartVnode, insertedVnodeQueue)
-          canMove && nodeOps.insertBefore(parentElm, oldEndVnode.elm, oldStartVnode.elm)
-          oldEndVnode = oldCh[--oldEndIdx]
+![](../images/diff2.png)
+
+![](../images/diff5.png)
+
+![](../images/diff4.png)
+
+#### **设置 key 的 diff 过程**
+
+> 设置 key 的节点会被重新复用。
+
+![](../images/diff3.png)
+
+#### **源码分析**
+
+diff 算法 使用 updateChildren() 实现，位于[src/core/vdom/patch.js](https://github.com/vuejs/vue/blob/v2.3.0/src/core/vdom/patch.js)，该算法来源于 [snabbdom](https://github.com/snabbdom/snabbdom)。
+
+```javascript
+  function updateChildren (parentElm, oldCh, newCh, insertedVnodeQueue, removeOnly) {
+    let oldStartIdx = 0
+    let newStartIdx = 0
+    let oldEndIdx = oldCh.length - 1
+    let oldStartVnode = oldCh[0]
+    let oldEndVnode = oldCh[oldEndIdx]
+    let newEndIdx = newCh.length - 1
+    let newStartVnode = newCh[0]
+    let newEndVnode = newCh[newEndIdx]
+    let oldKeyToIdx, idxInOld, elmToMove, refElm
+
+    // removeOnly is a special flag used only by <transition-group>
+    // to ensure removed elements stay in correct relative positions
+    // during leaving transitions
+    const canMove = !removeOnly
+
+    while (oldStartIdx <= oldEndIdx && newStartIdx <= newEndIdx) {
+      if (isUndef(oldStartVnode)) {
+        oldStartVnode = oldCh[++oldStartIdx] // Vnode has been moved left
+      } else if (isUndef(oldEndVnode)) {
+        oldEndVnode = oldCh[--oldEndIdx]
+      } else if (sameVnode(oldStartVnode, newStartVnode)) {
+        /*前四种情况其实是指定key的时候，判定为同一个VNode，则直接patchVnode即可，分别比较oldCh以及newCh的两头节点2*2=4种情况*/
+        patchVnode(oldStartVnode, newStartVnode, insertedVnodeQueue)
+        oldStartVnode = oldCh[++oldStartIdx]
+        newStartVnode = newCh[++newStartIdx]
+      } else if (sameVnode(oldEndVnode, newEndVnode)) {
+        patchVnode(oldEndVnode, newEndVnode, insertedVnodeQueue)
+        oldEndVnode = oldCh[--oldEndIdx]
+        newEndVnode = newCh[--newEndIdx]
+      } else if (sameVnode(oldStartVnode, newEndVnode)) { // Vnode moved right
+        patchVnode(oldStartVnode, newEndVnode, insertedVnodeQueue)
+        canMove && nodeOps.insertBefore(parentElm, oldStartVnode.elm, nodeOps.nextSibling(oldEndVnode.elm))
+        oldStartVnode = oldCh[++oldStartIdx]
+        newEndVnode = newCh[--newEndIdx]
+      } else if (sameVnode(oldEndVnode, newStartVnode)) { // Vnode moved left
+        patchVnode(oldEndVnode, newStartVnode, insertedVnodeQueue)
+        canMove && nodeOps.insertBefore(parentElm, oldEndVnode.elm, oldStartVnode.elm)
+        oldEndVnode = oldCh[--oldEndIdx]
+        newStartVnode = newCh[++newStartIdx]
+      } else {
+        /*
+          生成一个key与旧VNode的key对应的哈希表（只有第一次进来undefined的时候会生成，也为后面检测重复的key值做铺垫）
+          比如childre是这样的 [{xx: xx, key: 'key0'}, {xx: xx, key: 'key1'}, {xx: xx, key: 'key2'}]  beginIdx = 0   endIdx = 2  
+          结果生成{key0: 0, key1: 1, key2: 2}
+        */
+        if (isUndef(oldKeyToIdx)) oldKeyToIdx = createKeyToOldIdx(oldCh, oldStartIdx, oldEndIdx)
+        /*如果newStartVnode新的VNode节点存在key并且这个key在oldVnode中能找到则返回这个节点的idxInOld（即第几个节点，下标）*/
+        idxInOld = isDef(newStartVnode.key) ? oldKeyToIdx[newStartVnode.key] : null
+        if (isUndef(idxInOld)) { // New element
+          /*newStartVnode没有key或者是该key没有在老节点中找到则创建一个新的节点*/
+          createElm(newStartVnode, insertedVnodeQueue, parentElm, oldStartVnode.elm)
           newStartVnode = newCh[++newStartIdx]
         } else {
-          /*
-            生成一个key与旧VNode的key对应的哈希表（只有第一次进来undefined的时候会生成，也为后面检测重复的key值做铺垫）
-            比如childre是这样的 [{xx: xx, key: 'key0'}, {xx: xx, key: 'key1'}, {xx: xx, key: 'key2'}]  beginIdx = 0   endIdx = 2  
-            结果生成{key0: 0, key1: 1, key2: 2}
-          */
-          if (isUndef(oldKeyToIdx)) oldKeyToIdx = createKeyToOldIdx(oldCh, oldStartIdx, oldEndIdx)
-          /*如果newStartVnode新的VNode节点存在key并且这个key在oldVnode中能找到则返回这个节点的idxInOld（即第几个节点，下标）*/
-          idxInOld = isDef(newStartVnode.key) ? oldKeyToIdx[newStartVnode.key] : null
-          if (isUndef(idxInOld)) { // New element
-            /*newStartVnode没有key或者是该key没有在老节点中找到则创建一个新的节点*/
-            createElm(newStartVnode, insertedVnodeQueue, parentElm, oldStartVnode.elm)
+          /*获取同key的老节点*/
+          elmToMove = oldCh[idxInOld]
+          /* istanbul ignore if */
+          if (process.env.NODE_ENV !== 'production' && !elmToMove) {
+            /*如果elmToMove不存在说明之前已经有新节点放入过这个key的Dom中，提示可能存在重复的key，确保v-for的时候item有唯一的key值*/
+            warn(
+              'It seems there are duplicate keys that is causing an update error. ' +
+              'Make sure each v-for item has a unique key.'
+            )
+          }
+          if (sameVnode(elmToMove, newStartVnode)) {
+            /*如果新VNode与得到的有相同key的节点是同一个VNode则进行patchVnode*/
+            patchVnode(elmToMove, newStartVnode, insertedVnodeQueue)
+            /*因为已经patchVnode进去了，所以将这个老节点赋值undefined，之后如果还有新节点与该节点key相同可以检测出来提示已有重复的key*/
+            oldCh[idxInOld] = undefined
+            /*当有标识位canMove实可以直接插入oldStartVnode对应的真实Dom节点前面*/
+            canMove && nodeOps.insertBefore(parentElm, newStartVnode.elm, oldStartVnode.elm)
             newStartVnode = newCh[++newStartIdx]
           } else {
-            /*获取同key的老节点*/
-            elmToMove = oldCh[idxInOld]
-            /* istanbul ignore if */
-            if (process.env.NODE_ENV !== 'production' && !elmToMove) {
-              /*如果elmToMove不存在说明之前已经有新节点放入过这个key的Dom中，提示可能存在重复的key，确保v-for的时候item有唯一的key值*/
-              warn(
-                'It seems there are duplicate keys that is causing an update error. ' +
-                'Make sure each v-for item has a unique key.'
-              )
-            }
-            if (sameVnode(elmToMove, newStartVnode)) {
-              /*如果新VNode与得到的有相同key的节点是同一个VNode则进行patchVnode*/
-              patchVnode(elmToMove, newStartVnode, insertedVnodeQueue)
-              /*因为已经patchVnode进去了，所以将这个老节点赋值undefined，之后如果还有新节点与该节点key相同可以检测出来提示已有重复的key*/
-              oldCh[idxInOld] = undefined
-              /*当有标识位canMove实可以直接插入oldStartVnode对应的真实Dom节点前面*/
-              canMove && nodeOps.insertBefore(parentElm, newStartVnode.elm, oldStartVnode.elm)
-              newStartVnode = newCh[++newStartIdx]
-            } else {
-              // same key but different element. treat as new element
-              /*当新的VNode与找到的同样key的VNode不是sameVNode的时候（比如说tag不一样或者是有不一样type的input标签），创建一个新的节点*/
-              createElm(newStartVnode, insertedVnodeQueue, parentElm, oldStartVnode.elm)
-              newStartVnode = newCh[++newStartIdx]
-            }
+            // same key but different element. treat as new element
+            /*当新的VNode与找到的同样key的VNode不是sameVNode的时候（比如说tag不一样或者是有不一样type的input标签），创建一个新的节点*/
+            createElm(newStartVnode, insertedVnodeQueue, parentElm, oldStartVnode.elm)
+            newStartVnode = newCh[++newStartIdx]
           }
         }
       }
-      if (oldStartIdx > oldEndIdx) {
-        /*全部比较完成以后，发现oldStartIdx > oldEndIdx的话，说明老节点已经遍历完了，新节点比老节点多，所以这时候多出来的新节点需要一个一个创建出来加入到真实Dom中*/
-        refElm = isUndef(newCh[newEndIdx + 1]) ? null : newCh[newEndIdx + 1].elm
-        addVnodes(parentElm, refElm, newCh, newStartIdx, newEndIdx, insertedVnodeQueue)
-      } else if (newStartIdx > newEndIdx) {
-        /*如果全部比较完成以后发现newStartIdx > newEndIdx，则说明新节点已经遍历完了，老节点多余新节点，这个时候需要将多余的老节点从真实Dom中移除*/
-        removeVnodes(parentElm, oldCh, oldStartIdx, oldEndIdx)
-      }
     }
-  
-  ```
+    if (oldStartIdx > oldEndIdx) {
+      /*全部比较完成以后，发现oldStartIdx > oldEndIdx的话，说明老节点已经遍历完了，新节点比老节点多，所以这时候多出来的新节点需要一个一个创建出来加入到真实Dom中*/
+      refElm = isUndef(newCh[newEndIdx + 1]) ? null : newCh[newEndIdx + 1].elm
+      addVnodes(parentElm, refElm, newCh, newStartIdx, newEndIdx, insertedVnodeQueue)
+    } else if (newStartIdx > newEndIdx) {
+      /*如果全部比较完成以后发现newStartIdx > newEndIdx，则说明新节点已经遍历完了，老节点多余新节点，这个时候需要将多余的老节点从真实Dom中移除*/
+      removeVnodes(parentElm, oldCh, oldStartIdx, oldEndIdx)
+    }
+  }
+
+```
 
 
 
-#### 组件创建
+### **组件创建**
 
-* 组件创建时机：
+#### **组件创建时机**
 
-  * render 方法调用的 _createElement() 方法中：当 tag 不是 string 时，调用 createComponent() 创建组件；
-  * path 方法调用 createElem() 方法中： 调用 createComponent() 创建组件；
+* render 方法调用的 _createElement() 方法中：当 tag 不是 string 时，调用 createComponent() 创建组件；
+* path 方法调用 createElem() 方法中： 调用 createComponent() 创建组件；
 
 * 根据不同的创建时机， createComponent() 实现不同，主要有两种实现：
 
@@ -3723,9 +3766,12 @@ tag:'div',	/*说明这是一个div标签*/
 
 * 查看组件的模板被编译后的渲染函数方式：访问 `this.$options.render`
 
-* 组件创建总体流程图：
 
-  ![](../images/createComponent.png)
+#### **组件创建流程图**
+
+
+
+![](../images/createComponent.png)
 
 * render 方法调用的 _createElement() 中的 `createComponent` 方法：
 
@@ -3733,102 +3779,105 @@ tag:'div',	/*说明这是一个div标签*/
 
     ![](../images/第二次createComponent流程.png)
 
-  * 源码：定义在 [src/core/vdom/create-component.js](https://github.com/vuejs/vue/blob/v2.3.0/src/core/vdom/create-component.js) 文件中。
 
-  ```js
-  /*创建一个组件节点，返回Vnode节点*/
-  export function createComponent (
-    Ctor: Class<Component> | Function | Object | void,
-    data?: VNodeData,
-    context: Component, //vm实例
-    children: ?Array<VNode>,
-    tag?: string
-  ): VNode | void {
-    /*没有传组件构造类直接返回*/
-    if (isUndef(Ctor)) {
-      return
-    }
-  
-    /*获取vue实例,_base存放了Vue，作为基类，这个的定义是在最开始初始化 Vue 的阶段，
-    在 src/core/global-api/index.js 中的 initGlobalAPI 函数中保存了vue实例*/
-    const baseCtor = context.$options._base 
-  
-    // plain options object: turn it into a constructor
-    if (isObject(Ctor)) {
-      // baseCtor.extend()实际为 Vue.extend 函数，定义在 src/core/global-api/extend.js 中
-      //子组件继承于vue实例
-      Ctor = baseCtor.extend(Ctor)
-    }
-  
-    // if at this stage it's not a constructor or an async component factory,
-    // reject.
-    /*如果在该阶段Ctor依然不是一个构造函数或者是一个异步组件工厂则直接返回*/
-    if (typeof Ctor !== 'function') {
-      if (process.env.NODE_ENV !== 'production') {
-        warn(`Invalid Component definition: ${String(Ctor)}`, context)
-      }
-      return
-    }
-  
-    // async component
-    /*处理异步组件*/
-    if (isUndef(Ctor.cid)) {
-      Ctor = resolveAsyncComponent(Ctor, baseCtor, context)
-      if (Ctor === undefined) {
-        // return nothing if this is indeed an async component
-        // wait for the callback to trigger parent update.
-        /*如果这是一个异步组件则会不会返回任何东西（undifiened），直接return掉，等待回调函数去触发父组件更新。s*/
-        return
-      }
-    }
-  
-    // resolve constructor options in case global mixins are applied after
-    // component constructor creation
-    resolveConstructorOptions(Ctor)
-  
-    data = data || {}
-  
-    // transform component v-model data into props & events
-    if (isDef(data.model)) {
-      transformModel(Ctor.options, data)
-    }
-  
-    // extract props
-    const propsData = extractPropsFromVNodeData(data, Ctor, tag)
-  
-    // functional component
-    if (isTrue(Ctor.options.functional)) {
-      return createFunctionalComponent(Ctor, propsData, data, context, children)
-    }
-  
-    // extract listeners, since these needs to be treated as
-    // child component listeners instead of DOM listeners
-    const listeners = data.on
-    // replace with listeners with .native modifier
-    data.on = data.nativeOn
-  
-    if (isTrue(Ctor.options.abstract)) {
-      // abstract components do not keep anything
-      // other than props & listeners
-      data = {}
-    }
-  
-    // merge component management hooks onto the placeholder node
-    //合并组件钩子和vue实例钩子
-   //在 VNode 执行 patch 的过程中执行相关的钩子函数
-    mergeHooks(data)
-  
-    // return a placeholder vnode
-    //返回一个占位符节点
-    const name = Ctor.options.name || tag
-    const vnode = new VNode(
-      `vue-component-${Ctor.cid}${name ? `-${name}` : ''}`, //tag参数
-      data, undefined, undefined, undefined, context, //data、children、text、elm、context参数
-      { Ctor, propsData, listeners, tag, children } //componentOptions参数
-    )
-    return vnode
+#### **源码分析**
+
+定义在 [src/core/vdom/create-component.js](https://github.com/vuejs/vue/blob/v2.3.0/src/core/vdom/create-component.js) 文件中。
+
+```js
+/*创建一个组件节点，返回Vnode节点*/
+export function createComponent (
+  Ctor: Class<Component> | Function | Object | void,
+  data?: VNodeData,
+  context: Component, //vm实例
+  children: ?Array<VNode>,
+  tag?: string
+): VNode | void {
+  /*没有传组件构造类直接返回*/
+  if (isUndef(Ctor)) {
+    return
   }
-  ```
+
+  /*获取vue实例,_base存放了Vue，作为基类，这个的定义是在最开始初始化 Vue 的阶段，
+  在 src/core/global-api/index.js 中的 initGlobalAPI 函数中保存了vue实例*/
+  const baseCtor = context.$options._base 
+
+  // plain options object: turn it into a constructor
+  if (isObject(Ctor)) {
+    // baseCtor.extend()实际为 Vue.extend 函数，定义在 src/core/global-api/extend.js 中
+    //子组件继承于vue实例
+    Ctor = baseCtor.extend(Ctor)
+  }
+
+  // if at this stage it's not a constructor or an async component factory,
+  // reject.
+  /*如果在该阶段Ctor依然不是一个构造函数或者是一个异步组件工厂则直接返回*/
+  if (typeof Ctor !== 'function') {
+    if (process.env.NODE_ENV !== 'production') {
+      warn(`Invalid Component definition: ${String(Ctor)}`, context)
+    }
+    return
+  }
+
+  // async component
+  /*处理异步组件*/
+  if (isUndef(Ctor.cid)) {
+    Ctor = resolveAsyncComponent(Ctor, baseCtor, context)
+    if (Ctor === undefined) {
+      // return nothing if this is indeed an async component
+      // wait for the callback to trigger parent update.
+      /*如果这是一个异步组件则会不会返回任何东西（undifiened），直接return掉，等待回调函数去触发父组件更新。s*/
+      return
+    }
+  }
+
+  // resolve constructor options in case global mixins are applied after
+  // component constructor creation
+  resolveConstructorOptions(Ctor)
+
+  data = data || {}
+
+  // transform component v-model data into props & events
+  if (isDef(data.model)) {
+    transformModel(Ctor.options, data)
+  }
+
+  // extract props
+  const propsData = extractPropsFromVNodeData(data, Ctor, tag)
+
+  // functional component
+  if (isTrue(Ctor.options.functional)) {
+    return createFunctionalComponent(Ctor, propsData, data, context, children)
+  }
+
+  // extract listeners, since these needs to be treated as
+  // child component listeners instead of DOM listeners
+  const listeners = data.on
+  // replace with listeners with .native modifier
+  data.on = data.nativeOn
+
+  if (isTrue(Ctor.options.abstract)) {
+    // abstract components do not keep anything
+    // other than props & listeners
+    data = {}
+  }
+
+  // merge component management hooks onto the placeholder node
+  //合并组件钩子和vue实例钩子
+ //在 VNode 执行 patch 的过程中执行相关的钩子函数
+  mergeHooks(data)
+
+  // return a placeholder vnode
+  //返回一个占位符节点
+  const name = Ctor.options.name || tag
+  const vnode = new VNode(
+    `vue-component-${Ctor.cid}${name ? `-${name}` : ''}`, //tag参数
+    data, undefined, undefined, undefined, context, //data、children、text、elm、context参数
+    { Ctor, propsData, listeners, tag, children } //componentOptions参数
+  )
+  return vnode
+}
+```
 
 * path 方法调用 createElem() 方法中的 `createComponent()` 的实现:定义在 [src/core/vdom/patch.js](https://github.com/vuejs/vue/blob/v2.3.0/src/core/vdom/patch.js) 文件中。
 
@@ -4197,22 +4246,21 @@ tag:'div',	/*说明这是一个div标签*/
 
 #### 异步更新原理
 
-* 理解异步更新，先理解 [js 事件循环机制](https://gitee.com/jokerxw/myNotes/tree/master/javascript/javascript%E7%9F%A5%E8%AF%86%E7%82%B9%E6%95%B4%E5%90%88#%E4%BA%8B%E4%BB%B6%E5%BE%AA%E7%8E%AF)
+理解异步更新，先理解 [js 事件循环机制](https://gitee.com/jokerxw/myNotes/tree/master/javascript/javascript%E7%9F%A5%E8%AF%86%E7%82%B9%E6%95%B4%E5%90%88#%E4%BA%8B%E4%BB%B6%E5%BE%AA%E7%8E%AF)
 
-  ![](../images/nextTick2.png)
+![](../images/nextTick2.png)
 
-  ![](../images/nextTick3.png)
+![](../images/nextTick3.png)
 
-  
+
 
 * **异步更新队列原理：**
-
-  * Vue中有一个watcher，用于观察数据的变化，然后更新dom。
-  * Vue里面不是每一次数据改变都会触发更新dom，而是将这些操作都缓存在一个队列，在一个事件循环结束之后，刷新队列，统一执行dom更新操作
-
-* 核心流程：
-
-  * **定义响应式：**遍历 data 属性为其增加 get，set 方法，在 get 方法中会收集依赖 (dev.subs.push(watcher))，而 set 方法则会调用 dep 的notify 方法，此方法的作用是通知 subs 中的所有的 watcher 并调用 watcher 的 update 方法，我们可以将此理解为设计模式中的发布与订阅;
+  * JavaScript 是单线程，使用事件循环机制。
+  * 在一次事件循环中（既一帧中）， 当 Vue 中的数据发生变更时，创建变更数据的 Watcher 对象，并开启一个队列将 Watcher 对象存入。
+  * 在同一个事件循环中（既同一帧中），当同一个数据多次变更，相同的 Watcher 只会被存入队列中一次。
+  * 在一个事件循环结束之后，下一个事件循环中遍历队列，调用 Wather 对象的 update 方法，统一执行dom更新操作。
+* **核心流程**：
+  * **定义响应式：**遍历 data 属性为其增加 get，set 方法，在 get 方法中会收集依赖 (dev.subs.push(watcher))，而 set 方法则会调用 dep 的 notify 方法，此方法的作用是通知 subs 中的所有的 watcher 并调用 watcher 的 update 方法，我们可以将此理解为设计模式中的发布与订阅;
   * **修改数据：**当我们在组件中对响应的数据做了修改，就会触发 setter 的逻辑，最后调用 `dep.notify()` 方法，notify() 遍历所有的 `subs`，也就是 `Watcher` 的实例数组，然后调用每一个 `watcher` 的 `update` 方法;
   * **数据更新：** update 方法中首先判断两个特殊标记（ `Watcher` 的状态标记）:
     - 是否为 lazy 懒更新，则设置 dirty 为 true，以标记当前 `watcher` 为懒更新;
@@ -4232,158 +4280,494 @@ tag:'div',	/*说明这是一个div标签*/
     * 然后执行队列遍历：在对 `queue` 排序后，接着就是要对它做遍历，拿到对应的 `watcher`，执行 `watcher.run()`
   * flushSchedulerQueue 在被执行后调用 watcher.run()，而 run 方法被调用后接下来的操作就是通过新的虚拟 dom 与老的虚拟 dom 做 diff 算法后生成新的真实 dom于是你看到了一个新的页面
 
-* 实现异步更新流程：
+#### **实现异步更新流程**
 
-  ```js
-  //============================简单实现异步更新流程==============================================
-  let uid = 0;
-  class Watcher {
-    constructor() {
-      this.id = ++uid; //观察者对象的uid
-    }
-  
-    update() {
-      console.log('watch' + this.id + ' update');
-      queueWatcher(this); //观察者队列
-    }
-  
-    run() {
-      console.log('watch' + this.id + '视图更新啦～');
-    }
+```js
+//============================简单实现异步更新流程==============================================
+let uid = 0;
+class Watcher {
+  constructor() {
+    this.id = ++uid; //观察者对象的uid
   }
-  
-  let has = {};
-  let queue = []; //watcher 队列
-  //waiting 是一个标记位，标记是否已经向 nextTick 传递了 flushSchedulerQueue 方法，在下一个 tick
-  //时候执行 flushSchedulerQueue 方法来 flush queue，执行它里面的所有 Watcher 对象的 run 方法
-  let waiting = false;
-  
-  /**
-   * 缓存变更数据的观察者队列，如果队列中不存在该观察者对象，则缓存；否则忽略
-   * @param {Watcher} watcher 变更数据对应的观察者对象
-   */
-  function queueWatcher(watcher) {
-    const id = watcher.id; //获取观察者对象id
-    if (has[id] == null) { //观察者队列中不存在id的观察者对象,则添加进队列
-      has[id] = true; //设置存在标记
-      queue.push(watcher);
-      if (!waiting) { //未向nextTick传入flushSchedulerQueue,则传入队列
-        waiting = true; //等待执行 watcher queue
-        nextTick(flushSchedulerQueue);
-      }
-    }
-  }
-  
-  /**
-   * 取出一次 tick 时所有 Watcher，执行它里面的所有 Watcher 对象的 run 方法
-   */
-  function flushSchedulerQueue() {
-    let watcher, id;
-    queue.sort((a, b) => a.id - b.id) //队列排序
-    // 执行 watcher queue 中所有 run()
-    for (index = 0; index < queue.length; index++) {
-      watcher = queue[index]
-      id = watcher.id;
-      has[id] = null;
-      watcher.run();
-    }
-    waiting = false; // 停止等待执行一次 tick 时所有 watcher queue
-  }
-  
-  //callbacks 数组用来存储 nextTick，在下一个tick处理这些回调函数之前，所有的cb都会被存在这个callbacks数组中
-  let callbacks = [];
-  let pending = false;// pending 是一个标记位，代表一个等待的状态
-  
-  /**
-   * 在下次 DOM 更新循环结束之后执行延迟回调，在修改数据之后立即使用这个方法，获取更新后的 DOM
-   * @param {Function} cb 回调函数
-   */
-  function nextTick(cb) {
-    callbacks.push(cb);
-    if (!pending) {
-      pending = true;
-      //使用setTimeout模拟异步更新, setTimeout会在 task 中创建一个事件 flushCallbacks 
-      setTimeout(flushCallbacks, 0);
-    }
-  }
-  
-  /**
-   * 在执行时将 callbacks 中的所有 cb 依次执行,这里的 cb 就是 flushSchedulerQueue 方法
-   */
-  function flushCallbacks() {
-    pending = false;
-    const copies = callbacks.slice(0);
-    callbacks.length = 0; //清空回调队列
-    // 执行回调队列中所有的回调函数
-    for (let i = 0; i < copies.length; i++) {
-      copies[i]();
-    }
-  }
-  
-  //--------------------------------测试---------------------------------------------------
-  (function () {
-    let watch1 = new Watcher();
-    let watch2 = new Watcher();
-  
-    watch1.update();
-    watch1.update();
-    watch2.update();
-  })();
-  /**
-    我们现在 new 了两个 Watcher 对象，因为修改了 data 的数据，所以我们模拟触发了两次 watch1的 update 以及 一次 watch2 的 update
-    假设没有批量异步更新策略的话，理论上应该执行 Watcher 对象的 run，那么会打印：
-    watch1 update
-    watch1 视图更新啦～
-    watch1 update
-    watch1 视图更新啦～
-    watch2 update
-    watch2 视图更新啦～
-    实际上则执行：
-    watch1 update
-    watch1 update
-    watch2 update
-    watch1 视图更新啦～
-    watch2 视图更新啦～
-    异步更新策略的效果把相同的 Watcher 对象会在这个过程中被剔除，在下一个 tick 的时候去更新视图
-   */
-  ```
-  
-  
-  
-* > 为什么要为什么要异步更新数据 ？
 
-  ```vue
-  <template>
-      <div><div>{{number}}</div>
-          <div@click="handleClick">click</div>
-      </div>
-  </template>
-  
-  export default {
-  	data(){ 
-  		return {
-  			number: 0
-  		};
-  	},
-  	methods: {
-  		handleClick(){
-  			for( let i=0; i < 1000 ;i++) { 
-              	this.number++;
-              }
-          }
-      }
-    }
-  ```
+  update() {
+    console.log('watch' + this.id + ' update');
+    queueWatcher(this); //观察者队列
+  }
 
-  * 当我们按下  click  按钮的时候， number 会被循环增加 1000 次。
-  *  那么按照之前的理解，每次 number 被  +1  的时候，都会触发 number 的 setter 方法，从而根据上面的流程一直跑下来最后修改真实  DOM。那么在这个过程中，DOM  会被更新  1000  次！ Vue.js  为了避免如此低效的处理方法。
-  * Vue.js 在默认情况下，每次触发某个数据的 setter 方法后，对应的 Watcher 对象其实会被 push 进一个队列 queue 中，在下一个  tick  的时候将这个队列queue 全部拿出来 run（ Watcher 对象的一个方法，用来触发 patch 操作）  一遍。
+  run() {
+    console.log('watch' + this.id + '视图更新啦～');
+  }
+}
+
+let has = {};
+let queue = []; //watcher 队列
+//waiting 是一个标记位，标记是否已经向 nextTick 传递了 flushSchedulerQueue 方法，在下一个 tick
+//时候执行 flushSchedulerQueue 方法来 flush queue，执行它里面的所有 Watcher 对象的 run 方法
+let waiting = false;
+
+/**
+ * 缓存变更数据的观察者队列，如果队列中不存在该观察者对象，则缓存；否则忽略
+ * @param {Watcher} watcher 变更数据对应的观察者对象
+ */
+function queueWatcher(watcher) {
+  const id = watcher.id; //获取观察者对象id
+  if (has[id] == null) { //观察者队列中不存在id的观察者对象,则添加进队列
+    has[id] = true; //设置存在标记
+    queue.push(watcher);
+    if (!waiting) { //未向nextTick传入flushSchedulerQueue,则传入队列
+      waiting = true; //等待执行 watcher queue
+      nextTick(flushSchedulerQueue);
+    }
+  }
+}
+
+/**
+ * 取出一次 tick 时所有 Watcher，执行它里面的所有 Watcher 对象的 run 方法
+ */
+function flushSchedulerQueue() {
+  let watcher, id;
+  queue.sort((a, b) => a.id - b.id) //队列排序
+  // 执行 watcher queue 中所有 run()
+  for (index = 0; index < queue.length; index++) {
+    watcher = queue[index]
+    id = watcher.id;
+    has[id] = null;
+    watcher.run();
+  }
+  waiting = false; // 停止等待执行一次 tick 时所有 watcher queue
+}
+
+//callbacks 数组用来存储 nextTick，在下一个tick处理这些回调函数之前，所有的cb都会被存在这个callbacks数组中
+let callbacks = [];
+let pending = false;// pending 是一个标记位，代表一个等待的状态
+
+/**
+ * 在下次 DOM 更新循环结束之后执行延迟回调，在修改数据之后立即使用这个方法，获取更新后的 DOM
+ * @param {Function} cb 回调函数
+ */
+function nextTick(cb) {
+  callbacks.push(cb);
+  if (!pending) {
+    pending = true;
+    //使用setTimeout模拟异步更新, setTimeout会在 task 中创建一个事件 flushCallbacks 
+    setTimeout(flushCallbacks, 0);
+  }
+}
+
+/**
+ * 在执行时将 callbacks 中的所有 cb 依次执行,这里的 cb 就是 flushSchedulerQueue 方法
+ */
+function flushCallbacks() {
+  pending = false;
+  const copies = callbacks.slice(0);
+  callbacks.length = 0; //清空回调队列
+  // 执行回调队列中所有的回调函数
+  for (let i = 0; i < copies.length; i++) {
+    copies[i]();
+  }
+}
+
+//--------------------------------测试---------------------------------------------------
+(function () {
+  let watch1 = new Watcher();
+  let watch2 = new Watcher();
+
+  watch1.update();
+  watch1.update();
+  watch2.update();
+})();
+/**
+  我们现在 new 了两个 Watcher 对象，因为修改了 data 的数据，所以我们模拟触发了两次 watch1的 update 以及 一次 watch2 的 update
+  假设没有批量异步更新策略的话，理论上应该执行 Watcher 对象的 run，那么会打印：
+  watch1 update
+  watch1 视图更新啦～
+  watch1 update
+  watch1 视图更新啦～
+  watch2 update
+  watch2 视图更新啦～
+  实际上则执行：
+  watch1 update
+  watch1 update
+  watch2 update
+  watch1 视图更新啦～
+  watch2 视图更新啦～
+  异步更新策略的效果把相同的 Watcher 对象会在这个过程中被剔除，在下一个 tick 的时候去更新视图
+ */
+```
+
+
+
+#### **为什么要异步更新数据 ？**
+
+1. **性能优化**：
+   * 批量更新 DOM 可以显著减少浏览器的重排（reflow）和重绘（repaint）次数，从而提高页面性能。
+   * 如果 Vue 在每次数据变化时都立即更新 DOM，那么对于包含大量数据的复杂应用来说，这将导致浏览器频繁地执行重排和重绘，极大地降低页面性能。
+   * 通过异步更新数据，Vue 可以将多次数据变化合并成一次 DOM 更新，从而减少不必要的性能开销。
+2. **维护状态**：
+   * Vue 使用了虚拟 DOM（Virtual DOM）技术来模拟真实 DOM 的结构，并在数据变化时通过对比新旧虚拟 DOM 来确定需要更新的部分。
+   * 如果 Vue 在每次数据变化时都立即同步更新真实 DOM，那么可能会导致一些与状态维护相关的问题。
+     * 例如，如果一个组件在数据变化后立即读取了某些 DOM 元素的属性或状态，但由于真实 DOM 尚未更新完成，因此读取到的可能是旧的值。通过异步更新数据，Vue 可以确保在更新真实 DOM 之前，所有组件的渲染函数都已经执行完毕，从而避免了这种状态维护的问题。
+3. **提高用户体验**：
+   * 在某些情况下，数据的变化可能需要经过一系列的计算或处理才能最终反映到页面上。
+   * 如果 Vue 在每次数据变化时都立即同步更新页面，那么用户可能会在页面还没有完全准备好之前就看到了部分或错误的内容。
+   * 通过异步更新数据，Vue 可以先收集所有的数据变化，并在所有处理都完成后一次性更新页面，从而提高了用户体验。
+
+**示例：**
+
+```vue
+<template>
+    <div><div>{{number}}</div>
+        <div@click="handleClick">click</div>
+    </div>
+</template>
+
+export default {
+	data(){ 
+		return {
+			number: 0
+		};
+	},
+	methods: {
+		handleClick(){
+			for( let i=0; i < 1000 ;i++) { 
+            	this.number++;
+            }
+        }
+    }
+  }
+```
+
+* 当我们按下  click  按钮的时候， number 会被循环增加 1000 次。
+*  那么按照之前的理解，每次 number 被  +1  的时候，都会触发 number 的 setter 方法，从而根据上面的流程一直跑下来最后修改真实  DOM。那么在这个过程中，DOM  会被更新  1000  次！ Vue.js  为了避免如此低效的处理方法。
+* Vue.js 在默认情况下，每次触发某个数据的 setter 方法后，对应的 Watcher 对象其实会被 push 进一个队列 queue 中，在下一个  tick  的时候将这个队列queue 全部拿出来 run（ Watcher 对象的一个方法，用来触发 patch 操作）  一遍。
+
+
+
+
 
 ### 销毁实例阶段
 
-
+> 待探索...
 
 ---
+
+## VUE 2.X 缺陷
+
+### [数组和对象的检测缺陷](https://vue3js.cn/docs/zh/guide/change-detection.html#%E5%A3%B0%E6%98%8E%E5%93%8D%E5%BA%94%E5%BC%8F-property)
+
+#### 缺陷
+
+vue2.x使用 `Object.defineProperty() `实现数据响应式`Object.defineProperty()`存在以下缺陷
+
+* **不能监听数组的变化**
+
+* **无法检测到对象属性的新增或删除**
+
+  > 原因：在初始化阶段的定义响应式过程中，已经通过 `Object.defineProperty() ` 深度遍历完成对数据对象属性的响应式定义。因此在后期更新阶段中，当对数据对象新增或者删除属性时，此时新增的数据属性是没有被响应式定义的，所以无法触发视图的更新。
+
+#### 缺陷检测
+
+![](../images/quexian.png)
+
+### 为什么 Vue2 无法检测到 data 对象属性的新增或删除？
+
+* Vue.js 2.x 的响应系统是基于 **Object.defineProperty** 的，该 API **只能对对象单个属性操作拦截**;
+* Vue 的响应式系统**在实例化时会对数据对象 data 选项进行递归遍历**，将其属性转换为getter/setter，从而实现数据的响应式更新;由于 Object.defineProperty只能对对象单个属性操作拦，因此必须对对象深度遍历；
+* **当初始化完成以后，不再进行响应式操作**，因此在运行时通过直接给对象新增或删除属性的方式来改变数据，Vue 无法遍历到新增的属性，因此无法对新增属性调用 `defineReactive` 定义响应式。
+
+以下截取部分 `手写响应式原理过程`（详细代码可参考以上 `手写响应式原理`）, 当新增数据时候， ` if (data.hasOwnProperty(key))`  语句为 `false`，跳过了 `defineReactive`，因此新增属性无法进行响应式。
+
+```js
+//遍历数据，对数据每一个属性定义响应式
+function Observer(data) {
+  for (let key in data) {
+  // 当新增数据时候，该语句为 false，跳过了 defineReactive 方法，因此新增属性无法进行响应式。
+    if (data.hasOwnProperty(key)) {
+      defineReactive(data, key, data[key]);
+    }
+  }
+}
+
+function defineReactive(obj, key, value) {
+  let dep = new Dep();
+
+  Object.defineProperty(obj, key, {
+    enumerable: true,
+    configurable: true,
+    get: function() {
+      if (Dep.target) {
+        dep.addWatcher(Dep.target);
+      }
+      return value;
+    },
+    set: function(newValue) {
+      if (value !== newValue) {
+        value = newValue;
+        dep.notify();
+      }
+    }
+  });
+}
+
+// vue 实例，初始化时遍历 data 对象，进行观察数据，双向绑定
+function Vue(options) {
+  this.data = options.data;
+  Observer(this.data);
+  this.bindData();
+}
+
+Vue.prototype.bindData = function() {
+  let self = this;
+  // 遍历对象上所有属性进行双向绑定
+  for (let key in this.data) {
+    if (this.data.hasOwnProperty(key)) {
+      Object.defineProperty(this, key, {
+        get: function() {
+          return self.data[key];
+        },
+        set: function(newValue) {
+          self.data[key] = newValue;
+        }
+      });
+    }
+  }
+};
+
+let vm = new Vue({
+  data: {
+    someObject: {
+        key1: 'value1'
+    }
+  }
+});
+
+// 无法监听到 key2 值的变化
+vm.data.key2 = 'value2'
+```
+
+### **解决 vue2 无法检测到 data 对象属性的新增或删除**
+
+**Vue2 解决方案**
+
+为了让Vue能够响应新增或删除属性的变化，你可以使用Vue提供的**`Vue.set`或`this.$set`方法来添加属性**，以及使用**`Vue.delete`或`this.$delete`方法来删除属性**。这些方法会通过特殊的方式触发属性的更新，使Vue能够检测到属性的变化并更新视图。
+
+```js
+// 在Vue实例中使用Vue.set添加属性
+Vue.set(obj, 'newProperty', 'value');
+
+// 在Vue组件中使用this.$set添加属性
+this.$set(this.obj, 'newProperty', 'value');
+
+// 在Vue实例中使用Vue.delete删除属性
+Vue.delete(obj, 'propertyToRemove');
+
+// 在Vue组件中使用this.$delete删除属性
+this.$delete(this.obj, 'propertyToRemove');
+```
+
+
+
+**Vue3 解决方案**
+
+使用 `Proxy` API 替换 `Object.defineProperty() ` 方法对 `data` 对象定义响应式，`Proxy` 接口底层支持检测代理对象属性的新增和删除检测。
+
+## Vue2.x数组变更方法
+
+### **Vue 不能检测到数组的变动**
+
+* Vue 不能检测到利用索引直接设置一个项
+
+  例如：`vm.items[indexOfItem] = newValue`；使用：`Vue.set(example1.items, indexOfItem, newValue)`；
+
+* Vue 不能检测到数组的长度的修改
+  例如：`vm.items.length = newLength`；使用 `vm.items.splice(newLength)`。
+
+### **数组变更方法实现**
+
+[变更方法](https://cn.vuejs.org/v2/guide/list.html#变更方法)：Vue 将被侦听的数组的变更方法进行了包裹，所以它们也将会触发视图更新。
+
+这些被包裹过的方法包括：
+
+* `push()`
+* `pop()`
+* `shift()`
+* `unshift()`
+* `splice()`
+* `sort()`
+* `reverse()`
+
+### **数组方法包裹实现原理**
+
+> 1. 首先，进行**代理原型**；
+>
+> 2. 然后，通过**重写数组变更方法，调用缓存的数组变更方法**；
+>
+> 3. 最后**对新插入数据进行数据观测和通知视图变更**；
+
+* 首先，进行代理原型：
+
+  * 原数组对象原型关系： `ArrayInstance.__proto__` =  `Array.prototype`;
+
+    ![](../images/vue-proto.png)
+
+  * 以数组对象的原型 `Array.prototype` 创建新的对象 `arrayMethods` 作为代理原型 ；
+
+  * 创建新数组对象 `methodsToPatch`，将新数组对象的 `methodsToPatch.__proto__` 属性指向了  `arrayMethods`；
+
+  * 将  `arrayMethods__proto__` 属性指向 `Array.prototype`;
+
+  * 因此经过代理原型后，原型关系为：`ArrayInstance.__proto__` =  `methodsToPatch` , `methodsToPatch.__proto__`  =  `Array.prototype`;
+
+    ![](../images/proto2.png)
+
+* 然后，通过重写数组变更方法，调用缓存的数组变更方法；
+
+* 最后对新插入数据进行数据观测和通知视图变更。
+
+* 源码分析：
+
+  * 在 new Vue() 初始化时候，进入到定义响应式数据，调用 observer() 
+
+    ```javascript
+    export class Observer {
+      constructor (value: any) {
+        this.value = value
+        this.dep = new Dep()
+        this.vmCount = 0
+        def(value, '__ob__', this)
+        if (Array.isArray(value)) {
+          const augment = hasProto
+            ? protoAugment
+            : copyAugment
+          augment(value, arrayMethods, arrayKeys)
+          this.observeArray(value)
+        } else {
+          // ...
+        }
+      }
+    }
+    ```
+
+    这里我们只需要关注 `value` 是 Array 的情况，首先获取 `augment`，这里的 `hasProto` 实际上就是判断对象中是否存在 `__proto__`，如果存在则 `augment` 指向 `protoAugment`， 否则指向 `copyAugment`，来看一下这两个函数的定义：
+
+    ```js
+    /**
+     * Augment an target Object or Array by intercepting
+     * the prototype chain using __proto__
+     `protoAugment` 方法是直接把 `target.__proto__` 原型直接修改为 `src`
+     */
+    function protoAugment (target, src: Object, keys: any) {
+      /* eslint-disable no-proto */
+      target.__proto__ = src
+      /* eslint-enable no-proto */
+    }
+    
+    /**
+     * Augment an target Object or Array by defining
+     * hidden properties.
+     `copyAugment` 方法是遍历 keys，通过 `def`，也就是 `Object.defineProperty` 去定义它自身的属性值。
+     */
+    /* istanbul ignore next */
+    function copyAugment (target: Object, src: Object, keys: Array<string>) {
+      for (let i = 0, l = keys.length; i < l; i++) {
+        const key = keys[i]
+        def(target, key, src[key])
+      }
+    }
+    ```
+
+    对于大部分现代浏览器都会走到 `protoAugment`，那么它实际上就把 `value` 的原型指向了 `arrayMethods` 
+
+  * `arrayMethods` 的定义在 `src/core/observer/array.js` 中：
+
+    ```js
+    import { def } from '../util/index'
+    
+    const arrayProto = Array.prototype
+    //`arrayMethods` 首先继承了 `Array`
+    export const arrayMethods = Object.create(arrayProto)
+    
+    const methodsToPatch = [
+      'push',
+      'pop',
+      'shift',
+      'unshift',
+      'splice',
+      'sort',
+      'reverse'
+    ]
+    
+    /**
+     * Intercept mutating methods and emit events
+     方法进行重写
+     */
+    methodsToPatch.forEach(function (method) {
+      // cache original method
+      const original = arrayProto[method]
+      // def 为 defineReactive 方法
+      def(arrayMethods, method, function mutator (...args) {
+        const result = original.apply(this, args)
+        const ob = this.__ob__
+        let inserted
+        switch (method) {
+          case 'push':
+          case 'unshift':
+            inserted = args
+            break
+          case 'splice':
+            inserted = args.slice(2)
+            break
+        }
+         //获取到插入的值，然后把新添加的值变成一个响应式对象
+        if (inserted) ob.observeArray(inserted)
+        // notify change
+        ob.dep.notify()
+        return result
+    })
+    })
+    ```
+
+    * 对原来数字方法进行重写，重写的方法会先执行它们本身原有的逻辑，并对能增加数组长度的 3 个方法 `push、unshift、splice` 方法做了判断，获取到插入的值，然后把新添加的值变成一个响应式对象
+    * 再调用 `ob.dep.notify()` 手动触发依赖通知
+
+---
+
+## VUE2.x 问答题
+
+**基础题**
+
+> **如何让CSS只在当前组件中起作用**？
+
+Q：在组件中的 style 标签上加上 scoped。
+
+> **如何获取dom?**
+
+Q：ref="domName" 用法：this.$refs.domName
+
+> **vue获取数据在哪个周期函数?**
+
+Q：普通单页应用项目一般在 created 钩子以后，如： created、before Mount、mounted。
+
+SSR 项目中： 由于没有动态更新，所有的生命周期钩子函数中，只有 `beforeCreate` 和 `created` 会在服务器端渲染 (SSR) 过程中被调用。这就是说任何其他生命周期钩子函数中的代码（例如 `beforeMount` 或 `mounted`），只会在客户端执行。所以静态化的数据一般只在 `beforeCreate` 和 `created` 中服务端获取渲染，动态获取的数据在 `beforeMount` 或 `mounted` 中客户端获取。
+
+> **第一次页面加载会触发哪几个钩子？**
+
+Q：第一次页面加载即为首次渲染过程，首次渲染不涉及数据更新和页面销毁过程，所以只触发 beforeCreate, created, beforeMount, mounted ，并在 mounted 的时候DOM渲染完成。
+
+>  **vue中数据渲染的时候如何保证将数据原样输出？**
+
+* v-text：将数据输出到元素内部，如果输出的数据有HTML代码，会作为普通文本输出
+* v-html：将数据输出到元素内部，如果输出的数据有HTML代码，会被渲染
+* {{}}：插值表达式，可以直接获取Vue实例中定义的数据或函数，使用插值表达式的时候，值可能闪烁；而使用v-html、v-text不会闪烁，有值就显示，没值就隐藏
+
+
+
+> props 和 $attr 区别？
+
+* [props](https://cn.vuejs.org/v2/api/#props):props 可以是数组或对象，用于接收来自父组件的数据。
+
+* [vm.$attrs](https://cn.vuejs.org/v2/api/#vm-attrs):包含了父作用域中不作为 prop 被识别 (且获取) 的 attribute 绑定 (`class` 和 `style` 除外)。当一个组件没有声明任何 prop 时，这里会包含所有父作用域的绑定 (`class` 和 `style` 除外)，并且可以通过 `v-bind="$attrs"` 传入内部组件——在创建高级别的组件时非常有用。
 
 
 
@@ -4513,30 +4897,6 @@ A: options 的合并有 2 种方式:第一种，外部初始化 Vue 通过 merge
 A: mergeHook()函数中定义合并策略(src/core/utils/options)
 
 
-
-### **全局API 问答**
-
-
-
->  Vue 初始化全局 API 时，做了什么？
-
-* 1.Vue 初始化了全局的 config 配置并设为响应式。
-* 2.暴露一些工具方法，如日志、选项扩展、选项合并、设置对象响应式 
-* 3.暴露全局初始化方法，如 Vue.set、Vue.delete、Vue.nextTick、Vue.observable 
-* 4.暴露组件配置注册方法，如  Vue.options.components、Vue.options.directives、Vue.options.filters、Vue.options._base 
-* 5.暴露全局方法，如 Vue.use、Vue.mixin、Vue.extend、Vue.initAssetRegisters()
-
-
-
-> Vue 全局 API 有什么作用？
-
-* Vue.use()： 用来安装 plugin 插件，对插件进行缓存优化，并执行 install() 安装。
-
-* Vue.mixin()：用来在 Vue 的全局配置上合并 options 配置。并且每个组件生成 vnode 时会合并全局配置和组件配置，因此可以作为抽离公共的业务逻辑，实现公共的业务逻辑，也就是类的继承。
-
-* Vue.extend()：用来在 Vue 实例扩展子类，可以用于一些公共组件化配置上。与 Vue.mixin() 区别，我认为 extend 更多的是公众的组件化，也就是类的多态，外观模式。
-
-* Vue.initAssetRegisters()：用来将实例上的 component、directive、filter 对象配置到全局的 Vue.options 上。
 
 
 
