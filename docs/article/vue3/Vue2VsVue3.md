@@ -23,9 +23,10 @@ tag:
 |          |           **Hooks 和 Mixins**            | Vue2 通过 Mixins 复用代码，一个混入对象可以包含任意组件选项。mixins 会导致依赖关系不清晰 |  相比 Mxins，hooks 能实现更加清晰的逻辑复用，并避免命名冲突  |
 |          |             **生命周期钩子**             | Vue 2 提供了 beforeCreate、created、beforeMount、mounted、beforeUpdate、updated、beforeDestroy、destroyed 等生命周期钩子。 | Vue 3 对生命周期钩子进行了重新设计，提供了 setup、onMounted、onUpdated、onUnmounted 等新的生命周期钩子，并移除了 beforeDestroy 和 destroyed。 |
 |          |             **创建实例方式**             | 使用 `new Vue()` 创建实例<br />同一个 Vue 构造函数**创建的每个根实例共享相同的全局配置**，因此全局 API 影响所有 vue 实例。 | 使用 `createApp()`工厂函数创建实例<br />可以返回一个提供应用上下文的应用实例，不同的实例注册的组件无法在不同的实例下使用 |
+|          |               **组件注册**               |           组件必须注册才能使用，分为全局和局部注册           | 全局注册、局部注册、使用 `defineComponent`注册、`<script setup>` 中直接使用 setup 函数中定义的组件，而无需在 components 选项中显式注册 |
 |          |               **内置组件**               |                                                              | Vue3 支持模板下可以有多个根节点<br />引入了 `<suspense>` 组件和`<teleport>` 组件 |
-|          |               **模板语法**               |                  vue3 组件可以有多个根节点                   |                   Vue2组件只能有一个根节点                   |
-|          |      **`v-if` 与 `v-for` 的优先级**      |                vue3 中 v-if 优先级大于 v-for                 |                vue2 中 v-for 优先级大于 v-if                 |
+|          |               **模板语法**               |                   Vue2组件只能有一个根节点                   |                  Vue3 组件可以有多个根节点                   |
+|          |      **`v-if` 与 `v-for` 的优先级**      |                Vue2 中 v-for 优先级大于 v-if                 |                Vue3 中 v-if 优先级大于 v-for                 |
 |          |                                          |                                                              |                                                              |
 
 ## **源码管理**
@@ -325,7 +326,7 @@ Vue3相比Vue2在体积方面做了以下优化：
 2. 移除冷门的 feature；
 3. 包体积优化: 内部逻辑进行了拆分，并进行了懒加载处理。
 
-### **引入 Tree-shaking **
+### **引入 Tree-shaking**
 
 #### **Tree-shaking**
 

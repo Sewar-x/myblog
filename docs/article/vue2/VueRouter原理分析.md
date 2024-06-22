@@ -349,25 +349,43 @@ export default class VueRouter {
 
 * vue 中定义了三种路由模式：`hash`、`history`、`abstract` 。
 
-  * **hash 模式：** 使用 url 的 hash 值来作为路由。支持所有浏览器。一般用于单页应用。
-    * 表现： 
-      * url 中带有 “#” 符号，如 `http://localhost:8080/#/`；
-      * 页面跳转时 “#” 后面 hash 值改变；当 URL 改变时，页面不会重新加载（实际有重新获取数据）；
-      * 通过浏览器的前进、后退、刷新页面均可以变；
-    * 原理：
-      * 监听路由变化： 如果支持 [popstate 事件](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/popstate_event)，则监听 popstate 事件，否则监听 [hashchange 事件](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/hashchange_event);
-      * 点击 `router-link` 路由切换：判断是否支持  [HTML5 History API](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/history) （replaceState 和 pushState），支持则使用 History API，否则使用 [Location.hash API](https://developer.mozilla.org/zh-CN/docs/Web/API/Location/hash) 
 
-  * **History 模式：** 使用 [HTML5 History API](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/history) 和并需要服务器配置。一般用于多页应用。
-    * 表现：
-      * url 中没有 “#” 符号
-      * 可以通过浏览器前进、后退，但刷新页面会导致 404 (如果服务器中没有相应的响应或者资源)；
-    * 原理：
-      * 监听路由变化：监听 [popstate 事件](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/popstate_event)；
-      * 点击 `router-link` 路由切换：使用  [HTML5 History API](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/history) （replaceState 和 pushState）切换路由；
-    * 缺点：
-      * 要在服务端增加一个覆盖所有情况的候选资源：如果 URL 匹配不到任何静态资源，则应该返回同一个 `index.html` 页面，这个页面就是你 app 依赖的页面。
-  * **Abstract 模式：** 支持所有javascript运行模式。如果发现没有浏览器的API，路由会自动强制进入这个模式。
+### **hash 模式**
+
+ 使用 url 的 hash 值来作为路由。支持所有浏览器。一般用于单页应用。
+
+**表现：** 
+
+* url 中带有 `#` 符号，如 `http://localhost:8080/#/`；
+* 页面跳转时   `#` 后面 hash 值改变；当 URL 改变时，页面不会重新加载（实际有重新获取数据）；
+* 通过浏览器的前进、后退、刷新页面均可以变；
+
+**原理：**
+
+* 监听路由变化： 如果支持 [popstate 事件](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/popstate_event)，则监听 popstate 事件，否则监听 [hashchange 事件](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/hashchange_event);
+* 点击 `router-link` 路由切换：判断是否支持  [HTML5 History API](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/history) （replaceState 和 pushState），支持则使用 History API，否则使用 [Location.hash API](https://developer.mozilla.org/zh-CN/docs/Web/API/Location/hash) 
+
+### **History 模式**
+
+ 使用 [HTML5 History API](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/history) 和并需要服务器配置。一般用于多页应用。
+
+**表现：**
+
+* url 中没有 `#` 符号
+* 可以通过浏览器前进、后退，但刷新页面会导致 404 (如果服务器中没有相应的响应或者资源)；
+
+**原理：**
+
+* 监听路由变化：监听 [popstate 事件](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/popstate_event)；
+* 点击 `router-link` 路由切换：使用  [HTML5 History API](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/history) （replaceState 和 pushState）切换路由；
+
+**缺点：**
+
+* 要在服务端增加一个覆盖所有情况的候选资源：如果 URL 匹配不到任何静态资源，则应该返回同一个 `index.html` 页面，这个页面就是你 app 依赖的页面。
+
+### **Abstract 模式**
+
+*  支持所有javascript运行模式。如果发现没有浏览器的API，路由会自动强制进入这个模式。
 
 * 三种模式中类继承关系![](../images/路由模式类关系.png)
 
@@ -375,9 +393,10 @@ export default class VueRouter {
 
   ![](../images/路由模式初始化.png)
 
-* 三种模式路由切换的底层实现:
 
-  ![](../images/不同路由模式切换原理.png)
+### **三种模式路由切换的底层实现**
+
+![](../images/不同路由模式切换原理.png)
 
 ## 路由安装
 
@@ -973,7 +992,8 @@ export default new Router({
   > * 登录页面 -> 进入异步路由页面 -> 刷新页面 -> 页面空白
   > * 发现刷新页面后未进入  ` router.beforeEach` 回调函数中的 debugger 断点
 
-* 
+
+
 
 ## 参考资料
 

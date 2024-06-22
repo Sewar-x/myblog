@@ -31,19 +31,19 @@ tag:
 
 * 核心属性：
 
-  * **State 状态：** 存储状态数据，状态存储是响应式的。
+  * **State 状态：**  存储状态数据，状态存储是响应式的。
 
     * 获取 state 数据: `this.$store.state` 获取， store 实例中读取状态最简单的方法就是在[计算属性 (opens new window)](https://cn.vuejs.org/guide/computed.html)中返回某个状态 。
     * 获取多个状态：`mapState` 辅助函数。`mapState` 返回的是一个对象，使用对象展开运算符`...` 将对象混入到外部对象中。
 
-  * **Getter：**用于获取 `state`。
+  * **Getter： ** 用于获取 `state`。
 
     * 参数：Getter 接受 state 作为其第一个参数，其他 getter 作为第二个参数。
     * 返回值：返回值会根据它的依赖被缓存起来，且只有当它的依赖值发生了改变才会被重新计算。
     * 获取单个 getters：  `this.$store.getters` 对象。
     * 获取多个 getters：`mapGetters` 辅助函数，返回多个 getters 对象。
 
-  * **Mutation：**提交 mutation 是更改状态的唯一方法。
+  * **Mutation： ** 提交 mutation 是更改状态的唯一方法。
 
     * 规则：
 
