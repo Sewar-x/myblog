@@ -118,7 +118,7 @@ export default [ // 导航栏配置
         text: '低代码平台',
         ariaLabel: '低代码平台',
         children: [
-            { text: '微前端', link: '/article/微前端/搭建低代码平台.md' }
+            { text: '低代码平台', link: '/article/低代码/搭建低代码平台.md' }
         ]
     },
 ]
