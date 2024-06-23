@@ -65,16 +65,6 @@ export default [ // 导航栏配置
         ]
     },
     {
-        text: '微前端',
-        ariaLabel: '微前端',
-        children: [
-            { text: '微前端基础', link: '/article/微前端/微前端基础.md' },
-            { text: '微前端技术方案', link: '/article/微前端/微前端技术方案.md' },
-            { text: '微前端框架', link: '/article/微前端/微前端框架.md' },
-            { text: '使用微前端重构项目', link: '/article/微前端/使用微前端重构项目.md' },
-        ]
-    },
-    {
         text: '前端工程',
         ariaLabel: '前端工程',
         children: [
@@ -112,6 +102,23 @@ export default [ // 导航栏配置
             { text: '从零到一搭建Vue3工程化项目', link: '/article/项目总结/从零到一搭建Vue3工程化项目.md' },
             { text: '搭建低代码平台', link: '/article/项目总结/搭建低代码平台.md' },
             { text: '混合桌面应用开发实践', link: '/article/项目总结/混合桌面应用开发实践.md' },
+        ]
+    },
+    {
+        text: '微前端',
+        ariaLabel: '微前端',
+        children: [
+            { text: '微前端基础', link: '/article/微前端/微前端基础.md' },
+            { text: '微前端技术方案', link: '/article/微前端/微前端技术方案.md' },
+            { text: '微前端框架', link: '/article/微前端/微前端框架.md' },
+            { text: '使用微前端重构项目', link: '/article/微前端/使用微前端重构项目.md' },
+        ]
+    },
+    {
+        text: '低代码平台',
+        ariaLabel: '低代码平台',
+        children: [
+            { text: '微前端', link: '/article/微前端/搭建低代码平台.md' }
         ]
     },
 ]
