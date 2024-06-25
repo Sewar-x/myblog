@@ -1124,6 +1124,336 @@ console.log(promise)
 
   答案参考 [Promise 异步流程控制](https://zhuanlan.zhihu.com/p/29792886)
 
+
+
+
+
+## 异步循环
+
+> 异步循环：在循环中包含异步操作
+
+* 解决思路： promise + async wait: 使用promise封装异步操作，使用async await执行循环
+
+  ```javascript
+  let getSomething = function (param) {
+    return new Promise((reslove, reject) => {
+      setTimeout(() => {
+        reslove(`get ${param}`)
+      }, 1000);
+    })
+  }
+  
+  let getAll = async function () {
+    for (let i = 0; i < 10; i++) {
+      let result = await getSomething(i)
+      console.log(result)
+    }
+  }
+  
+  getAll()
+  ```
+
+
+
+## 异步串行
+
+> 异步方案有：
+>
+> * 回调
+> * promise
+> * async await
+
+### 回调实现
+
+```js
+// operations defined elsewhere and ready to execute
+const operations = [
+  { func: function1, args: args1 },
+  { func: function2, args: args2 },
+  { func: function3, args: args3 },
+];
+
+function executeFunctionWithArgs(operation, callback) {
+  // executes function
+  const { args, func } = operation;
+  func(args, callback); // 传入参数并执行函数
+}
+
+function serialProcedure(operation) {
+  if (!operation) process.exit(0); // finished
+  executeFunctionWithArgs(operation, function (result) {
+    // continue AFTER callback
+    serialProcedure(operations.shift());//回调中执行下一个异步函数
+  });
+}
+
+serialProcedure(operations.shift());
+
+```
+
+
+
+## 异步并行
+
+### 全并行
+
+* 全并行：全部异步函数同时并发执行，不限制数据量
+* 题目：实现通过电子邮件发送 1,000,000 个电子邮件收件人的列表。
+
+#### 回调实现
+
+```js
+let count = 0;
+let success = 0;
+const failed = [];
+const recipients = [
+  { name: 'Bart', email: 'bart@tld' },
+  { name: 'Marge', email: 'marge@tld' },
+  { name: 'Homer', email: 'homer@tld' },
+  { name: 'Lisa', email: 'lisa@tld' },
+  { name: 'Maggie', email: 'maggie@tld' },
+];
+
+function dispatch(recipient, callback) {
+  // `sendEmail` is a hypothetical SMTP client
+  sendMail(
+    {
+      subject: 'Dinner tonight',
+      message: 'We have lots of cabbage on the plate. You coming?',
+      smtp: recipient.email,
+    },
+    callback
+  );
+}
+
+function final(result) {
+  console.log(`Result: ${result.count} attempts \
+      & ${result.success} succeeded emails`);
+  if (result.failed.length)
+    console.log(`Failed to send to: \
+        \n${result.failed.join('\n')}\n`);
+}
+
+recipients.forEach(function (recipient) {
+  dispatch(recipient, function (err) {
+    if (!err) {
+      success += 1;
+    } else {
+      failed.push(recipient.name);
+    }
+    count += 1;
+
+    if (count === recipients.length) {
+      final({
+        count,
+        success,
+        failed,
+      });
+    }
+  });
+});
+
+```
+
+
+
+
+
+### 有限并行
+
+* 优先并行：通过控制限制并发数量，实现并发请求
+
+#### 回调实现
+
+```js
+let successCount = 0; // 记录成功发送的邮件数量
+let parallelCount = 100; // 并发执行数量
+function final() {
+  console.log(`dispatched ${successCount} emails`); // 打印成功发送的邮件数量
+  console.log('finished'); // 打印任务完成的消息
+}
+
+function dispatch(recipient, callback) {
+  // `sendEmail` 是一个假设的 SMTP 客户端，用于发送邮件
+  sendMail(
+    {
+      subject: 'Dinner tonight',
+      message: 'We have lots of cabbage on the plate. You coming?',
+      smtp: recipient.email,
+    },
+    callback
+  );
+}
+
+function sendOneMillionEmailsOnly() {
+  getListOfTenMillionGreatEmails(function (err, bigList) {
+    if (err) throw err;
+
+    function parallel(recipients) {
+      let count = 0; // 并行发送的邮件计数器
+      let index = 0; // 收件人列表的索引
+
+      function sendNext() {
+        if (count >= 1000000) return final(); // 达到发送限制时调用 final 函数结束发送
+        if (index >= recipients.length) return; // 所有收件人都已处理完毕时直接返回
+
+        dispatch(recipients[index], function (_err) {
+          if (!_err) {
+            successCount += 1; // 更新成功发送的邮件数量
+            count += 1; // 更新并行发送的邮件计数器
+          }
+          index += 1; // 更新收件人列表的索引
+          sendNext(); // 递归调用 sendNext 处理下一个收件人
+        });
+      }
+
+      for (let i = 0; i < parallelCount; i++) {
+        sendNext(); // 启动并行发送任务
+      }
+    }
+
+    parallel(bigList.slice(0, parallelCount)); // 将收件人列表切片为大小为 parallelCount 的子列表作为初始并行任务的输入
+  });
+}
+
+sendOneMillionEmailsOnly(); // 启动发送一百万封电子邮件的过程
+```
+
+
+
+
+
+## 异步题目
+
+### 异步API执行顺序
+
+* 题目一：以下代码输出结果
+
+  ```js
+  async function async1() {
+   console.log('async1 start')
+   await async2()
+   console.log('async1 end')
+  }
+  
+  async function async2() {
+   console.log('async2')
+  }
+  
+  console.log('script start')
+  
+  setTimeout(function () {
+   console.log('setTimeout0')
+  }, 0)
+  
+  setTimeout(function () {
+   console.log('setTimeout2')
+  }, 300)
+  
+  setImmediate(() => console.log('setImmediate'))
+  
+  process.nextTick(() => console.log('nextTick1'))
+  
+  async1()
+  
+  process.nextTick(() => console.log('nextTick2'))
+  
+  new Promise(function (resolve) {
+   console.log('promise1')
+   resolve();
+   console.log('promise2')
+  }).then(function () {
+   console.log('promise3')
+  })
+  
+  console.log('script end')
+  ```
+
+  * 结果：
+
+    ```js
+    script start
+    async1 start
+    async2
+    promise1
+    promise2
+    script end
+    nextTick1
+    nextTick2
+    async1 end
+    promise3
+    setTimeout0
+    setImmediate
+    setTimeout2
+    ```
+
+  * 分析：
+
+    > 1. 首先，代码从顶部开始执行，**输出`script start`。**
+    > 2. 接下来，`async1()`函数被调用，**输出`async1 start`。**
+    > 3. 在`async1()`函数内部，遇到了`await async2()`语句。由于`async2()`函数是一个异步函数，所以它会返回一个Promise并暂停`async1()`函数的执行（async await 后面的函数被放入微任务列队）。
+    > 4. 此时，JavaScript引擎继续执行后面的代码。**输出`async2`**，这是由于`async2()`函数被调用。
+    > 5. 紧接着，**输出`promise1`**，这是因为`new Promise`的回调函数立即执行。
+    > 6. 继续执行，**输出`promise2`**，然后调用`resolve()`。
+    > 7. Promise的`resolve()`方法并不会立即执行`then`方法中的回调函数，而是将其放入事件队列中，等待当前执行栈为空后执行。
+    > 8. 继续执行主任务，**输出`script end`**。
+    > 9. **输出`nextTick1`**，这是由于`process.nextTick()`方法的回调函数会在当前执行栈执行完成后立即执行。
+    > 10. **输出`nextTick2`**，这是因为在上一个`nextTick`回调函数之后，又调用了`process.nextTick()`方法。
+    > 11. 回到`async1()`函数，**输出`async1 end`**。
+    > 12. 然后，`promise.then()`中的回调函数被放入事件队列中，等待当前执行栈为空后执行。
+    > 13. **输出`promise3`**，这是因为`then`方法中的回调函数在上一步骤中被调用。
+    > 14. `setTimeout0`回调函数被放入事件队列中，等待至少达到设定的延迟时间（0ms）后执行，**输出`setTimeout0`**。
+    > 15. `setImmediate`回调函数被放入事件队列中，等待当前执行栈为空后执行，**输出`setImmediate`**。
+    > 16. `setTimeout2`回调函数被放入事件队列中，等待至少达到设定的延迟时间（300ms）后执行，**输出`setTimeout2`**。
+    >
+    > 最后，根据事件循环机制和各个定时器的规则，事件循环会按照一定的顺序处理事件队列中的回调函数。因此，`setImmediate`回调函数会在`setTimeout`回调函数之前执行，而`setTimeout0`回调函数会在`setTimeout2`回调函数之前执行。
+
+### setTimeout 与 setImmediate 输出顺序
+
+* 以下代码输出结果为：
+
+  ```js
+  setTimeout(() => {
+      console.log("setTimeout");
+  }, 0);
+  setImmediate(() => {
+      console.log("setImmediate");
+  });
+  ```
+
+  * 结果：
+
+    ```js
+    情况一：
+    setTimeout
+    setImmediate
+    情况二：
+    setImmediate
+    setTimeout
+    ```
+
+  * 分析：
+
+    > ● 外层同步代码一次性全部执行完，遇到异步API就塞到对应的阶段
+    >
+    > ● 遇到setTimeout,虽然设置的是0毫秒触发，但实际上会被强制改成1ms,时间到了然后塞入times阶段
+    >
+    > ● 遇到setImmediate塞入check 阶段
+    >
+    > ● 同步代码执行完毕，进入Event Loop
+    >
+    > ● 先进入times阶段，检查当前时间过去了1毫秒没有，如果过了1毫秒，满足setTimeout条件，执行回调，如果没过1毫秒，跳过
+    >
+    > ● 跳过空的阶段，进入check阶段，执行setImmediate回调
+    >
+    > 这里的关键在于这1ms,如果同步代码执行时间较长，进入Event Loop的时候1毫秒已经过了，setTimeout先执行，如果1毫秒还没到，就先执行了setImmediate
+
+
+
+
+
+
+
 ## 参考资料
 
 [Promise](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise)
