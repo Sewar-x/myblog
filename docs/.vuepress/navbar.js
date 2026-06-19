@@ -60,6 +60,8 @@ export default navbar([ // 导航栏配置
                     { text: 'React 组件渲染', link: '/article/React/React组件渲染原理/React组件渲染流程.md' },
                     { text: 'React Fiber', link: '/article/React/React-Fiber.md' },
                     { text: 'React 性能优化', link: '/article/React/React性能优化.md' },
+                    { text: 'React19', link: '/article/React/React19.md' },
+                    { text: 'React 面试题', link: '/article/React/React面试题.md' },
                     { text: 'Vue Vs React', link: '/article/React/VueVsReact.md' },
                 ]
             },
