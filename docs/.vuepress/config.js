@@ -5,7 +5,7 @@ import theme from "./theme.js";
 export default defineUserConfig({
   title: 'Sewen 博客',
   base: `/myblog/`,
-  description: '记录分享 Sewen 的前端学习笔记、前端基础总结、技术深度剖析、项目过程总结.',
+  description: '记录分享学习笔记、前端基础总结、技术深度剖析、项目过程总结.',
   head: [
     ['link', { rel: 'icon', href: './mylogo.png' }],
   ],
@@ -14,7 +14,7 @@ export default defineUserConfig({
     hostname: 'https://sewar-x.github.io/',
     pageInfo: {
       author: true,
-      time: true,
+      time: false,
       category: true,
       tag: true,
       'reading-time': true,

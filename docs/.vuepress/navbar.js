@@ -240,4 +240,15 @@ export default navbar([ // 导航栏配置
             { text: '移动端SSG项目实践', link: '/article/移动端/移动端SSG项目实践.md' },
         ]
     },
+    {
+        text: '3D',
+        icon: 'bolt',
+        ariaLabel: 'threejs/webgl',
+        children: [
+            { text: 'threejs基础', link: '/article/3d/threejs基础.md' },
+            { text: 'threejs重点回顾.md', link: '/article/3d/threejs重点回顾.md' },
+            { text: 'ReactThree Fiber', link: '/article/3d/ReactThreeFibe.md' },
+            { text: 'Shader', link: '/article/3d/Shader.md' },
+        ]
+    }
 ])
