@@ -60,7 +60,7 @@ export default navbar([ // 导航栏配置
                     { text: 'React 组件渲染', link: '/article/React/React组件渲染原理/React组件渲染流程.md' },
                     { text: 'React Fiber', link: '/article/React/React-Fiber.md' },
                     { text: 'React 性能优化', link: '/article/React/React性能优化.md' },
-                    { text: 'React19', link: '/article/React/React19.md' },
+                    { text: 'React 19', link: '/article/React/React19.md' },
                     { text: 'React 面试题', link: '/article/React/React面试题.md' },
                     { text: 'Vue Vs React', link: '/article/React/VueVsReact.md' },
                 ]
@@ -246,9 +246,10 @@ export default navbar([ // 导航栏配置
         ariaLabel: 'threejs/webgl',
         children: [
             { text: 'threejs基础', link: '/article/3d/threejs基础.md' },
-            { text: 'threejs重点回顾.md', link: '/article/3d/threejs重点回顾.md' },
-            { text: 'ReactThree Fiber', link: '/article/3d/ReactThreeFibe.md' },
+            { text: 'threejs重点回顾.md', link: '/article/3d/threejs重点.md' },
+            { text: 'React Three Fiber', link: '/article/3d/ReactThreeFiber.md' },
             { text: 'Shader', link: '/article/3d/Shader.md' },
+            { text: 'OpenScad', link: '/article/3d/openscad.md' },
         ]
     }
 ])

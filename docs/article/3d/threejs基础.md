@@ -1,10 +1,9 @@
-# Three.js 一页速查表（Beginner → Junior）
+# Three.js 基础
 
 > 目标：30 秒快速回忆 Three.js 的核心知识体系
 
 ---
 
-# ① 核心概念（最重要）
 
 ## Three.js 的本质
 

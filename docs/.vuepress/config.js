@@ -8,6 +8,20 @@ export default defineUserConfig({
   description: '记录分享学习笔记、前端基础总结、技术深度剖析、项目过程总结.',
   head: [
     ['link', { rel: 'icon', href: './mylogo.png' }],
+    // 默认黑暗模式：首次访问默认使用暗色主题，用户切换后记住偏好
+    ['script', {}, `
+      (function() {
+        try {
+          var scheme = localStorage.getItem('vuepress-theme-hope-scheme');
+          if (scheme === null) {
+            scheme = 'dark';
+            localStorage.setItem('vuepress-theme-hope-scheme', 'dark');
+          }
+          var isDark = scheme === 'dark' || (scheme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+          document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+        } catch(e) {}
+      })();
+    `],
   ],
   themeConfig: {
     logo: './mylogo.png',  // 左上角logo
