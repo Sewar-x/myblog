@@ -4,7 +4,7 @@ icon: home
 title: Sewen Blog
 hero: true
 heroText: Sewen Blog
-tagline: 记录分享学习笔记、前端基础总结、技术深度剖析、项目过程总结
+tagline: 记录分享学习笔记、前端知识总结、技术深度剖析、项目过程总结
 bgImage: false
 footer: <a href="https://github.com/Sewar-x">Sewen</a>
 copyright: MIT LICENSE
@@ -55,8 +55,8 @@ highlights:
         details: 前端工程化体系、架构实践与模块化方案
         icon: hammer
         link: /article/前端工程化/前端工程化.md
-      - title: Three.js 重点回顾
-        details: Three.js 核心概念、高频考点与底层原理面试题
+      - title: threejs入门
+        details: Three.js 核心概念
         icon: cube
-        link: /article/3d/threejs重点回顾.md
+        link: /article/3d/threejs入门到精通.md
 ---
