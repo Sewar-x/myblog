@@ -15,18 +15,10 @@ actions:
   - text: GitHub
     link: https://github.com/Sewar-x
 highlights:
-  - header: 重点文章
+  - header: 文章列表
     description: 精选核心技术与深度分析文章
     type: order
     highlights:
-      - title: JavaScript 基础
-        details: 深入理解 JavaScript 核心概念、语法特性与底层原理
-        icon: javascript
-        link: /article/javascript/
-      - title: TypeScript
-        details: TypeScript 类型系统、高级类型与工程实践
-        icon: typescript
-        link: /article/typescript/
       - title: Vue3 源码分析
         details: Vue3 响应式原理、编译优化与源码深度剖析
         icon: vue
@@ -35,10 +27,18 @@ highlights:
         details: React 19 新特性、Actions、useActionState 与并发渲染
         icon: react
         link: /article/React/React19.md
-      - title: React 面试题
-        details: React 基础、高频考点、重点难点题与详细答案
+      - title: React 原理解析
+        details: React 原理深入分析
         icon: react
-        link: /article/React/React面试题.md
+        link: /article/React/React-Fiber.md
+      - title: 微前端基础
+        details: 微前端架构思想、技术方案对比与框架选型
+        icon: layer-group
+        link: /article/微前端/微前端基础.md
+      - title: 前端渲染架构
+        details: CSR、SSR、SSG 渲染模式对比与选型实践
+        icon: bolt
+        link: /article/前端工程化/前端渲染架构.md
       - title: Webpack 构建原理
         details: Webpack 核心原理、Loader/Plugin 机制与构建流程
         icon: cube
@@ -55,14 +55,6 @@ highlights:
         details: 前端工程化体系、架构实践与模块化方案
         icon: hammer
         link: /article/前端工程化/前端工程化.md
-      - title: 微前端基础
-        details: 微前端架构思想、技术方案对比与框架选型
-        icon: layer-group
-        link: /article/微前端/微前端基础.md
-      - title: 前端渲染架构
-        details: CSR、SSR、SSG 渲染模式对比与选型实践
-        icon: bolt
-        link: /article/前端工程化/前端渲染架构.md
       - title: Three.js 重点回顾
         details: Three.js 核心概念、高频考点与底层原理面试题
         icon: cube
