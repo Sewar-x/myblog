@@ -4,11 +4,12 @@
   "description": "Sewen Blog",
   "main": "index.js",
   "scripts": {
-    "dev": "cross-env NODE_OPTIONS=--max-old-space-size=8192 vuepress dev docs",
-    "build": "cross-env NODE_OPTIONS=--max-old-space-size=8192 vuepress build docs",
+    "dev": "cross-env NODE_OPTIONS=\"--max-old-space-size=3500 --max-semi-space-size=64\" vuepress dev docs",
+    "build": "cross-env NODE_OPTIONS=\"--max-old-space-size=3500 --max-semi-space-size=64\" vuepress build docs",
+    "preview": "cross-env NODE_OPTIONS=\"--max-old-space-size=3500 --max-semi-space-size=64\" vuepress build docs && npx serve docs/.vuepress/dist",
     "deploy": "sh deploy.sh",
     "upload": "cd docs/.vuepress/dist && git push -f https://github.com/Sewar-x/myblog.git master:gh-pages",
-    "clean-dev": "cross-env NODE_OPTIONS=--max-old-space-size=8192 vuepress dev docs --clean-cache"
+    "clean-dev": "cross-env NODE_OPTIONS=\"--max-old-space-size=3500 --max-semi-space-size=64\" vuepress dev docs --clean-cache"
   },
   "repository": {
     "type": "git",
