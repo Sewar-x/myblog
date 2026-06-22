@@ -27,18 +27,22 @@ highlights:
         details: React 原理深入分析
         icon: react
         link: /article/React/React-Fiber.md
-      - title: MCP 实践
-        details: 组件库 MCP 实践
-        icon: react
-        link: /article/AI/组件库MCP实践.md
       - title: 微前端基础
         details: 微前端架构思想、技术方案对比与框架选型
         icon: layer-group
         link: /article/微前端/微前端基础.md
-      - title: 前端渲染架构
-        details: CSR、SSR、SSG 渲染模式对比与选型实践
+      - title: 从零到一搭建企业级组件库
+        details: 从零到一搭建企业级组件库实践
         icon: bolt
-        link: /article/前端工程化/前端渲染架构.md
+        link: /article/前端组件化/从零到一搭建基础组件库.md
+      - title: MCP 实践
+        details: 组件库 MCP 实践
+        icon: react
+        link: /article/AI/组件库MCP实践.md
+      - title: 构建参数化 3D 模型平台
+        details: 从设计到实践的完整指南
+        icon: cube
+        link: /article/3d/构建参数化3D模型平台-从设计到实践的完整指南.md
       - title: Webpack 构建原理
         details: Webpack 核心原理、Loader/Plugin 机制与构建流程
         icon: cube
@@ -55,8 +59,4 @@ highlights:
         details: 前端工程化体系、架构实践与模块化方案
         icon: hammer
         link: /article/前端工程化/前端工程化.md
-      - title: threejs入门
-        details: Three.js 核心概念
-        icon: cube
-        link: /article/3d/threejs入门到精通.md
 ---

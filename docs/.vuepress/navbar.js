@@ -257,6 +257,7 @@ export default navbar([ // 导航栏配置
             { text: 'React Three Fiber', link: '/article/3d/ReactThreeFiber.md' },
             { text: 'Shader', link: '/article/3d/Shader.md' },
             { text: 'OpenScad', link: '/article/3d/openscad.md' },
+            { text: '构建参数化3D模型平台', link: '/article/3d/构建参数化3D模型平台-从设计到实践的完整指南.md' },
         ]
     }
 ])
