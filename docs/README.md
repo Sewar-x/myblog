@@ -23,14 +23,14 @@ highlights:
         details: Vue3 响应式原理、编译优化与源码深度剖析
         icon: vue
         link: /article/vue3/Vue3源码分析/响应式原理.md
-      - title: React 19
-        details: React 19 新特性、Actions、useActionState 与并发渲染
-        icon: react
-        link: /article/React/React19.md
       - title: React 原理解析
         details: React 原理深入分析
         icon: react
         link: /article/React/React-Fiber.md
+      - title: MCP 实践
+        details: 组件库 MCP 实践
+        icon: react
+        link: /article/AI/组件库MCP实践.md
       - title: 微前端基础
         details: 微前端架构思想、技术方案对比与框架选型
         icon: layer-group

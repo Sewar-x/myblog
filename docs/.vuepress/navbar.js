@@ -2,6 +2,13 @@ import { navbar } from "vuepress-theme-hope";
 
 export default navbar([ // 导航栏配置
     { text: '首页',icon:'house', link: '/' },
+    {
+        text: 'AI',
+        icon: 'robot',
+        children: [
+            { text: '组件库 MCP 实践', link: '/article/AI/组件库MCP实践.md' },
+        ]
+    },
 
     {
         text: '前端与计算机基础',
