@@ -245,8 +245,8 @@ export default navbar([ // 导航栏配置
         icon: 'bolt',
         ariaLabel: 'threejs/webgl',
         children: [
-            { text: 'Three.js 入门到精通', link: '/article/3d/threejs入门到精通.md' },
-            { text: 'Three.js 重点回顾', link: '/article/3d/threejs重点.md' },
+            { text: 'threejs基础', link: '/article/3d/threejs基础.md' },
+            { text: 'threejs重点回顾.md', link: '/article/3d/threejs重点.md' },
             { text: 'React Three Fiber', link: '/article/3d/ReactThreeFiber.md' },
             { text: 'Shader', link: '/article/3d/Shader.md' },
             { text: 'OpenScad', link: '/article/3d/openscad.md' },
