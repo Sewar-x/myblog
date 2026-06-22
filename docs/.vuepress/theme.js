@@ -87,7 +87,7 @@ export default hopeTheme({
             //启用 echart: https://theme-hope.vuejs.press/zh/guide/markdown/chart/echarts.html
             echarts: false,
             //Mermaid: https://theme-hope.vuejs.press/zh/guide/markdown/chart/mermaid.html
-            mermaid: false,
+            mermaid: true,
             //思维导图：https://theme-hope.vuejs.press/zh/guide/markdown/chart/markmap.html#settings
             markmap: false,
             //流程图：https://theme-hope.vuejs.press/zh/guide/markdown/chart/flowchart.html#%E9%85%8D%E7%BD%AE
