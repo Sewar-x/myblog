@@ -160,7 +160,7 @@ export default navbar([ // 导航栏配置
                 children: [
                     { text: '前端组件化', link: '/article/前端组件化/Vue组件基础.md' },
                     { text: '组件设计', link: '/article/前端组件化/组件设计.md' },
-                    { text: '从零到一搭建公共组件库', link: '/article/前端组件化/从零到一搭建公共组件库.md' },
+                    { text: '从零到一搭建组件库', link: '/article/前端组件化/从零到一搭建基础组件库.md' },  
                     { text: 'JSON Scheme 组件', link: '/article/前端组件化/JSON组件.md' },
                     { text: '前端模块化', link: '/article/前端工程化/前端模块化.md' },
                 ]
